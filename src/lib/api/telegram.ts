@@ -1,6 +1,7 @@
 /**
  * Telegram Channel Feed Fetcher
  * Fetches messages from public Telegram channels via RSSHub
+ * Uses native fetch for Cloudflare Workers compatibility
  */
 
 import type { FeedItem, MicroblogMetadata, MediaAttachment } from '../types';
@@ -20,6 +21,34 @@ export function isTelegramConfigured(): boolean {
 }
 
 /**
+ * Fetch and parse RSS feed using native fetch (Cloudflare Workers compatible)
+ */
+async function fetchAndParseRSS(url: string): Promise<{ items: any[]; title?: string }> {
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (compatible; Basalt/1.0)',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  const xmlText = await response.text();
+
+  // Dynamic import rss-parser for parsing only
+  const RSSParser = (await import('rss-parser')).default;
+  const parser = new RSSParser({
+    customFields: {
+      item: ['content', 'encoded', 'description', 'media:content', 'enclosure'],
+    },
+  });
+
+  // Parse from string instead of URL
+  return parser.parseString(xmlText);
+}
+
+/**
  * Fetch messages via RSSHub (for public channels)
  */
 async function fetchViaRSSHub(options?: {
@@ -34,16 +63,7 @@ async function fetchViaRSSHub(options?: {
 
   try {
     const rssUrl = `${RSSHUB_INSTANCE}/telegram/channel/${TELEGRAM_CHANNEL_USERNAME}`;
-
-    // Use dynamic import for rss-parser to avoid issues
-    const RSSParser = (await import('rss-parser')).default;
-    const parser = new RSSParser({
-      customFields: {
-        item: ['content', 'encoded', 'description', 'media:content', 'enclosure'],
-      },
-    });
-
-    const feed = await parser.parseURL(rssUrl);
+    const feed = await fetchAndParseRSS(rssUrl);
 
     // Extract channel name from feed title (e.g., "环形废墟 - Telegram Channel")
     const feedTitle = feed.title || '';

@@ -1,8 +1,43 @@
 /**
  * RSS Parser for Douban and other sources
+ * Uses native fetch for Cloudflare Workers compatibility
  */
 
 import type { CurrentItem, FeedItem, MediaMetadata } from '../types';
+
+/**
+ * Fetch and parse RSS feed using native fetch (Cloudflare Workers compatible)
+ */
+async function fetchAndParseRSS(url: string): Promise<{ items: any[] }> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; Basalt/1.0)',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const xmlText = await response.text();
+
+    // Dynamic import rss-parser for parsing only
+    const RSSParser = (await import('rss-parser')).default;
+    const parser = new RSSParser({
+      customFields: {
+        item: ['content', 'encoded', 'description'],
+      },
+    });
+
+    // Parse from string instead of URL
+    const feed = await parser.parseString(xmlText);
+    return feed;
+  } catch (error) {
+    console.error(`Error fetching RSS from ${url}:`, error);
+    throw error;
+  }
+}
 
 /**
  * Get environment variable (works in both Astro and Node contexts)
@@ -193,15 +228,7 @@ export async function fetchDoubanFeed(): Promise<FeedItem[]> {
   }
 
   try {
-    // Dynamic import to avoid issues in non-Node environments
-    const RSSParser = (await import('rss-parser')).default;
-    const parser = new RSSParser({
-      customFields: {
-        item: ['content', 'encoded', 'description'],
-      },
-    });
-
-    const feed = await parser.parseURL(DOUBAN_USER_RSS);
+    const feed = await fetchAndParseRSS(DOUBAN_USER_RSS);
 
     const items: FeedItem[] = feed.items
       .map((item) => {
@@ -252,15 +279,7 @@ export async function getCurrentItems(): Promise<CurrentItem[]> {
   }
 
   try {
-    // Dynamic import to avoid issues in non-Node environments
-    const RSSParser = (await import('rss-parser')).default;
-    const parser = new RSSParser({
-      customFields: {
-        item: ['content', 'encoded', 'description'],
-      },
-    });
-
-    const feed = await parser.parseURL(DOUBAN_USER_RSS);
+    const feed = await fetchAndParseRSS(DOUBAN_USER_RSS);
 
     const currentItems: CurrentItem[] = [];
 
@@ -302,11 +321,7 @@ export async function getCurrentItems(): Promise<CurrentItem[]> {
  */
 export async function fetchGenericRSS(url: string): Promise<FeedItem[]> {
   try {
-    // Dynamic import to avoid issues in non-Node environments
-    const RSSParser = (await import('rss-parser')).default;
-    const parser = new RSSParser();
-
-    const feed = await parser.parseURL(url);
+    const feed = await fetchAndParseRSS(url);
 
     return feed.items.map((item) => ({
       id: item.guid || item.link || `rss-${Date.now()}-${Math.random()}`,
