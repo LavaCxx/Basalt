@@ -2,14 +2,7 @@
  * RSS Parser for Douban and other sources
  */
 
-import RSSParser from 'rss-parser';
 import type { CurrentItem, FeedItem, MediaMetadata } from '../types';
-
-const parser = new RSSParser({
-  customFields: {
-    item: ['content', 'encoded', 'description'],
-  },
-});
 
 /**
  * Get environment variable (works in both Astro and Node contexts)
@@ -200,6 +193,14 @@ export async function fetchDoubanFeed(): Promise<FeedItem[]> {
   }
 
   try {
+    // Dynamic import to avoid issues in non-Node environments
+    const RSSParser = (await import('rss-parser')).default;
+    const parser = new RSSParser({
+      customFields: {
+        item: ['content', 'encoded', 'description'],
+      },
+    });
+
     const feed = await parser.parseURL(DOUBAN_USER_RSS);
 
     const items: FeedItem[] = feed.items
@@ -251,6 +252,14 @@ export async function getCurrentItems(): Promise<CurrentItem[]> {
   }
 
   try {
+    // Dynamic import to avoid issues in non-Node environments
+    const RSSParser = (await import('rss-parser')).default;
+    const parser = new RSSParser({
+      customFields: {
+        item: ['content', 'encoded', 'description'],
+      },
+    });
+
     const feed = await parser.parseURL(DOUBAN_USER_RSS);
 
     const currentItems: CurrentItem[] = [];
@@ -274,8 +283,6 @@ export async function getCurrentItems(): Promise<CurrentItem[]> {
           cover: parsed.cover,
           date: parsed.date,
           url: item.link,
-          // Note: Douban RSS doesn't include progress percentage
-          // So we don't show progress bars
         });
       }
 
@@ -295,6 +302,10 @@ export async function getCurrentItems(): Promise<CurrentItem[]> {
  */
 export async function fetchGenericRSS(url: string): Promise<FeedItem[]> {
   try {
+    // Dynamic import to avoid issues in non-Node environments
+    const RSSParser = (await import('rss-parser')).default;
+    const parser = new RSSParser();
+
     const feed = await parser.parseURL(url);
 
     return feed.items.map((item) => ({

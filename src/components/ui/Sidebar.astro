@@ -1,16 +1,25 @@
 ---
 import type { FriendLink, CurrentItem } from '../../lib/types';
 import { getCurrentItems } from '../../lib/api';
-import { mockFriendLinks } from '../../lib/mock-data';
+import { mockFriendLinks, mockCurrentItems } from '../../lib/mock-data';
 
 interface Props {
   friends?: FriendLink[];
   currentItems?: CurrentItem[];
 }
 
-// Fetch current items at build time
-const fetchedCurrentItems = await getCurrentItems();
-const currentItems = Astro.props.currentItems || fetchedCurrentItems;
+// Fetch current items - with fallback to mock data on error
+let currentItems: CurrentItem[] = mockCurrentItems;
+try {
+  const fetched = await getCurrentItems();
+  if (fetched.length > 0) {
+    currentItems = fetched;
+  }
+} catch (e) {
+  console.error('Failed to fetch current items:', e);
+}
+
+currentItems = Astro.props.currentItems || currentItems;
 const friends = Astro.props.friends || mockFriendLinks;
 
 const typeLabels: Record<string, string> = {
