@@ -1,0 +1,179 @@
+---
+import type { FriendLink, CurrentItem } from '../../lib/types';
+import { getCurrentItems } from '../../lib/api';
+import { mockFriendLinks } from '../../lib/mock-data';
+
+interface Props {
+  friends?: FriendLink[];
+  currentItems?: CurrentItem[];
+}
+
+// Fetch current items at build time
+const fetchedCurrentItems = await getCurrentItems();
+const currentItems = Astro.props.currentItems || fetchedCurrentItems;
+const friends = Astro.props.friends || mockFriendLinks;
+
+const typeLabels: Record<string, string> = {
+  reading: '阅读中',
+  watching: '观看中',
+  playing: '游玩中',
+  listening: '收听中',
+};
+
+const mediaTypeLabels: Record<string, string> = {
+  book: '书籍',
+  movie: '电影',
+  tv: '剧集',
+  music: '音乐',
+  game: '游戏',
+};
+
+const mediaTypeStyles: Record<string, string> = {
+  book: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  movie: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
+  tv: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  music: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+  game: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+};
+---
+
+<aside class="space-y-6">
+  <!-- Profile Card -->
+  <div class="p-4 border border-border rounded-lg bg-background">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-purple-500 flex items-center justify-center text-white font-semibold text-lg">
+        玄
+      </div>
+      <div>
+        <h3 class="font-medium text-text-primary">玄武</h3>
+        <p class="text-sm text-text-muted">数字园丁</p>
+      </div>
+    </div>
+    <p class="mt-3 text-sm text-text-secondary">
+      他处书写，此处发布。一个收集想法、照片与记忆的空间。
+    </p>
+  </div>
+
+  <!-- Currently Section -->
+  {currentItems.length > 0 && (
+    <div class="p-4 border border-border rounded-lg bg-background">
+      <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
+        最近
+      </h3>
+      <div class="space-y-3">
+        {currentItems.map((item) => {
+          const mediaType = (item as any).mediaType || (item.type === 'reading' ? 'book' : item.type === 'watching' ? 'movie' : item.type === 'listening' ? 'music' : 'game');
+          return (
+          <div class="flex items-start gap-3">
+            {item.cover ? (
+              <img
+                src={item.cover}
+                alt={item.title}
+                class="w-10 h-14 object-cover rounded flex-shrink-0"
+                loading="lazy"
+              />
+            ) : (
+              <div class="w-10 h-14 rounded bg-surface-secondary flex items-center justify-center flex-shrink-0">
+                <span class="text-xs text-text-muted">
+                  {mediaType === 'book' ? '书' : mediaType === 'movie' ? '影' : mediaType === 'tv' ? '剧' : mediaType === 'music' ? '音' : '游'}
+                </span>
+              </div>
+            )}
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium leading-none ${mediaTypeStyles[mediaType] || 'bg-gray-100 text-gray-700'}`}>
+                  {mediaTypeLabels[mediaType] || mediaType}
+                </span>
+                {(item as any).date && (
+                  <span class="text-xs text-text-muted">
+                    {(item as any).date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
+                  </span>
+                )}
+              </div>
+              {item.url ? (
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm text-text-primary hover:text-accent transition-colors line-clamp-1"
+                >
+                  {item.title}
+                </a>
+              ) : (
+                <p class="text-sm text-text-primary line-clamp-1">{item.title}</p>
+              )}
+              {item.author && (
+                <p class="text-xs text-text-muted truncate">{item.author}</p>
+              )}
+              {item.progress !== undefined && (
+                <div class="mt-1.5 h-1 bg-border rounded-full overflow-hidden">
+                  <div class="h-full bg-accent rounded-full" style={`width: ${item.progress}%`}></div>
+                </div>
+              )}
+            </div>
+          </div>
+        )})}
+      </div>
+    </div>
+  )}
+
+  <!-- Friends Section -->
+  {friends.length > 0 && (
+    <div class="p-4 border border-border rounded-lg bg-background">
+      <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
+        友链
+      </h3>
+      <div class="grid grid-cols-2 gap-2">
+        {friends.map((friend) => (
+          <a
+            href={friend.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-2 p-2 rounded-md hover:bg-background-alt transition-colors group"
+          >
+            {friend.avatar ? (
+              <img
+                src={friend.avatar}
+                alt={friend.name}
+                class="w-6 h-6 rounded-full"
+              />
+            ) : (
+              <div class="w-6 h-6 rounded-full bg-border flex items-center justify-center text-xs text-text-muted">
+                {friend.name.charAt(0)}
+              </div>
+            )}
+            <span class="text-sm text-text-secondary group-hover:text-text-primary truncate">
+              {friend.name}
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- Stats -->
+  <div class="p-4 border border-border rounded-lg bg-background">
+    <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
+      统计
+    </h3>
+    <div class="grid grid-cols-2 gap-4 text-center">
+      <div>
+        <p class="text-2xl font-ui font-semibold text-text-primary">24</p>
+        <p class="text-xs text-text-muted">篇文章</p>
+      </div>
+      <div>
+        <p class="text-2xl font-ui font-semibold text-text-primary">156</p>
+        <p class="text-xs text-text-muted">张照片</p>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<style>
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

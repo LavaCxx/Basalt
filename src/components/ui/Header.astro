@@ -1,0 +1,141 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+
+const navItems = [
+  { label: '首页', href: '/' },
+  { label: '归档', href: '/archives' },
+  { label: '相册', href: '/memories' },
+  { label: '友链', href: '/friends' },
+  { label: '关于', href: '/about' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header transition:persist class={`border-b border-border sticky top-0 bg-background/80 backdrop-blur-sm z-50 ${className || ''}`}>
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-14">
+      <!-- Logo -->
+      <a
+        href="/"
+        data-astro-prefetch="hover"
+        class="font-ui text-xl font-semibold text-text-primary hover:text-accent transition-colors"
+      >
+        Basalt
+      </a>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden sm:flex items-center gap-1 font-ui">
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            data-astro-prefetch="hover"
+            data-nav-link
+            class:list={[
+              'px-3 py-2 text-sm font-medium rounded-md transition-colors',
+              currentPath === item.href
+                ? 'text-text-primary bg-active'
+                : 'text-text-secondary hover:text-text-primary hover:bg-black/[0.06]',
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button
+        type="button"
+        class="sm:hidden p-2 text-text-secondary hover:text-text-primary"
+        aria-label="Toggle menu"
+        id="mobile-menu-button"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="sm:hidden hidden" id="mobile-menu">
+      <div class="py-3 space-y-1 border-t border-border">
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            data-astro-prefetch="hover"
+            data-nav-link
+            class:list={[
+              'block px-3 py-2 text-sm font-medium rounded-md transition-colors',
+              currentPath === item.href
+                ? 'text-text-primary bg-active'
+                : 'text-text-secondary hover:text-text-primary hover:bg-black/[0.06]',
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </nav>
+</header>
+
+<script>
+  // Simple mobile menu toggle
+  const button = document.getElementById('mobile-menu-button');
+  const menu = document.getElementById('mobile-menu');
+
+  if (button && menu) {
+    button.addEventListener('click', () => {
+      menu.classList.toggle('hidden');
+    });
+  }
+
+  // Update active nav state on page navigation (for View Transitions)
+  function updateActiveNav() {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('nav a[data-nav-link]');
+
+    navLinks.forEach((link) => {
+      const href = link.getAttribute('href');
+      const isActive = href === currentPath;
+
+      if (isActive) {
+        link.classList.add('text-text-primary');
+        link.classList.add('bg-active');
+        link.classList.remove('text-text-secondary');
+      } else {
+        link.classList.remove('text-text-primary');
+        link.classList.remove('bg-active');
+        link.classList.add('text-text-secondary');
+      }
+    });
+  }
+
+  // Run on initial load
+  updateActiveNav();
+
+  // Run on View Transitions navigation
+  document.addEventListener('astro:page-load', updateActiveNav);
+</script>
+
+<style>
+  .bg-active {
+    background-color: rgba(0, 0, 0, 0.06);
+  }
+</style>

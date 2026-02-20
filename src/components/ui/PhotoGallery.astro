@@ -1,0 +1,30 @@
+---
+/**
+ * Photo Gallery Astro Wrapper
+ * Use this in Astro pages for server-side rendering
+ */
+
+import PhotoGallery, { type PhotoItem } from '../islands/PhotoGallery';
+
+interface Props {
+  photos: PhotoItem[];
+  columns?: number;
+  gap?: number;
+  aspectRatio?: 'square' | 'video' | 'auto';
+  showInfo?: boolean;
+  class?: string;
+}
+
+const { photos, columns, gap, aspectRatio, showInfo, class: className } = Astro.props;
+---
+
+<div class:list={['photo-gallery-wrapper', className]}>
+  <PhotoGallery
+    photos={photos}
+    columns={columns}
+    gap={gap}
+    aspectRatio={aspectRatio}
+    showInfo={showInfo}
+    client:load
+  />
+</div>

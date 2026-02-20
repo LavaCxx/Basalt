@@ -1,0 +1,126 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { mockFriendLinks } from '../lib/mock-data';
+
+const friends = mockFriendLinks;
+
+// Extended friend data for this page
+const extendedFriends = [
+  ...friends,
+  {
+    name: 'Eva',
+    url: 'https://eva.example.com',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Eva',
+    description: '用户体验研究员',
+  },
+  {
+    name: 'Frank',
+    url: 'https://frank.example.com',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Frank',
+    description: '数据科学家',
+  },
+  {
+    name: 'Grace',
+    url: 'https://grace.example.com',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Grace',
+    description: '插画师',
+  },
+  {
+    name: 'Henry',
+    url: 'https://henry.example.com',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Henry',
+    description: '后端工程师',
+  },
+];
+---
+
+<Layout title="友链" description="朋友们的网站">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Page Header -->
+    <header class="mb-12">
+      <h1 class="font-ui text-4xl font-bold text-text-primary mb-2">
+        友链
+      </h1>
+      <p class="text-text-secondary">
+        优秀的伙伴们与他们的数字花园
+      </p>
+    </header>
+
+    <!-- Friends Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {extendedFriends.map((friend) => (
+        <a
+          href={friend.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group p-4 border border-border rounded-lg bg-background hover:border-text-muted hover:bg-background-alt transition-all"
+        >
+          <div class="flex items-center gap-3">
+            {friend.avatar ? (
+              <img
+                src={friend.avatar}
+                alt={friend.name}
+                class="w-12 h-12 rounded-full"
+              />
+            ) : (
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-purple-500 flex items-center justify-center text-white font-semibold">
+                {friend.name.charAt(0)}
+              </div>
+            )}
+            <div class="flex-1 min-w-0">
+              <h3 class="font-medium text-text-primary group-hover:text-accent transition-colors truncate">
+                {friend.name}
+              </h3>
+              {friend.description && (
+                <p class="text-sm text-text-muted truncate">
+                  {friend.description}
+                </p>
+              )}
+            </div>
+            <!-- Arrow icon -->
+            <svg
+              class="w-5 h-5 text-text-muted group-hover:text-accent transition-colors flex-shrink-0"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <!-- Add friend CTA -->
+    <div class="mt-12 text-center">
+      <p class="text-text-muted mb-4">
+        想要交换友链？欢迎联系！
+      </p>
+      <a
+        href="mailto:hello@example.com"
+        class="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-md text-text-secondary hover:text-text-primary hover:border-text-muted transition-colors"
+      >
+        <svg
+          class="w-4 h-4"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+          <polyline points="22,6 12,13 2,6" />
+        </svg>
+        联系我
+      </a>
+    </div>
+  </div>
+</Layout>

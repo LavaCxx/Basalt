@@ -1,0 +1,8 @@
+name = "basalt"
+compatibility_date = "2024-01-01"
+
+# KV namespace for Notion API caching
+# Run `wrangler kv:namespace create NOTION_CACHE` to get the ID
+[[kv_namespaces]]
+binding = "NOTION_CACHE"
+id = "placeholder-replace-with-your-kv-id"

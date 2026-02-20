@@ -1,0 +1,128 @@
+---
+import '../styles/global.css';
+import { ViewTransitions } from 'astro:transitions';
+import ThemeToggle from '../components/islands/ThemeToggle';
+import Footer from '../components/ui/Footer.astro';
+import Header from '../components/ui/Header.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Whether to show the sidebar layout */
+  withSidebar?: boolean;
+}
+
+const {
+  title = 'Basalt',
+  description = 'A Digital Garden & Content Aggregator',
+  withSidebar = false,
+} = Astro.props;
+
+const fullTitle = title === 'Basalt' ? title : `${title} | Basalt`;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{fullTitle}</title>
+
+    <!-- View Transitions for smooth page navigation -->
+    <ViewTransitions />
+  </head>
+  <body class="min-h-screen bg-background text-text-primary font-ui antialiased">
+    <!-- Theme Toggle - Client-side only -->
+    <ThemeToggle client:only="solid-js" />
+
+    <!-- Header -->
+    <Header />
+
+    <!-- Main Content -->
+    <main class="min-h-[calc(100vh-8rem)]">
+      {withSidebar ? (
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div class="flex flex-col lg:flex-row gap-8 lg:items-start">
+            <!-- Main content area -->
+            <div class="flex-1 min-w-0">
+              <slot />
+            </div>
+            <!-- Sidebar -->
+            <aside class="lg:w-72 flex-shrink-0 lg:sticky lg:top-20">
+              <slot name="sidebar" />
+            </aside>
+          </div>
+        </div>
+      ) : (
+        <slot />
+      )}
+    </main>
+
+    <!-- Footer -->
+    <Footer />
+
+    <!-- Dot grid background overlay -->
+    <div transition:persist class="fixed inset-0 bg-dot-grid opacity-30 pointer-events-none -z-10" aria-hidden="true"></div>
+  </body>
+</html>
+
+<style is:global>
+  /* CSS custom properties for theme colors */
+  :root {
+    --background: #faf9f6;
+    --background-alt: #f5f5f7;
+    --border: #e5e5e5;
+    --border-subtle: #f0f0f0;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --accent: #0066ff;
+    --accent-hover: #0052cc;
+  }
+
+  .dark {
+    --background: #0a0a0a;
+    --background-alt: #141414;
+    --border: #262626;
+    --border-subtle: #1a1a1a;
+    --text-primary: #fafafa;
+    --text-secondary: #a3a3a3;
+    --text-muted: #737373;
+  }
+
+  /* ===== View Transitions ===== */
+  /* Fade transition for page navigation */
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Old page exiting */
+  ::view-transition-old(root) {
+    animation: fade-out 0.15s ease-out;
+  }
+
+  /* New page entering */
+  ::view-transition-new(root) {
+    animation: fade-in 0.15s ease-in;
+  }
+
+  /* Prevent white flash during transition */
+  html::view-transition-group(root) {
+    background-color: var(--background);
+  }
+
+  /* Fallback for browsers without View Transitions */
+  @supports not (view-transition-name: none) {
+    /* No special handling needed, normal page load */
+  }
+</style>

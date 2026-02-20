@@ -1,0 +1,165 @@
+---
+import type { FeedItem } from '../../lib/types';
+
+interface Props {
+  item: FeedItem;
+  /** Card size variant */
+  size?: 'default' | 'compact' | 'featured';
+}
+
+const { item, size = 'default' } = Astro.props;
+
+// Format date in Chinese
+const formattedDate = item.date.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+
+// Get type-specific styles and labels
+const typeConfig: Record<string, { style: string; label: string }> = {
+  article: {
+    style: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+    label: '文章',
+  },
+  microblog: {
+    style: 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300',
+    label: '微博',
+  },
+  media: {
+    style: 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
+    label: '媒体',
+  },
+  photo: {
+    style: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
+    label: '照片',
+  },
+};
+
+const config = typeConfig[item.type] || typeConfig.article;
+
+// Get metadata
+const metadata = item.metadata as any;
+---
+
+<article
+  class:list={[
+    'group border border-border rounded-lg bg-background overflow-hidden transition-all hover:border-text-muted',
+    size === 'featured' && 'md:col-span-2',
+    size === 'compact' && 'p-3',
+  ]}
+>
+  {size !== 'compact' && item.image && (
+    <a href={item.url || '#'} class="block aspect-video overflow-hidden">
+      <img
+        src={item.image}
+        alt={item.title || ''}
+        class="w-full h-full object-cover transition-transform group-hover:scale-105"
+        loading="lazy"
+      />
+    </a>
+  )}
+
+  <div class:list={['p-4', size === 'compact' && 'p-0 pt-3']}>
+    <!-- Type badge & Date -->
+    <div class="flex items-center gap-2 mb-2">
+      <span class={`text-xs px-2 py-0.5 rounded ${config.style}`}>
+        {config.label}
+      </span>
+      <time class="text-xs text-text-muted">{formattedDate}</time>
+    </div>
+
+    <!-- Title (for articles and media) -->
+    {item.title && (
+      <h3 class="font-ui text-lg font-semibold text-text-primary mb-2">
+        <a
+          href={item.url || '#'}
+          class="hover:text-accent transition-colors"
+        >
+          {item.title}
+        </a>
+      </h3>
+    )}
+
+    <!-- Content/Excerpt -->
+    {(item.content || metadata?.excerpt) && (
+      <p class="text-sm text-text-secondary line-clamp-3">
+        {metadata?.excerpt || item.content.replace(/<[^>]*>/g, '')}
+      </p>
+    )}
+
+    <!-- Metadata for articles -->
+    {item.type === 'article' && metadata?.readingTime && (
+      <p class="mt-2 text-xs text-text-muted">
+        {metadata.readingTime} 分钟阅读
+        {metadata.tags && metadata.tags.length > 0 && (
+          <span> · {metadata.tags.slice(0, 3).join(', ')}</span>
+        )}
+      </p>
+    )}
+
+    <!-- Metadata for media -->
+    {item.type === 'media' && metadata && (
+      <div class="mt-2 flex items-center gap-2">
+        {metadata.rating && (
+          <div class="flex items-center gap-1">
+            <span class="text-amber-500">
+              {'★'.repeat(Math.round(metadata.rating / (metadata.maxRating || 5) * 5))}
+            </span>
+            <span class="text-xs text-text-muted">
+              {metadata.rating}/{metadata.maxRating || 5}
+            </span>
+          </div>
+        )}
+        {metadata.creator && (
+          <span class="text-xs text-text-muted">· {metadata.creator}</span>
+        )}
+      </div>
+    )}
+
+    <!-- Metadata for microblog -->
+    {item.type === 'microblog' && metadata && (
+      <div class="mt-2 flex items-center gap-3 text-xs text-text-muted">
+        {metadata.likes !== undefined && (
+          <span>{metadata.likes} 赞</span>
+        )}
+        {metadata.replies !== undefined && (
+          <span>{metadata.replies} 评论</span>
+        )}
+      </div>
+    )}
+
+    <!-- Compact mode: Show image inline -->
+    {size === 'compact' && item.image && (
+      <div class="mt-2 flex gap-3">
+        <img
+          src={item.image}
+          alt={item.title || ''}
+          class="w-16 h-16 object-cover rounded"
+          loading="lazy"
+        />
+        <div class="flex-1 min-w-0">
+          <p class="text-sm text-text-secondary line-clamp-2">
+            {metadata?.excerpt || item.content.replace(/<[^>]*>/g, '')}
+          </p>
+        </div>
+      </div>
+    )}
+  </div>
+</article>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

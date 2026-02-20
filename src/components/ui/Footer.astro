@@ -1,0 +1,39 @@
+---
+const currentYear = new Date().getFullYear();
+
+const links = [
+  { label: 'GitHub', href: 'https://github.com' },
+  { label: 'Twitter', href: 'https://twitter.com' },
+  { label: '订阅', href: '/rss.xml' },
+];
+---
+
+<footer class="border-t border-border bg-background">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <!-- Copyright -->
+      <p class="text-sm text-text-muted">
+        &copy; {currentYear} Basalt. 保留所有权利.
+      </p>
+
+      <!-- Links -->
+      <nav class="flex items-center gap-6">
+        {links.map((link) => (
+          <a
+            href={link.href}
+            class="text-sm text-text-secondary hover:text-text-primary transition-colors"
+            target={link.href.startsWith('http') ? '_blank' : undefined}
+            rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
+    </div>
+
+    <!-- Built with -->
+    <p class="mt-4 text-center text-xs text-text-muted">
+      由 <a href="https://astro.build" class="hover:text-accent" target="_blank" rel="noopener noreferrer">Astro</a> 与 <a href="https://tailwindcss.com" class="hover:text-accent" target="_blank" rel="noopener noreferrer">Tailwind CSS</a> 驱动
+    </p>
+  </div>
+</footer>

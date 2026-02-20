@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Solid hexagon - basalt columnar joint -->
+  <path d="M16 2L28 9v14L16 30L4 23V9L16 2z" fill="currentColor"/>
+  <!-- Mountain peaks - layered geometric forms -->
+  <path d="M16 8l6 10H10l6-10z" fill="#fff" opacity="0.9"/>
+  <path d="M16 13l4 7h-8l4-7z" fill="#fff" opacity="0.5"/>
+  <style>
+    svg { color: #1a1a1a; }
+    @media (prefers-color-scheme: dark) {
+      svg { color: #fafafa; }
+      path:nth-child(2) { fill: #1a1a1a; }
+      path:nth-child(3) { fill: #1a1a1a; }
+    }
+  </style>
+</svg>

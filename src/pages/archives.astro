@@ -1,0 +1,8 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ArchiveList from '../components/islands/ArchiveList';
+---
+
+<Layout title="归档" description="按年份整理的所有文章">
+  <ArchiveList client:load />
+</Layout>
