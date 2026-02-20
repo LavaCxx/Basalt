@@ -10,9 +10,19 @@ import type { CurrentItem, FeedItem, MediaMetadata } from '../types';
  */
 async function fetchAndParseRSS(url: string): Promise<{ items: any[] }> {
   try {
+    console.log('[RSS] Fetching:', url);
+
+    // Extract domain for Referer header
+    const urlObj = new URL(url);
+    const referer = `${urlObj.protocol}//${urlObj.hostname}/`;
+
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Basalt/1.0)',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'Referer': referer,
+        'Cache-Control': 'no-cache',
       },
     });
 
@@ -21,6 +31,7 @@ async function fetchAndParseRSS(url: string): Promise<{ items: any[] }> {
     }
 
     const xmlText = await response.text();
+    console.log('[RSS] Response length:', xmlText.length);
 
     // Dynamic import rss-parser for parsing only
     const RSSParser = (await import('rss-parser')).default;
@@ -32,9 +43,10 @@ async function fetchAndParseRSS(url: string): Promise<{ items: any[] }> {
 
     // Parse from string instead of URL
     const feed = await parser.parseString(xmlText);
+    console.log('[RSS] Parsed items:', feed.items?.length || 0);
     return feed;
   } catch (error) {
-    console.error(`Error fetching RSS from ${url}:`, error);
+    console.error(`[RSS] Error fetching from ${url}:`, error);
     throw error;
   }
 }
