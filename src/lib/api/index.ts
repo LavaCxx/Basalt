@@ -9,6 +9,9 @@ import { fetchDoubanFeed, getCurrentItems as getDoubanCurrentItems } from './rss
 import { fetchTelegramFeed, isTelegramConfigured } from './telegram';
 import { mockFeedItems, mockArchiveGroups, getArchiveGroups, mockCurrentItems } from '../mock-data';
 
+// Re-export env utilities
+export { getEnv, setRuntimeEnv } from './env';
+
 /**
  * Simple in-memory cache with TTL
  */
@@ -39,25 +42,39 @@ const feedItemsCache = createCache<FeedItem[]>();
 const archiveItemsCache = createCache<ArchiveGroup[]>();
 const currentItemsCache = createCache<CurrentItem[]>();
 
+// Import getEnv for internal use
+import { getEnv, setRuntimeEnv as baseSetRuntimeEnv } from './env';
+import { setRuntimeKVEnv } from '../kv-cache';
+
 /**
- * Whether to use real APIs or mock data
- * Try both import.meta.env (Astro/Vite) and process.env (Node)
+ * Set runtime env and clear all caches (important for Cloudflare Workers)
  */
-const getEnv = (key: string): string | undefined => {
-  return (import.meta as any).env?.[key] || process.env[key];
-};
+export function setRuntimeEnvAndClearCache(env: Record<string, any>) {
+  baseSetRuntimeEnv(env);
+  setRuntimeKVEnv(env); // Also set KV binding
+  feedItemsCache.clear();
+  archiveItemsCache.clear();
+  currentItemsCache.clear();
+}
 
 // Check if should use real API - evaluated at call time for API routes
-function shouldUseRealAPI() {
+export function shouldUseRealAPI() {
   return !!(getEnv('NOTION_API_KEY') && getEnv('NOTION_ARTICLES_DATABASE_ID'));
 }
 
-function shouldUseDouban() {
+export function shouldUseDouban() {
   return !!getEnv('DOUBAN_USER_RSS');
 }
 
-function shouldUseTelegram() {
+export function shouldUseTelegram() {
   return isTelegramConfigured();
+}
+
+// Debug info for getFeedItems
+let feedItemsDebug: Record<string, any> = {};
+
+export function getFeedItemsDebug(): Record<string, any> {
+  return { ...feedItemsDebug };
 }
 
 /**
@@ -83,33 +100,39 @@ export async function getFeedItems(options?: {
   }
 
   try {
-    const promises: Promise<FeedItem[]>[] = [];
+    const results: FeedItem[][] = [];
 
     // Fetch from Notion if configured
     if (USE_REAL_API) {
-      promises.push(
-        Promise.all([getAllArticles(), getAllPhotos()]).then(([articles, photos]) => [
-          ...articles,
-          ...photos,
-        ])
-      );
+      const [articles, photos] = await Promise.all([getAllArticles(), getAllPhotos()]);
+      results.push(articles, photos);
     }
 
     // Fetch from Douban if configured
     if (USE_DOUBAN_RSS) {
-      promises.push(fetchDoubanFeed());
+      const doubanItems = await fetchDoubanFeed();
+      results.push(doubanItems);
     }
 
     // Fetch from Telegram if configured
     if (USE_TELEGRAM) {
-      promises.push(fetchTelegramFeed({ limit: 30 }));
+      const telegramItems = await fetchTelegramFeed({ limit: 30 });
+      results.push(telegramItems);
     }
 
-    const results = await Promise.all(promises);
     const allItems = results.flat();
 
-    // Sort by date descending
-    allItems.sort((a, b) => b.date.getTime() - a.date.getTime());
+    // Ensure all dates are Date objects, then sort by date descending
+    allItems.forEach(item => {
+      if (!(item.date instanceof Date)) {
+        item.date = new Date(item.date as any);
+      }
+    });
+    allItems.sort((a, b) => {
+      const aTime = a.date instanceof Date ? a.date.getTime() : 0;
+      const bTime = b.date instanceof Date ? b.date.getTime() : 0;
+      return bTime - aTime;
+    });
 
     // Cache the results
     feedItemsCache.set(allItems);

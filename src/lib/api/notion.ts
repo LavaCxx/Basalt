@@ -12,6 +12,7 @@ import type {
 } from '@notionhq/client/build/src/api-endpoints';
 import type { FeedItem, ArticleMetadata } from '../types';
 import { withKVCache, isKVAvailable } from '../kv-cache';
+import { getEnv } from './env';
 
 // Cache TTL: 1 hour
 const CACHE_TTL_SECONDS = 3600;
@@ -21,13 +22,6 @@ const CACHE_KEYS = {
   ARTICLES: 'notion:articles:all',
   PHOTOS: 'notion:photos:all',
   ARTICLE_PREFIX: 'notion:article:',
-};
-
-/**
- * Get environment variable (works in both Astro and Node contexts)
- */
-const getEnv = (key: string): string | undefined => {
-  return (import.meta as any).env?.[key] || process.env[key];
 };
 
 // Lazy-initialized Notion client

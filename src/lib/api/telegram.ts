@@ -1,17 +1,12 @@
 /**
  * Telegram Channel Feed Fetcher
  * Fetches messages from public Telegram channels via RSSHub
- * Uses native fetch for Cloudflare Workers compatibility
+ * Uses fast-xml-parser for Cloudflare Workers compatibility
  */
 
+import { XMLParser } from 'fast-xml-parser';
 import type { FeedItem, MicroblogMetadata, MediaAttachment } from '../types';
-
-/**
- * Get environment variable (works in both Astro and Node contexts)
- */
-const getEnv = (key: string): string | undefined => {
-  return (import.meta as any).env?.[key] || process.env[key];
-};
+import { getEnv } from './env';
 
 /**
  * Check if Telegram is configured (RSSHub mode for public channels)
@@ -21,14 +16,13 @@ export function isTelegramConfigured(): boolean {
 }
 
 /**
- * Fetch and parse RSS feed using native fetch (Cloudflare Workers compatible)
+ * Fetch and parse RSS feed using native fetch + fast-xml-parser
  */
 async function fetchAndParseRSS(url: string): Promise<{ items: any[]; title?: string }> {
   const response = await fetch(url, {
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
       'Accept': 'application/rss+xml, application/xml, text/xml, */*',
-      'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
     },
   });
 
@@ -38,16 +32,33 @@ async function fetchAndParseRSS(url: string): Promise<{ items: any[]; title?: st
 
   const xmlText = await response.text();
 
-  // Dynamic import rss-parser for parsing only
-  const RSSParser = (await import('rss-parser')).default;
-  const parser = new RSSParser({
-    customFields: {
-      item: ['content', 'encoded', 'description', 'media:content', 'enclosure'],
-    },
+  // Parse XML with fast-xml-parser
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: '@_',
+    textNodeName: '#text',
   });
 
-  // Parse from string instead of URL
-  return parser.parseString(xmlText);
+  const parsed = parser.parse(xmlText);
+  const channel = parsed.rss?.channel || parsed.channel;
+  const title = channel?.title;
+  const rawItems = channel?.item || [];
+
+  // Normalize items
+  const items = (Array.isArray(rawItems) ? rawItems : [rawItems]).map((item: any) => ({
+    title: item.title,
+    link: item.link,
+    pubDate: item.pubDate,
+    isoDate: item.pubDate ? new Date(item.pubDate).toISOString() : undefined,
+    content: item['content:encoded'] || item.description || item.content,
+    description: item.description,
+    contentSnippet: typeof item.description === 'string'
+      ? item.description.replace(/<[^>]+>/g, '').trim()
+      : '',
+    guid: item.guid?.['#text'] || item.guid || item.link,
+  }));
+
+  return { items, title };
 }
 
 /**

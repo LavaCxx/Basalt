@@ -1,11 +1,17 @@
 ---
 import type { FriendLink, CurrentItem } from '../../lib/types';
-import { getCurrentItems } from '../../lib/api';
+import { getCurrentItems, setRuntimeEnvAndClearCache } from '../../lib/api';
 import { mockFriendLinks, mockCurrentItems } from '../../lib/mock-data';
 
 interface Props {
   friends?: FriendLink[];
   currentItems?: CurrentItem[];
+}
+
+// Inject Cloudflare runtime env if available
+const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
+if (runtimeEnv) {
+  setRuntimeEnvAndClearCache(runtimeEnv);
 }
 
 // Fetch current items - with fallback to mock data on error

@@ -3,21 +3,33 @@
  * Provides a simple interface for caching API responses in Cloudflare KV
  */
 
+// Store runtime env with KV binding (set by API routes)
+let runtimeEnvWithKV: Record<string, any> | null = null;
+
+export function setRuntimeKVEnv(env: Record<string, any>): void {
+  runtimeEnvWithKV = env;
+}
+
 /**
- * Get the KV namespace from Astro runtime
+ * Get the KV namespace from runtime env
  */
 function getKVNamespace(): KVNamespace | null {
-  // Astro Cloudflare adapter makes bindings available via globalThis
+  // First check runtime env injected by API route
+  if (runtimeEnvWithKV?.NOTION_CACHE) {
+    return runtimeEnvWithKV.NOTION_CACHE;
+  }
+
+  // Fallback: try globalThis (for local dev with wrangler)
   if (typeof globalThis !== 'undefined') {
     const runtime = (globalThis as any).Astro?.runtime;
     if (runtime?.env?.NOTION_CACHE) {
       return runtime.env.NOTION_CACHE;
     }
-    // Fallback: direct binding on globalThis
     if ((globalThis as any).NOTION_CACHE) {
       return (globalThis as any).NOTION_CACHE;
     }
   }
+
   return null;
 }
 
@@ -31,32 +43,65 @@ export function isKVAvailable(): boolean {
 /**
  * Get cached data from KV
  */
-export async function kvGet<T>(key: string): Promise<T | null> {
+export async function kvGet<T>(key: string): Promise<{ data: T | null; error?: string }> {
   const kv = getKVNamespace();
-  if (!kv) return null;
+  if (!kv) return { data: null, error: 'KV namespace not available' };
 
   try {
     const data = await kv.get(key, 'json');
-    return data as T | null;
+    if (!data) return { data: null };
+
+    // Revive Date objects in the cached data
+    const revived = reviveDates(data);
+    return { data: revived as T };
   } catch (error) {
     console.error(`KV get error for key ${key}:`, error);
-    return null;
+    return { data: null, error: String(error) };
   }
+}
+
+/**
+ * Recursively convert date strings back to Date objects
+ */
+function reviveDates(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+
+  if (Array.isArray(obj)) {
+    return obj.map(reviveDates);
+  }
+
+  if (typeof obj === 'object') {
+    const result: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === 'date' && typeof value === 'string') {
+        result[key] = new Date(value);
+      } else if (typeof value === 'object' && value !== null) {
+        result[key] = reviveDates(value);
+      } else {
+        result[key] = value;
+      }
+    }
+    return result;
+  }
+
+  return obj;
 }
 
 /**
  * Set data in KV with TTL (in seconds)
  */
-export async function kvSet<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
+export async function kvSet<T>(key: string, value: T, ttlSeconds: number): Promise<{ success: boolean; error?: string }> {
   const kv = getKVNamespace();
-  if (!kv) return;
+  if (!kv) return { success: false, error: 'KV namespace not available' };
 
   try {
     await kv.put(key, JSON.stringify(value), {
       expirationTtl: ttlSeconds,
     });
+    return { success: true };
   } catch (error) {
     console.error(`KV set error for key ${key}:`, error);
+    return { success: false, error: String(error) };
   }
 }
 
@@ -82,8 +127,13 @@ export async function withKVCache<T>(
   fetcher: () => Promise<T>,
   ttlSeconds: number = 3600 // Default 1 hour
 ): Promise<T> {
+  // Check if KV is available
+  if (!isKVAvailable()) {
+    return fetcher();
+  }
+
   // Try to get from KV cache first
-  const cached = await kvGet<T>(key);
+  const { data: cached } = await kvGet<T>(key);
   if (cached !== null) {
     console.log(`KV cache hit: ${key}`);
     return cached;
