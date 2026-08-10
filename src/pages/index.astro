@@ -2,11 +2,31 @@
 import Layout from '../layouts/Layout.astro';
 import Sidebar from '../components/ui/Sidebar.astro';
 import FeedList from '../components/islands/FeedList';
+import { getFeedItems, setRuntimeEnvAndClearCache } from '../lib/api';
+
+// Inject Cloudflare runtime env if available
+const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
+if (runtimeEnv) {
+  setRuntimeEnvAndClearCache(runtimeEnv);
+}
+
+// Fetch feed items server-side
+let feedItems: any[] = [];
+try {
+  feedItems = await getFeedItems();
+} catch (e) {
+  console.error('Failed to fetch feed items:', e);
+}
+
+// Serialize dates for client-side hydration
+const serializedItems = feedItems.map((item) => ({
+  ...item,
+  date: item.date instanceof Date ? item.date.toISOString() : item.date,
+}));
 ---
 
 <Layout title="首页" description="数字花园与内容聚合站" withSidebar>
-  <!-- Feed - Client-side rendered -->
-  <FeedList client:load />
+  <FeedList client:load items={serializedItems} />
 
   <!-- Sidebar Slot -->
   <Sidebar slot="sidebar" />

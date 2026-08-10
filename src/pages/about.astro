@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Comments from '../components/islands/Comments';
 ---
 
 <Layout title="关于" description="关于这个数字花园">
@@ -100,5 +101,8 @@ import Layout from '../layouts/Layout.astro';
         </a>
       </div>
     </div>
+
+    <!-- Comments -->
+    <Comments client:load mapping="specific" term="about" />
   </div>
 </Layout>

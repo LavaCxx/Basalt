@@ -13,14 +13,21 @@ export async function GET({ url }: { url: URL }) {
     return new Response('Missing url parameter', { status: 400 });
   }
 
-  // Only allow doubanio.com images for security
-  if (!imageUrl.includes('doubanio.com')) {
+  // Only allow doubanio.com images for security (strict hostname check)
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(imageUrl);
+  } catch {
+    return new Response('Invalid URL', { status: 400 });
+  }
+
+  if (!parsedUrl.hostname.endsWith('.doubanio.com')) {
     return new Response('Only doubanio.com images are allowed', { status: 403 });
   }
 
   try {
     // Fetch with douban referer to bypass hotlink protection
-    const response = await fetch(imageUrl, {
+    const response = await fetch(parsedUrl.href, {
       headers: {
         'Referer': 'https://www.douban.com/',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',

@@ -1,4 +1,4 @@
-import { createSignal, onMount, For, Show } from 'solid-js';
+import { createSignal, For, Show } from 'solid-js';
 
 interface ArchiveItem {
   id: string;
@@ -22,21 +22,21 @@ function formatDate(date: Date): string {
   });
 }
 
-export default function ArchiveList() {
-  const [groups, setGroups] = createSignal<ArchiveGroup[]>([]);
-  const [loading, setLoading] = createSignal(true);
+interface ArchiveListProps {
+  groups?: ArchiveGroup[];
+}
 
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/archives');
-      const data = await res.json();
-      setGroups(data);
-    } catch (error) {
-      console.error('Failed to fetch archives:', error);
-    } finally {
-      setLoading(false);
-    }
-  });
+export default function ArchiveList(props: ArchiveListProps) {
+  const [groups] = createSignal<ArchiveGroup[]>(
+    (props.groups || []).map((group) => ({
+      ...group,
+      items: group.items.map((item) => ({
+        ...item,
+        date: new Date(item.date),
+      })),
+    }))
+  );
+  const [loading] = createSignal(false);
 
   const totalCount = () => groups().reduce((sum, g) => sum + g.count, 0);
 

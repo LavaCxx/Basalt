@@ -1,8 +1,31 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ArchiveList from '../components/islands/ArchiveList';
+import { getArchiveItems, setRuntimeEnvAndClearCache } from '../lib/api';
+
+// Inject Cloudflare runtime env if available
+const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
+if (runtimeEnv) {
+  setRuntimeEnvAndClearCache(runtimeEnv);
+}
+
+let archiveGroups: any[] = [];
+try {
+  archiveGroups = await getArchiveItems();
+} catch (e) {
+  console.error('Failed to fetch archives:', e);
+}
+
+// Serialize dates for client-side hydration
+const serializedGroups = archiveGroups.map((group) => ({
+  ...group,
+  items: group.items.map((item: any) => ({
+    ...item,
+    date: item.date instanceof Date ? item.date.toISOString() : item.date,
+  })),
+}));
 ---
 
 <Layout title="归档" description="按年份整理的所有文章">
-  <ArchiveList client:load />
+  <ArchiveList client:load groups={serializedGroups} />
 </Layout>

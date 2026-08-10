@@ -15,11 +15,9 @@ export type ContentSource = 'notion' | 'telegram' | 'douban' | 'rss';
 /**
  * Unified feed item interface - all content sources map to this
  */
-export interface FeedItem {
+interface FeedItemBase {
   /** Unique identifier */
   id: string;
-  /** Type of content */
-  type: FeedItemType;
   /** Title (optional for microblogs) */
   title?: string;
   /** Main content (HTML for articles, plain text for microblogs) */
@@ -32,9 +30,29 @@ export interface FeedItem {
   url?: string;
   /** Cover/thumbnail image */
   image?: string;
-  /** Additional metadata specific to content type */
-  metadata?: ArticleMetadata | MicroblogMetadata | MediaMetadata | PhotoMetadata;
 }
+
+export interface ArticleFeedItem extends FeedItemBase {
+  type: 'article';
+  metadata?: ArticleMetadata;
+}
+
+export interface MicroblogFeedItem extends FeedItemBase {
+  type: 'microblog';
+  metadata?: MicroblogMetadata;
+}
+
+export interface MediaFeedItem extends FeedItemBase {
+  type: 'media';
+  metadata?: MediaMetadata;
+}
+
+export interface PhotoFeedItem extends FeedItemBase {
+  type: 'photo';
+  metadata?: PhotoMetadata;
+}
+
+export type FeedItem = ArticleFeedItem | MicroblogFeedItem | MediaFeedItem | PhotoFeedItem;
 
 /**
  * Article-specific metadata

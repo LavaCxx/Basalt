@@ -1,8 +1,37 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import MemoriesGallery from '../components/islands/MemoriesGallery';
+import Comments from '../components/islands/Comments';
+import { getPhotosByYear, setRuntimeEnvAndClearCache } from '../lib/api';
+
+// Inject Cloudflare runtime env if available
+const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
+if (runtimeEnv) {
+  setRuntimeEnvAndClearCache(runtimeEnv);
+}
+
+let photoGroups: Record<number, any[]> = {};
+try {
+  photoGroups = await getPhotosByYear();
+} catch (e) {
+  console.error('Failed to fetch photos:', e);
+}
+
+// Serialize for client-side hydration
+const serializedGroups: Record<string, any[]> = {};
+for (const [year, photos] of Object.entries(photoGroups)) {
+  serializedGroups[year] = photos.map((p) => ({
+    ...p,
+    date: p.date instanceof Date ? p.date.toISOString() : p.date,
+  }));
+}
 ---
 
 <Layout title="相册" description="照片与记忆的画廊">
-  <MemoriesGallery client:load />
+  <MemoriesGallery client:load photoGroups={serializedGroups} />
+
+  <!-- Comments -->
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <Comments client:load mapping="specific" term="memories" />
+  </div>
 </Layout>

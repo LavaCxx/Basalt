@@ -1,4 +1,4 @@
-import { createSignal, onMount, For, Show } from 'solid-js';
+import { createSignal, For, Show } from 'solid-js';
 import PhotoGallery, { type PhotoItem } from './PhotoGallery';
 
 interface RawPhoto {
@@ -11,48 +11,32 @@ interface RawPhoto {
   };
 }
 
-export default function MemoriesGallery() {
-  const [photoGroups, setPhotoGroups] = createSignal<Record<number, PhotoItem[]>>({});
-  const [sortedYears, setSortedYears] = createSignal<number[]>([]);
-  const [loading, setLoading] = createSignal(true);
+interface MemoriesGalleryProps {
+  photoGroups?: Record<string, RawPhoto[]>;
+}
 
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/photos');
-      const photos: RawPhoto[] = await res.json();
+export default function MemoriesGallery(props: MemoriesGalleryProps) {
+  // Transform pre-grouped photos from server
+  const groups: Record<number, PhotoItem[]> = {};
+  for (const [year, photos] of Object.entries(props.photoGroups || {})) {
+    groups[Number(year)] = photos
+      .filter((p) => p.image)
+      .map((p) => ({
+        id: p.id,
+        src: p.image!,
+        thumbnail: p.image!,
+        alt: p.title,
+        title: p.title,
+        date: new Date(p.date),
+        location: p.metadata?.location,
+      }));
+  }
 
-      // Transform and group by year
-      const groups: Record<number, PhotoItem[]> = {};
-
-      photos
-        .filter((p) => p.image)
-        .forEach((p) => {
-          const date = new Date(p.date);
-          const year = date.getFullYear();
-
-          if (!groups[year]) {
-            groups[year] = [];
-          }
-
-          groups[year].push({
-            id: p.id,
-            src: p.image!,
-            thumbnail: p.image!,
-            alt: p.title,
-            title: p.title,
-            date: date,
-            location: p.metadata?.location,
-          });
-        });
-
-      setPhotoGroups(groups);
-      setSortedYears(Object.keys(groups).map(Number).sort((a, b) => b - a));
-    } catch (error) {
-      console.error('Failed to fetch photos:', error);
-    } finally {
-      setLoading(false);
-    }
-  });
+  const [photoGroups] = createSignal<Record<number, PhotoItem[]>>(groups);
+  const [sortedYears] = createSignal<number[]>(
+    Object.keys(groups).map(Number).sort((a, b) => b - a)
+  );
+  const [loading] = createSignal(false);
 
   return (
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { mockFriendLinks } from '../lib/mock-data';
+import Comments from '../components/islands/Comments';
 
 const friends = mockFriendLinks;
 
@@ -122,5 +123,8 @@ const extendedFriends = [
         联系我
       </a>
     </div>
+
+    <!-- Comments -->
+    <Comments client:load mapping="specific" term="friends" />
   </div>
 </Layout>

@@ -12,49 +12,17 @@ import { mockFeedItems, mockArchiveGroups, getArchiveGroups, mockCurrentItems } 
 // Re-export env utilities
 export { getEnv, setRuntimeEnv } from './env';
 
-/**
- * Simple in-memory cache with TTL
- */
-function createCache<T>(ttlMs: number = 5 * 60 * 1000) { // Default 5 minutes
-  let cachedData: T | null = null;
-  let cachedAt: number = 0;
-
-  return {
-    get(): T | null {
-      if (cachedData && Date.now() - cachedAt < ttlMs) {
-        return cachedData;
-      }
-      return null;
-    },
-    set(data: T) {
-      cachedData = data;
-      cachedAt = Date.now();
-    },
-    clear() {
-      cachedData = null;
-      cachedAt = 0;
-    }
-  };
-}
-
-// Create caches for each data type
-const feedItemsCache = createCache<FeedItem[]>();
-const archiveItemsCache = createCache<ArchiveGroup[]>();
-const currentItemsCache = createCache<CurrentItem[]>();
-
 // Import getEnv for internal use
 import { getEnv, setRuntimeEnv as baseSetRuntimeEnv } from './env';
 import { setRuntimeKVEnv } from '../kv-cache';
 
 /**
- * Set runtime env and clear all caches (important for Cloudflare Workers)
+ * Set runtime env for Cloudflare Workers
+ * (KV cache is auto-cleared on TTL expiry)
  */
 export function setRuntimeEnvAndClearCache(env: Record<string, any>) {
   baseSetRuntimeEnv(env);
   setRuntimeKVEnv(env); // Also set KV binding
-  feedItemsCache.clear();
-  archiveItemsCache.clear();
-  currentItemsCache.clear();
 }
 
 // Check if should use real API - evaluated at call time for API routes
@@ -84,12 +52,6 @@ export async function getFeedItems(options?: {
   pageSize?: number;
   useMock?: boolean;
 }): Promise<FeedItem[]> {
-  // Check cache first
-  const cached = feedItemsCache.get();
-  if (cached) {
-    return cached;
-  }
-
   const USE_REAL_API = shouldUseRealAPI();
   const USE_DOUBAN_RSS = shouldUseDouban();
   const USE_TELEGRAM = shouldUseTelegram();
@@ -134,9 +96,6 @@ export async function getFeedItems(options?: {
       return bTime - aTime;
     });
 
-    // Cache the results
-    feedItemsCache.set(allItems);
-
     return allItems;
   } catch (error) {
     console.error('Error fetching feed items:', error);
@@ -149,12 +108,6 @@ export async function getFeedItems(options?: {
  * Get "currently consuming" items for sidebar
  */
 export async function getCurrentItems(): Promise<CurrentItem[]> {
-  // Check cache first
-  const cached = currentItemsCache.get();
-  if (cached) {
-    return cached;
-  }
-
   if (!shouldUseDouban()) {
     return mockCurrentItems;
   }
@@ -162,7 +115,6 @@ export async function getCurrentItems(): Promise<CurrentItem[]> {
   try {
     const items = await getDoubanCurrentItems();
     if (items.length > 0) {
-      currentItemsCache.set(items);
       return items;
     }
     // Fallback to mock if no items found
@@ -177,12 +129,6 @@ export async function getCurrentItems(): Promise<CurrentItem[]> {
  * Get articles for archives page
  */
 export async function getArchiveItems(): Promise<ArchiveGroup[]> {
-  // Check cache first
-  const cached = archiveItemsCache.get();
-  if (cached) {
-    return cached;
-  }
-
   if (!shouldUseRealAPI()) {
     return mockArchiveGroups;
   }
@@ -190,7 +136,6 @@ export async function getArchiveItems(): Promise<ArchiveGroup[]> {
   try {
     const articles = await getAllArticles();
     const result = getArchiveGroups(articles);
-    archiveItemsCache.set(result);
     return result;
   } catch (error) {
     console.error('Error fetching archive items:', error);
