@@ -73,12 +73,12 @@ export async function getFeedItems(options?: {
   const labels: string[] = [];
 
   if (USE_REAL_API) {
-    // Notion articles and photos as one settled unit
-    tasks.push(
-      Promise.all([getAllArticles(), getAllPhotos()])
-        .then(([a, p]) => [...a, ...p])
-    );
-    labels.push('notion');
+    // Articles and photos are fetched independently so a 404 on the
+    // photos database doesn't discard articles (and vice versa).
+    tasks.push(getAllArticles());
+    labels.push('notion-articles');
+    tasks.push(getAllPhotos());
+    labels.push('notion-photos');
   }
   if (USE_DOUBAN_RSS) {
     tasks.push(fetchDoubanFeed());
