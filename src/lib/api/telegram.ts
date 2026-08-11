@@ -7,6 +7,7 @@
 import type { FeedItem, MicroblogMetadata, MediaAttachment } from '../types';
 import { getEnv } from './env';
 import { fetchAndParseRSS } from './rss-parser';
+import { withKVCache, isKVAvailable } from '../kv-cache';
 
 /**
  * Check if Telegram is configured (RSSHub mode for public channels)
@@ -86,6 +87,13 @@ export async function fetchTelegramFeed(options?: {
   if (!isTelegramConfigured()) {
     console.warn('Telegram is not configured. Set TELEGRAM_CHANNEL_USERNAME for public channels.');
     return [];
+  }
+  if (isKVAvailable()) {
+    return withKVCache<FeedItem[]>(
+      'feed:telegram',
+      () => fetchViaRSSHub(options),
+      1800
+    );
   }
   return fetchViaRSSHub(options);
 }

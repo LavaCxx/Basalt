@@ -3,7 +3,6 @@ import Layout from '../layouts/Layout.astro';
 import Sidebar from '../components/ui/Sidebar.astro';
 import FeedList from '../components/islands/FeedList';
 import { getFeedItems, setRuntimeEnvAndClearCache } from '../lib/api';
-import { getAllArticles, getAllPhotos } from '../lib/api/notion';
 
 // Inject Cloudflare runtime env if available
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
@@ -19,19 +18,13 @@ try {
   console.error('Failed to fetch feed items:', e);
 }
 
-// Compute stats from real data — each source independently
-let stats: { articles?: number; photos?: number; microblogs?: number; media?: number } = {};
-try {
-  const [articlesRes, photosRes] = await Promise.allSettled([getAllArticles(), getAllPhotos()]);
-  stats = {
-    articles: articlesRes.status === 'fulfilled' ? articlesRes.value.length : 0,
-    photos: photosRes.status === 'fulfilled' ? photosRes.value.length : 0,
-    microblogs: feedItems.filter((i: any) => i.type === 'microblog').length,
-    media: feedItems.filter((i: any) => i.type === 'media').length,
-  };
-} catch (e) {
-  console.error('Failed to compute stats:', e);
-}
+// Compute stats from feed items already fetched (no extra requests)
+const stats: { articles?: number; photos?: number; microblogs?: number; media?: number } = {
+  articles: feedItems.filter((i: any) => i.type === 'article').length,
+  photos: feedItems.filter((i: any) => i.type === 'photo').length,
+  microblogs: feedItems.filter((i: any) => i.type === 'microblog').length,
+  media: feedItems.filter((i: any) => i.type === 'media').length,
+};
 
 // Serialize dates for client-side hydration
 const serializedItems = feedItems.map((item) => ({

@@ -6,6 +6,7 @@
 import type { CurrentItem, FeedItem, MediaMetadata } from '../types';
 import { getEnv } from './env';
 import { fetchAndParseRSS } from './rss-parser';
+import { withKVCache, isKVAvailable } from '../kv-cache';
 
 const DOUBAN_USER_RSS = () => getEnv('DOUBAN_USER_RSS');
 
@@ -184,6 +185,13 @@ export async function fetchDoubanFeed(): Promise<FeedItem[]> {
     return [];
   }
 
+  if (isKVAvailable()) {
+    return withKVCache<FeedItem[]>('feed:douban', () => fetchDoubanFeedInternal(rssUrl), 1800);
+  }
+  return fetchDoubanFeedInternal(rssUrl);
+}
+
+async function fetchDoubanFeedInternal(rssUrl: string): Promise<FeedItem[]> {
   try {
     const feed = await fetchAndParseRSS(rssUrl);
 
