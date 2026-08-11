@@ -21,7 +21,7 @@ export default function ArticleCard(props: { item: ArticleFeedItem }) {
         </Show>
         <div class="flex-1 min-w-0">
           <a href={item().url || '#'} class="group/link">
-            <h3 class="font-ui text-lg text-text-primary group-hover/link:text-accent transition-colors">{item().title}</h3>
+            <h3 class="font-ui text-lg text-text-primary group-hover/link:underline transition-colors">{item().title}</h3>
           </a>
           <Show when={meta()?.excerpt}>
             <p class="mt-1 text-sm text-text-secondary line-clamp-2">{meta()!.excerpt}</p>

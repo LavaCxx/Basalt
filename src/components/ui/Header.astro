@@ -11,19 +11,20 @@ const navItems = [
   { label: '相册', href: '/memories' },
   { label: '友链', href: '/friends' },
   { label: '关于', href: '/about' },
+  { label: '实验', href: '/lab' },
 ];
 
 const currentPath = Astro.url.pathname;
 ---
 
-<header transition:persist class={`border-b border-border sticky top-0 bg-background/80 backdrop-blur-sm z-50 ${className || ''}`}>
+<header transition:persist class={`border-b border-border sticky top-0 bg-background z-50 ${className || ''}`}>
   <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-14">
       <!-- Logo -->
       <a
         href="/"
         data-astro-prefetch="hover"
-        class="font-ui text-xl font-semibold text-text-primary hover:text-accent transition-colors"
+        class="font-ui text-xl font-semibold text-text-primary hover:underline transition-colors"
       >
         Basalt
       </a>
@@ -35,11 +36,11 @@ const currentPath = Astro.url.pathname;
             href={item.href}
             data-astro-prefetch="hover"
             data-nav-link
-            class:list={[
-              'px-3 py-2 text-sm font-medium rounded-md transition-colors',
-              currentPath === item.href
-                ? 'text-text-primary bg-active'
-                : 'text-text-secondary hover:text-text-primary hover:bg-black/[0.06]',
+           class:list={[
+          'px-3 py-2 text-sm font-medium transition-colors',
+           currentPath === item.href
+                ? 'text-text-primary underline underline-offset-4 font-semibold'
+                : 'text-text-secondary hover:text-text-primary hover:underline hover:underline-offset-4',
             ]}
           >
             {item.label}
@@ -74,17 +75,17 @@ const currentPath = Astro.url.pathname;
 
     <!-- Mobile Navigation -->
     <div class="sm:hidden hidden" id="mobile-menu">
-      <div class="py-3 space-y-1 border-t border-border">
+    <div class="py-3 space-y-1 border-t border-border">
         {navItems.map((item) => (
           <a
             href={item.href}
             data-astro-prefetch="hover"
             data-nav-link
-            class:list={[
-              'block px-3 py-2 text-sm font-medium rounded-md transition-colors',
-              currentPath === item.href
-                ? 'text-text-primary bg-active'
-                : 'text-text-secondary hover:text-text-primary hover:bg-black/[0.06]',
+           class:list={[
+          'block px-3 py-2 text-sm font-medium transition-colors',
+           currentPath === item.href
+                ? 'text-text-primary underline underline-offset-4 font-semibold'
+                : 'text-text-secondary hover:text-text-primary hover:underline hover:underline-offset-4',
             ]}
           >
             {item.label}
@@ -115,15 +116,11 @@ const currentPath = Astro.url.pathname;
       const href = link.getAttribute('href');
       const isActive = href === currentPath;
 
-      if (isActive) {
-        link.classList.add('text-text-primary');
-        link.classList.add('bg-active');
-        link.classList.remove('text-text-secondary');
-      } else {
-        link.classList.remove('text-text-primary');
-        link.classList.remove('bg-active');
-        link.classList.add('text-text-secondary');
-      }
+      link.classList.toggle('text-text-primary', isActive);
+      link.classList.toggle('text-text-secondary', !isActive);
+      link.classList.toggle('font-semibold', isActive);
+      link.classList.toggle('underline', isActive);
+      link.classList.toggle('underline-offset-4', isActive);
     });
   }
 
@@ -133,9 +130,3 @@ const currentPath = Astro.url.pathname;
   // Run on View Transitions navigation
   document.addEventListener('astro:page-load', updateActiveNav);
 </script>
-
-<style>
-  .bg-active {
-    background-color: rgba(0, 0, 0, 0.06);
-  }
-</style>

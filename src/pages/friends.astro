@@ -47,53 +47,51 @@ const extendedFriends = [
       </p>
     </header>
 
-    <!-- Friends Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <!-- Friends List -->
+    <div>
       {extendedFriends.map((friend) => (
         <a
-          href={friend.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="group p-4 border border-border rounded-lg bg-background hover:border-text-muted hover:bg-background-alt transition-all"
+         href={friend.url}
+         target="_blank"
+         rel="noopener noreferrer"
+          class="group flex items-center gap-4 py-4 border-b border-border-subtle transition-colors"
         >
-          <div class="flex items-center gap-3">
-            {friend.avatar ? (
-              <img
-                src={friend.avatar}
-                alt={friend.name}
-                class="w-12 h-12 rounded-full"
-              />
-            ) : (
-              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-purple-500 flex items-center justify-center text-white font-semibold">
-                {friend.name.charAt(0)}
-              </div>
-            )}
-            <div class="flex-1 min-w-0">
-              <h3 class="font-medium text-text-primary group-hover:text-accent transition-colors truncate">
-                {friend.name}
-              </h3>
-              {friend.description && (
-                <p class="text-sm text-text-muted truncate">
-                  {friend.description}
-                </p>
-              )}
+          {friend.avatar ? (
+            <img
+              src={friend.avatar}
+              alt={friend.name}
+              class="w-10 h-10 rounded-full flex-shrink-0"
+            />
+          ) : (
+            <div class="w-10 h-10 rounded-full bg-text-primary text-background flex items-center justify-center font-semibold flex-shrink-0">
+              {friend.name.charAt(0)}
             </div>
-            <!-- Arrow icon -->
-            <svg
-              class="w-5 h-5 text-text-muted group-hover:text-accent transition-colors flex-shrink-0"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
+          )}
+          <div class="flex-1 min-w-0 flex items-baseline gap-3">
+            <h3 class="font-medium text-text-primary group-hover:underline underline-offset-4 transition-colors">
+              {friend.name}
+            </h3>
+            {friend.description && (
+              <p class="text-sm text-text-muted truncate">
+                {friend.description}
+              </p>
+            )}
           </div>
+          <!-- Arrow icon -->
+          <svg
+            class="w-5 h-5 text-text-muted group-hover:text-text-primary transition-colors flex-shrink-0"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
         </a>
       ))}
     </div>
@@ -104,7 +102,7 @@ const extendedFriends = [
         想要交换友链？欢迎联系！
       </p>
       <a
-        href="mailto:hello@example.com"
+       href="mailto:hello@example.com"
         class="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-md text-text-secondary hover:text-text-primary hover:border-text-muted transition-colors"
       >
         <svg

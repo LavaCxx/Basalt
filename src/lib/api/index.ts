@@ -56,9 +56,14 @@ export async function getFeedItems(options?: {
   const USE_DOUBAN_RSS = shouldUseDouban();
   const USE_TELEGRAM = shouldUseTelegram();
 
-  // Force mock data if requested or if no APIs are configured
-  if (options?.useMock || (!USE_REAL_API && !USE_DOUBAN_RSS && !USE_TELEGRAM)) {
+  // Force mock data if explicitly requested, or if no APIs are configured (dev only)
+  if (options?.useMock || (import.meta.env.DEV && !USE_REAL_API && !USE_DOUBAN_RSS && !USE_TELEGRAM)) {
     return mockFeedItems;
+  }
+
+  // Production with no sources configured: return empty
+  if (!USE_REAL_API && !USE_DOUBAN_RSS && !USE_TELEGRAM) {
+    return [];
   }
 
   try {
@@ -99,8 +104,8 @@ export async function getFeedItems(options?: {
     return allItems;
   } catch (error) {
     console.error('Error fetching feed items:', error);
-    // Fallback to mock data on error
-    return mockFeedItems;
+    // Dev: fallback to mock data; Production: return empty
+    return import.meta.env.DEV ? mockFeedItems : [];
   }
 }
 
@@ -109,7 +114,7 @@ export async function getFeedItems(options?: {
  */
 export async function getCurrentItems(): Promise<CurrentItem[]> {
   if (!shouldUseDouban()) {
-    return mockCurrentItems;
+    return import.meta.env.DEV ? mockCurrentItems : [];
   }
 
   try {
@@ -117,11 +122,11 @@ export async function getCurrentItems(): Promise<CurrentItem[]> {
     if (items.length > 0) {
       return items;
     }
-    // Fallback to mock if no items found
-    return mockCurrentItems;
+    // Dev: fallback to mock; Production: return empty
+    return import.meta.env.DEV ? mockCurrentItems : [];
   } catch (error) {
     console.error('Error fetching current items:', error);
-    return mockCurrentItems;
+    return import.meta.env.DEV ? mockCurrentItems : [];
   }
 }
 
@@ -130,7 +135,7 @@ export async function getCurrentItems(): Promise<CurrentItem[]> {
  */
 export async function getArchiveItems(): Promise<ArchiveGroup[]> {
   if (!shouldUseRealAPI()) {
-    return mockArchiveGroups;
+    return import.meta.env.DEV ? mockArchiveGroups : [];
   }
 
   try {
@@ -139,7 +144,7 @@ export async function getArchiveItems(): Promise<ArchiveGroup[]> {
     return result;
   } catch (error) {
     console.error('Error fetching archive items:', error);
-    return mockArchiveGroups;
+    return import.meta.env.DEV ? mockArchiveGroups : [];
   }
 }
 
@@ -166,11 +171,14 @@ export async function getRecentFeedItems(count: number = 10): Promise<FeedItem[]
  */
 export async function getArticleBySlug(slug: string): Promise<FeedItem | null> {
   if (!shouldUseRealAPI()) {
-    return (
+    if (import.meta.env.DEV) {
+      return (
       mockFeedItems.find(
         (item) => item.type === 'article' && item.url?.endsWith(slug)
       ) || null
     );
+    }
+    return null;
   }
 
   try {
@@ -197,9 +205,12 @@ export async function getArticleBySlug(slug: string): Promise<FeedItem | null> {
  */
 export async function getAllArticleSlugs(): Promise<string[]> {
   if (!shouldUseRealAPI()) {
-    return mockFeedItems
+    if (import.meta.env.DEV) {
+      return mockFeedItems
       .filter((item) => item.type === 'article')
       .map((item) => item.url?.split('/').pop() || item.id);
+    }
+    return [];
   }
 
   try {
@@ -207,7 +218,9 @@ export async function getAllArticleSlugs(): Promise<string[]> {
     return articles.map((a) => a.url?.split('/').pop() || a.id);
   } catch (error) {
     console.error('Error fetching article slugs:', error);
-    return [];
+    return import.meta.env.DEV ? mockFeedItems
+      .filter((item) => item.type === 'article')
+      .map((item) => item.url?.split('/').pop() || item.id) : [];
   }
 }
 

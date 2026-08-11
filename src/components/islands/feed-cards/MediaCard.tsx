@@ -49,7 +49,7 @@ export default function MediaCard(props: { item: MediaFeedItem }) {
             </span>
           </Show>
           <a href={item().url || '#'} class="group/title" target="_blank" rel="noopener">
-            <h3 class="font-ui text-base text-text-primary group-hover/title:text-accent transition-colors mt-1.5">{item().title}</h3>
+            <h3 class="font-ui text-base text-text-primary group-hover/title:underline transition-colors mt-1.5">{item().title}</h3>
           </a>
           <Show when={meta()?.creator}>
             <p class="text-xs text-text-muted mt-0.5">{meta()!.creator}</p>
@@ -57,8 +57,8 @@ export default function MediaCard(props: { item: MediaFeedItem }) {
           <Show when={meta()?.rating}>
             <div class="mt-1 flex items-center gap-2">
               <span class="text-xs tracking-tight">
-                <span class="text-amber-500">{'★'.repeat(ratingPercent())}</span>
-                <span class="text-gray-300">{'☆'.repeat(5 - ratingPercent())}</span>
+                <span class="text-text-primary">{'★'.repeat(ratingPercent())}</span>
+                <span class="text-text-muted">{'☆'.repeat(5 - ratingPercent())}</span>
               </span>
               <span class="text-xs text-text-muted">{ratingLabel()}</span>
             </div>

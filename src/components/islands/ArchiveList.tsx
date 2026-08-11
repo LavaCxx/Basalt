@@ -79,12 +79,12 @@ export default function ArchiveList(props: ArchiveListProps) {
                     <li class="group">
                       <a
                         href={item.url}
-                        class="flex items-start gap-4 py-3 border-b border-border-subtle hover:bg-background-alt transition-colors -mx-2 px-2 rounded"
+                        class="flex items-start gap-4 py-3 border-b border-border-subtle group-hover:underline underline-offset-4 transition-colors"
                       >
                         <time class="text-sm text-text-muted w-16 flex-shrink-0 pt-0.5">
                           {formatDate(item.date)}
                         </time>
-                        <h3 class="text-text-primary group-hover:text-accent transition-colors flex-1">
+                        <h3 class="text-text-primary group-hover:underline transition-colors flex-1">
                           {item.title}
                         </h3>
                       </a>

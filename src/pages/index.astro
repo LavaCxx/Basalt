@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Sidebar from '../components/ui/Sidebar.astro';
 import FeedList from '../components/islands/FeedList';
 import { getFeedItems, setRuntimeEnvAndClearCache } from '../lib/api';
+import { getAllArticles, getAllPhotos } from '../lib/api/notion';
 
 // Inject Cloudflare runtime env if available
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
@@ -18,6 +19,20 @@ try {
   console.error('Failed to fetch feed items:', e);
 }
 
+// Compute stats from real data
+let stats: { articles?: number; photos?: number; microblogs?: number; media?: number } = {};
+try {
+  const [articles, photos] = await Promise.all([getAllArticles(), getAllPhotos()]);
+  stats = {
+    articles: articles.length,
+    photos: photos.length,
+    microblogs: feedItems.filter((i: any) => i.type === 'microblog').length,
+    media: feedItems.filter((i: any) => i.type === 'media').length,
+  };
+} catch (e) {
+  console.error('Failed to compute stats:', e);
+}
+
 // Serialize dates for client-side hydration
 const serializedItems = feedItems.map((item) => ({
   ...item,
@@ -29,7 +44,7 @@ const serializedItems = feedItems.map((item) => ({
   <FeedList client:load items={serializedItems} />
 
   <!-- Sidebar Slot -->
-  <Sidebar slot="sidebar" />
+  <Sidebar slot="sidebar" stats={stats} />
 </Layout>
 
 <style>
