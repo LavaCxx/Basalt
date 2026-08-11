@@ -19,13 +19,13 @@ try {
   console.error('Failed to fetch feed items:', e);
 }
 
-// Compute stats from real data
+// Compute stats from real data — each source independently
 let stats: { articles?: number; photos?: number; microblogs?: number; media?: number } = {};
 try {
-  const [articles, photos] = await Promise.all([getAllArticles(), getAllPhotos()]);
+  const [articlesRes, photosRes] = await Promise.allSettled([getAllArticles(), getAllPhotos()]);
   stats = {
-    articles: articles.length,
-    photos: photos.length,
+    articles: articlesRes.status === 'fulfilled' ? articlesRes.value.length : 0,
+    photos: photosRes.status === 'fulfilled' ? photosRes.value.length : 0,
     microblogs: feedItems.filter((i: any) => i.type === 'microblog').length,
     media: feedItems.filter((i: any) => i.type === 'media').length,
   };

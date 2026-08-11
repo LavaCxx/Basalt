@@ -66,28 +66,40 @@ export async function getFeedItems(options?: {
     return [];
   }
 
-  try {
-    const results: FeedItem[][] = [];
+  // Each source is fetched independently — one source failing must not
+  // discard results from the others. Use allSettled so a broken RSS feed
+  // or a Notion hiccup only zeroes out its own contribution.
+  const tasks: Promise<FeedItem[]>[] = [];
+  const labels: string[] = [];
 
-    // Fetch from Notion if configured
-    if (USE_REAL_API) {
-      const [articles, photos] = await Promise.all([getAllArticles(), getAllPhotos()]);
-      results.push(articles, photos);
+  if (USE_REAL_API) {
+    // Notion articles and photos as one settled unit
+    tasks.push(
+      Promise.all([getAllArticles(), getAllPhotos()])
+        .then(([a, p]) => [...a, ...p])
+    );
+    labels.push('notion');
+  }
+  if (USE_DOUBAN_RSS) {
+    tasks.push(fetchDoubanFeed());
+    labels.push('douban');
+  }
+  if (USE_TELEGRAM) {
+    tasks.push(fetchTelegramFeed({ limit: 30 }));
+    labels.push('telegram');
+  }
+
+  const settled = await Promise.allSettled(tasks);
+  const results: FeedItem[][] = [];
+  settled.forEach((res, i) => {
+    if (res.status === 'fulfilled') {
+      results.push(res.value);
+    } else {
+      console.error(`[feed] source "${labels[i]}" failed:`, res.reason);
     }
+  });
 
-    // Fetch from Douban if configured
-    if (USE_DOUBAN_RSS) {
-      const doubanItems = await fetchDoubanFeed();
-      results.push(doubanItems);
-    }
-
-    // Fetch from Telegram if configured
-    if (USE_TELEGRAM) {
-      const telegramItems = await fetchTelegramFeed({ limit: 30 });
-      results.push(telegramItems);
-    }
-
-    const allItems = results.flat();
+  const allItems = results.flat();
 
     // Ensure all dates are Date objects, then sort by date descending
     allItems.forEach(item => {
@@ -101,12 +113,7 @@ export async function getFeedItems(options?: {
       return bTime - aTime;
     });
 
-    return allItems;
-  } catch (error) {
-    console.error('Error fetching feed items:', error);
-    // Dev: fallback to mock data; Production: return empty
-    return import.meta.env.DEV ? mockFeedItems : [];
-  }
+  return allItems;
 }
 
 /**
