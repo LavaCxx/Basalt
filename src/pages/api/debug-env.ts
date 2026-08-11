@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
-import { setRuntimeEnvAndClearCache, getFeedItems } from '../../lib/api';
-import { getNotionClient, getArticlesDatabaseId } from '../../lib/api/notion/client';
-import { fetchArticles, getAllArticles } from '../../lib/api/notion/articles';
-import { kvDelete, isKVAvailable } from '../../lib/kv-cache';
+import { setRuntimeEnvAndClearCache } from '../../lib/api';
+import { getAllArticles, getAllPhotos } from '../../lib/api/notion';
+import { fetchDoubanFeed } from '../../lib/api/rss';
+import { fetchTelegramFeed } from '../../lib/api/telegram';
 
 export const prerender = false;
 
@@ -12,34 +12,33 @@ export const GET: APIRoute = async (context) => {
 
   const result: any = {};
 
-  // Clear KV cache
-  await kvDelete('notion:articles:all');
-  await kvDelete('notion:photos:all');
-
-  // Try fetchArticles directly (single page)
+  // Test each source individually
   try {
-    const { articles, hasMore, nextCursor } = await fetchArticles({ pageSize: 100 });
-    result.fetchArticlesCount = articles.length;
-    result.fetchArticlesSample = articles.map((a: any) => ({ id: a.id, title: a.title, type: a.type }));
+    const articles = await getAllArticles();
+    result.articles = articles.length;
   } catch (e: any) {
-    result.fetchArticlesError = e?.message || String(e);
+    result.articlesError = e?.message || String(e);
   }
 
-  // Try getAllArticles
   try {
-    const all = await getAllArticles();
-    result.getAllArticlesCount = all.length;
+    const photos = await getAllPhotos();
+    result.photos = photos.length;
   } catch (e: any) {
-    result.getAllArticlesError = e?.message || String(e);
+    result.photosError = e?.message || String(e);
   }
 
-  // Try getFeedItems
   try {
-    const feed = await getFeedItems();
-    result.feedCount = feed.length;
-    result.feedTypes = feed.map((f: any) => f.type);
+    const douban = await fetchDoubanFeed();
+    result.douban = douban.length;
   } catch (e: any) {
-    result.feedError = e?.message || String(e);
+    result.doubanError = e?.message || String(e);
+  }
+
+  try {
+    const telegram = await fetchTelegramFeed({ limit: 30 });
+    result.telegram = telegram.length;
+  } catch (e: any) {
+    result.telegramError = e?.message || String(e);
   }
 
   return new Response(JSON.stringify(result, null, 2), {
