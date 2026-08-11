@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
-import { setRuntimeEnvAndClearCache, getFeedItems } from '../../lib/api';
-import { getAllArticles } from '../../lib/api/notion';
+import { setRuntimeEnvAndClearCache } from '../../lib/api';
+import { getNotionClient, getArticlesDatabaseId } from '../../lib/api/notion/client';
+import { kvDelete, isKVAvailable } from '../../lib/kv-cache';
 
 export const prerender = false;
 
@@ -9,28 +10,45 @@ export const GET: APIRoute = async (context) => {
   if (runtimeEnv) setRuntimeEnvAndClearCache(runtimeEnv);
 
   const result: any = {
-    hasRuntimeEnv: !!runtimeEnv,
-    hasNotionKey: !!runtimeEnv?.NOTION_API_KEY,
-    hasArticlesDb: !!runtimeEnv?.NOTION_ARTICLES_DATABASE_ID,
-    hasKV: !!runtimeEnv?.NOTION_CACHE,
+    kvAvailable: isKVAvailable(),
   };
 
-  // Try fetching articles directly
-  try {
-    const articles = await getAllArticles();
-    result.articlesCount = articles.length;
-    result.articlesSample = articles.slice(0, 2).map((a: any) => ({ id: a.id, title: a.title }));
-  } catch (e: any) {
-    result.articlesError = e?.message || String(e);
-    result.articlesStack = e?.stack?.split('\n').slice(0, 5).join('\n');
+  // Clear KV cache for articles
+  if (isKVAvailable()) {
+    await kvDelete('notion:articles:all');
+    await kvDelete('notion:photos:all');
+    result.cacheCleared = true;
   }
 
-  // Try full feed
+  // Direct Notion query WITHOUT the 发布 filter (to see all pages)
   try {
-    const feed = await getFeedItems();
-    result.feedCount = feed.length;
+    const notion = getNotionClient();
+    const dbId = getArticlesDatabaseId();
+    result.dbId = dbId;
+
+    // Query without filter first — how many pages total?
+    const allResp = await notion.databases.query({
+      database_id: dbId,
+      page_size: 1,
+    });
+    result.totalPagesInDb = allResp.results.length;
+
+    // Query WITH the 发布 filter
+    const filteredResp = await notion.databases.query({
+      database_id: dbId,
+      filter: { property: '发布', checkbox: { equals: true } },
+      page_size: 1,
+    });
+    result.publishedPages = filteredResp.results.length;
+
+    // Check what properties the first page has
+    if (allResp.results.length > 0) {
+      const firstPage = allResp.results[0] as any;
+      result.samplePageProps = Object.keys(firstPage.properties || {});
+    }
   } catch (e: any) {
-    result.feedError = e?.message || String(e);
+    result.notionError = e?.message || String(e);
+    result.notionStatus = e?.status;
   }
 
   return new Response(JSON.stringify(result, null, 2), {
