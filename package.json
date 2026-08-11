@@ -20,9 +20,11 @@
     "fast-xml-parser": "^5.3.7",
     "shiki": "^3.22.0",
     "solid-js": "^1.9.11",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "three": "^0.169.0"
   },
   "devDependencies": {
+    "@types/three": "^0.169.0",
     "dotenv": "^17.3.1",
     "wrangler": "^4.67.0"
   }

@@ -1,12 +1,12 @@
 ---
-import type { FriendLink, CurrentItem } from '../../lib/types';
+import type { CurrentItem } from '../../lib/types';
 import { getCurrentItems, setRuntimeEnvAndClearCache } from '../../lib/api';
-import { mockFriendLinks, mockCurrentItems } from '../../lib/mock-data';
+import { mockCurrentItems } from '../../lib/mock-data';
 import { mediaTypeLabels } from '../../lib/media-config';
 
 interface Props {
-  friends?: FriendLink[];
   currentItems?: CurrentItem[];
+  stats?: { articles?: number; photos?: number; microblogs?: number; media?: number };
 }
 
 // Inject Cloudflare runtime env if available
@@ -27,7 +27,7 @@ try {
 }
 
 currentItems = Astro.props.currentItems || currentItems;
-const friends = Astro.props.friends || mockFriendLinks;
+const stats = Astro.props.stats || {};
 
 const typeLabels: Record<string, string> = {
   reading: '阅读中',
@@ -39,25 +39,10 @@ const typeLabels: Record<string, string> = {
 ---
 
 <aside class="space-y-6">
-  <!-- Profile Card -->
-  <div class="p-4 border border-border rounded-lg bg-background">
-    <div class="flex items-center gap-3">
-      <div class="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-purple-500 flex items-center justify-center text-white font-semibold text-lg">
-        玄
-      </div>
-      <div>
-        <h3 class="font-medium text-text-primary">玄武</h3>
-        <p class="text-sm text-text-muted">数字园丁</p>
-      </div>
-    </div>
-    <p class="mt-3 text-sm text-text-secondary">
-      他处书写，此处发布。一个收集想法、照片与记忆的空间。
-    </p>
-  </div>
-
-  <!-- Currently Section -->
-  {currentItems.length > 0 && (
-    <div class="p-4 border border-border rounded-lg bg-background">
+ <!-- Currently -->
+ <!-- Currently -->
+{currentItems.length > 0 && (
+   <section class="border-t border-border pt-5 mt-5">
       <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
         最近
       </h3>
@@ -96,7 +81,7 @@ const typeLabels: Record<string, string> = {
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-sm text-text-primary hover:text-accent transition-colors line-clamp-1"
+                  class="text-sm text-text-primary hover:underline transition-colors line-clamp-1"
                 >
                   {item.title}
                 </a>
@@ -108,66 +93,68 @@ const typeLabels: Record<string, string> = {
               )}
               {item.progress !== undefined && (
                 <div class="mt-1.5 h-1 bg-border rounded-full overflow-hidden">
-                  <div class="h-full bg-accent rounded-full" style={`width: ${item.progress}%`}></div>
+                  <div class="h-full bg-text-primary rounded-full" style={`width: ${item.progress}%`}></div>
                 </div>
               )}
             </div>
           </div>
         )})}
       </div>
-    </div>
+    </section>
   )}
-
-  <!-- Friends Section -->
-  {friends.length > 0 && (
-    <div class="p-4 border border-border rounded-lg bg-background">
-      <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
-        友链
-      </h3>
-      <div class="grid grid-cols-2 gap-2">
-        {friends.map((friend) => (
-          <a
-            href={friend.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex items-center gap-2 p-2 rounded-md hover:bg-background-alt transition-colors group"
-          >
-            {friend.avatar ? (
-              <img
-                src={friend.avatar}
-                alt={friend.name}
-                class="w-6 h-6 rounded-full"
-              />
-            ) : (
-              <div class="w-6 h-6 rounded-full bg-border flex items-center justify-center text-xs text-text-muted">
-                {friend.name.charAt(0)}
-              </div>
-            )}
-            <span class="text-sm text-text-secondary group-hover:text-text-primary truncate">
-              {friend.name}
-            </span>
-          </a>
-        ))}
-      </div>
-    </div>
-  )}
-
-  <!-- Stats -->
-  <div class="p-4 border border-border rounded-lg bg-background">
-    <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
-      统计
+ <!-- Stats -->
+ <section class="border-t border-border pt-5 mt-5">
+   <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
+     统计
     </h3>
     <div class="grid grid-cols-2 gap-4 text-center">
-      <div>
-        <p class="text-2xl font-ui font-semibold text-text-primary">24</p>
-        <p class="text-xs text-text-muted">篇文章</p>
-      </div>
-      <div>
-        <p class="text-2xl font-ui font-semibold text-text-primary">156</p>
-        <p class="text-xs text-text-muted">张照片</p>
-      </div>
+      {stats.articles !== undefined && (
+        <div>
+          <p class="text-2xl font-ui font-semibold text-text-primary">{stats.articles}</p>
+          <p class="text-xs text-text-muted">篇文章</p>
+        </div>
+      )}
+      {stats.photos !== undefined && (
+        <div>
+          <p class="text-2xl font-ui font-semibold text-text-primary">{stats.photos}</p>
+          <p class="text-xs text-text-muted">张照片</p>
+        </div>
+      )}
+      {stats.microblogs !== undefined && (
+        <div>
+          <p class="text-2xl font-ui font-semibold text-text-primary">{stats.microblogs}</p>
+          <p class="text-xs text-text-muted">条动态</p>
+        </div>
+      )}
+      {stats.media !== undefined && (
+        <div>
+          <p class="text-2xl font-ui font-semibold text-text-primary">{stats.media}</p>
+          <p class="text-xs text-text-muted">条标记</p>
+        </div>
+      )}
     </div>
-  </div>
+  </section>
+
+  <!-- Social Links -->
+  <section class="border-t border-border pt-5 mt-5">
+    <div class="flex items-center gap-4">
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="text-text-secondary hover:text-text-primary transition-colors" aria-label="GitHub">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      <a href="https://bilibili.com" target="_blank" rel="noopener noreferrer" class="text-text-secondary hover:text-text-primary transition-colors" aria-label="Bilibili">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906L17.813 4.653zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.764-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773H5.333zm2.347 3.013c.356 0 .658.129.907.387.249.258.373.564.373.92v1.173c0 .356-.124.662-.373.92-.249.258-.551.387-.907.387-.355 0-.657-.129-.906-.387-.25-.258-.373-.564-.373-.92V11.56c0-.356.124-.662.373-.92.249-.258.551-.387.906-.387zm8.64 0c.356 0 .658.129.907.387.249.258.373.564.373.92v1.173c0 .356-.124.662-.373.92-.249.258-.551.387-.907.387-.355 0-.657-.129-.906-.387-.25-.258-.373-.564-.373-.92V11.56c0-.356.124-.662.373-.92.249-.258.551-.387.906-.387z"/></svg>
+      </a>
+      <a href="/rss.xml" class="text-text-secondary hover:text-text-primary transition-colors" aria-label="RSS">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/></svg>
+      </a>
+      <a href="mailto:hello@example.com" class="text-text-secondary hover:text-text-primary transition-colors" aria-label="Email">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </a>
+      <a href="/drive" class="text-text-secondary hover:text-text-primary transition-colors" aria-label="Voxel Drive" title="Voxel Drive">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13l1.5-4.5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.5L21 13v5h-2a2 2 0 0 1-2-2H7a2 2 0 0 1-2 2H3v-5zm3.5-4L5.3 12h13.4l-1.2-3h-11zM6.5 15.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm11 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>
+      </a>
+    </div>
+  </section>
 </aside>
 
 <style>
