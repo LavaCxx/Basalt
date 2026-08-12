@@ -51,6 +51,47 @@ async function getHighlighter() {
   return _highlighterPromise;
 }
 
+
+interface UrlMetadata {
+  title: string;
+  description: string;
+}
+
+/** Fetch og:title / <title> and og:description / meta description from a URL */
+async function fetchUrlMetadata(url: string): Promise<UrlMetadata | null> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const resp = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' },
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) return null;
+    const html = await resp.text();
+    // Only parse first 50KB for performance
+    const head = html.substring(0, 50000);
+
+    let title = '';
+    let description = '';
+
+    // Try og:title first, then <title>
+    const ogTitle = head.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']*)["']/i);
+    const titleTag = head.match(/<title[^>]*>([^<]*)<\/title>/i);
+    title = (ogTitle?.[1] || titleTag?.[1] || '').trim();
+
+    // Try og:description first, then meta description
+    const ogDesc = head.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']*)["']/i);
+    const metaDesc = head.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i);
+    description = (ogDesc?.[1] || metaDesc?.[1] || '').trim();
+
+    if (!title && !description) return null;
+    return { title: title.substring(0, 200), description: description.substring(0, 300) };
+  } catch {
+    return null;
+  }
+}
+
 /** Notion color → CSS class name */
 const COLOR_MAP: Record<string, string> = {
   red: 'notion-red',
@@ -227,11 +268,16 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
       const safeHref = safeUrl(url);
       if (!safeHref) return '';
       const caption = richTextToHtml(b.bookmark.caption || []);
-      let displayText = caption || escapeHtml(url);
       let domain = '';
       try { domain = new URL(url).hostname; } catch { domain = url; }
       const favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
-      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title"><img class="notion-bookmark-icon" src="${escapeHtml(favicon)}" alt="" width="16" height="16" loading="lazy" />${displayText}</span><span class="notion-bookmark-url">${escapeHtml(url)}</span></span></a>`;
+
+      // Try to fetch page title and description
+      const meta = await fetchUrlMetadata(url).catch(() => null);
+      const title = caption || meta?.title || escapeHtml(url);
+      const description = meta?.description || '';
+
+      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title"><img class="notion-bookmark-icon" src="${escapeHtml(favicon)}" alt="" width="16" height="16" loading="lazy" />${title}</span>${description ? `<span class="notion-bookmark-desc">${escapeHtml(description)}</span>` : ''}<span class="notion-bookmark-url">${escapeHtml(domain)}</span></span></a>`;
     }
 
     case 'table': {
