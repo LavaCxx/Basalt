@@ -1,12 +1,11 @@
 /**
  * RSS Parser for Douban and other sources
- * Uses fast-xml-parser for Cloudflare Workers compatibility
+ * (KV caching removed — data now lives in D1, populated by the sync worker)
  */
 
 import type { CurrentItem, FeedItem, MediaMetadata } from '../types';
 import { getEnv } from './env';
 import { fetchAndParseRSS } from './rss-parser';
-import { withKVCache, isKVAvailable } from '../kv-cache';
 
 const DOUBAN_USER_RSS = () => getEnv('DOUBAN_USER_RSS');
 
@@ -55,7 +54,7 @@ function detectMediaType(title: string): 'book' | 'movie' | 'music' | 'tv' {
 /**
  * Parse Douban RSS item to extract media info
  */
-function parseDoubanItem(item: any): {
+export function parseDoubanItem(item: any): {
   title: string;
   status: string;
   rating?: number;
@@ -185,13 +184,6 @@ export async function fetchDoubanFeed(): Promise<FeedItem[]> {
     return [];
   }
 
-  if (isKVAvailable()) {
-    return withKVCache<FeedItem[]>('feed:douban', () => fetchDoubanFeedInternal(rssUrl), 1800);
-  }
-  return fetchDoubanFeedInternal(rssUrl);
-}
-
-async function fetchDoubanFeedInternal(rssUrl: string): Promise<FeedItem[]> {
   const feed = await fetchAndParseRSS(rssUrl);
 
   const items: FeedItem[] = feed.items

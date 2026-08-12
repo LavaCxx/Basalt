@@ -1,0 +1,25 @@
+{
+  "name": "basalt-sync",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --test-scheduled",
+    "deploy": "wrangler deploy",
+    "migrate": "wrangler d1 migrations apply basalt",
+    "migrate-local": "wrangler d1 migrations apply basalt --local"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.3.0",
+    "fast-xml-parser": "^5.3.7",
+    "shiki": "^3.22.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250101.0",
+    "typescript": "^5.7.0",
+    "wrangler": "^4.67.0"
+  },
+  "volta": {
+    "node": "24.19.0"
+  }
+}

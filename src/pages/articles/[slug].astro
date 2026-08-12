@@ -8,16 +8,15 @@
  */
 
 import Layout from '../../layouts/Layout.astro';
-import { getArticleBySlug, getAllArticleSlugs } from '../../lib/api';
+import { getArticleBySlug, initRuntime } from '../../lib/api';
 import ArticleContent from '../../components/islands/ArticleContent';
 import TableOfContents from '../../components/islands/TableOfContents';
 import Comments from '../../components/islands/Comments';
 
-export async function getStaticPaths() {
-  const slugs = await getAllArticleSlugs();
-  return slugs.map((slug) => ({
-    params: { slug },
-  }));
+// Initialize D1 binding from Cloudflare runtime env
+const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
+if (runtimeEnv) {
+  initRuntime(runtimeEnv);
 }
 
 const { slug } = Astro.params;
@@ -40,8 +39,8 @@ const readingTime = (metadata as any)?.readingTime || 5;
       <header class="article-header">
         <h1 class="article-title">{title}</h1>
         <div class="article-meta">
-          <time datetime={date.toISOString()}>
-            {date.toLocaleDateString('zh-CN', {
+          <time datetime={date instanceof Date ? date.toISOString() : String(date)}>
+            {(date instanceof Date ? date : new Date(date)).toLocaleDateString('zh-CN', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',

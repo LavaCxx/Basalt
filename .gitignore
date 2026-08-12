@@ -35,3 +35,7 @@ pnpm-debug.log*
 debug-*.mjs
 test-*.mjs
 check-env.mjs
+
+# Sync worker
+sync-worker/node_modules/
+sync-worker/.wrangler/

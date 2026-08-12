@@ -7,6 +7,25 @@ import { createHighlighter, createJavaScriptRegexEngine } from 'shiki';
 import { getNotionClient } from './client';
 import { escapeHtml, safeUrl } from './properties';
 
+/** Metadata for a bookmark link, used to render rich link previews */
+export interface BookmarkMeta {
+  title?: string;
+  description?: string;
+  image?: string;
+  favicon?: string;
+  domain?: string;
+}
+
+/** Options that can be passed to control block rendering behavior */
+export interface BlockRenderOptions {
+  /**
+   * If provided, this function is called for every bookmark block.
+   * It should return enriched metadata for the URL (e.g. from link_metadata table),
+   * or null/undefined to fall back to domain + favicon.
+   */
+  resolveBookmarkMeta?: (url: string) => Promise<BookmarkMeta | null | undefined>;
+}
+
 const LANG_MAP: Record<string, string> = {
   js: 'javascript',
   ts: 'typescript',
@@ -68,8 +87,11 @@ const COLOR_MAP: Record<string, string> = {
 /**
  * Fetch block children and convert to HTML
  */
-export async function fetchBlockChildren(blockId: string): Promise<string> {
-  return fetchChildrenRecursive(blockId);
+export async function fetchBlockChildren(
+  blockId: string,
+  options?: BlockRenderOptions
+): Promise<string> {
+  return fetchChildrenRecursive(blockId, options);
 }
 
 /**
@@ -77,7 +99,10 @@ export async function fetchBlockChildren(blockId: string): Promise<string> {
  * Groups consecutive bulleted/numbered items into <ul>/<ol>.
  *
  */
-async function fetchChildrenRecursive(blockId: string): Promise<string> {
+async function fetchChildrenRecursive(
+  blockId: string,
+  options?: BlockRenderOptions
+): Promise<string> {
   const notion = getNotionClient();
   const blocks = await notion.blocks.children.list({
     block_id: blockId,
@@ -110,7 +135,7 @@ async function fetchChildrenRecursive(blockId: string): Promise<string> {
       // Recursively render nested children inside list items
       let inner = '';
       if (b.has_children) {
-        inner = await fetchChildrenRecursive(b.id);
+        inner = await fetchChildrenRecursive(b.id, options);
       }
       const itemContent = richTextToHtml(b[b.type].rich_text);
       listItems.push(`<li>${itemContent}${inner ? `${inner}` : ''}</li>`);
@@ -120,7 +145,7 @@ async function fetchChildrenRecursive(blockId: string): Promise<string> {
     // Non-list block — close any open list first
     flushList();
 
-    const html = await blockToHtml(block, true);
+    const html = await blockToHtml(block, true, options);
     if (html) htmlParts.push(html);
   }
 
@@ -144,7 +169,11 @@ function colorWrapper(blockData: any): { cls: string; open: string; close: strin
   return { cls: fullCls, open: `<span class="${fullCls}">`, close: '</span>' };
 }
 
-export async function blockToHtml(block: GetBlockResponse, recurse = true): Promise<string> {
+export async function blockToHtml(
+  block: GetBlockResponse,
+  recurse = true,
+  options?: BlockRenderOptions
+): Promise<string> {
   const b = block as any;
 
   switch (b.type) {
@@ -208,7 +237,7 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
       const summary = richTextToHtml(b.toggle.rich_text);
       let inner = '';
       if (recurse && b.has_children) {
-        inner = await fetchChildrenRecursive(b.id);
+        inner = await fetchChildrenRecursive(b.id, options);
       }
       return `<details class="notion-toggle"><summary>${summary}</summary>${inner}</details>`;
     }
@@ -218,7 +247,7 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
       const text = richTextToHtml(b.to_do.rich_text);
       let inner = '';
       if (recurse && b.has_children) {
-        inner = await fetchChildrenRecursive(b.id);
+        inner = await fetchChildrenRecursive(b.id, options);
       }
       return `<div class="notion-todo"><input type="checkbox" disabled${checked ? ' checked' : ''} /><span class="${checked ? 'notion-todo-checked' : ''}">${text}</span>${inner ? `<div class="notion-todo-children">${inner}</div>` : ''}</div>`;
     }
@@ -231,25 +260,51 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
       const captionText = captionRaw.map((t: any) => t.plain_text).join('');
       let domain = '';
       try { domain = new URL(url).hostname; } catch { domain = url; }
-      const favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
+      const fallbackFavicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
 
-      // Split caption into title and description by newline
+      // Try to resolve enriched metadata (from link_metadata table during sync)
+      let meta: BookmarkMeta | null | undefined = null;
+      if (options?.resolveBookmarkMeta) {
+        try {
+          meta = await options.resolveBookmarkMeta(url);
+        } catch {
+          meta = null;
+        }
+      }
+
+      const favicon = escapeHtml(meta?.favicon || fallbackFavicon);
+
+      // Determine title and description: enriched meta > caption > domain fallback
       let title = escapeHtml(domain);
       let description = '';
-      if (captionText) {
+
+      if (meta?.title) {
+        title = escapeHtml(meta.title);
+      } else if (captionText) {
         const parts = captionText.split('\n');
         title = escapeHtml(parts[0].trim());
+      }
+
+      if (meta?.description) {
+        description = escapeHtml(meta.description);
+      } else if (captionText) {
+        const parts = captionText.split('\n');
         if (parts.length > 1 && parts[1].trim()) {
           description = escapeHtml(parts.slice(1).join(' ').trim());
         }
       }
 
-      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title"><img class="notion-bookmark-icon" src="${escapeHtml(favicon)}" alt="" width="16" height="16" loading="lazy" />${title}</span>${description ? `<span class="notion-bookmark-desc">${description}</span>` : ''}<span class="notion-bookmark-url">${escapeHtml(domain)}</span></span></a>`;
+      // OG image as cover thumbnail
+      const coverHtml = meta?.image
+        ? `<span class="notion-bookmark-cover"><img src="${escapeHtml(meta.image)}" alt="" loading="lazy" /></span>`
+        : '';
+
+      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title"><img class="notion-bookmark-icon" src="${favicon}" alt="" width="16" height="16" loading="lazy" />${title}</span>${description ? `<span class="notion-bookmark-desc">${description}</span>` : ''}<span class="notion-bookmark-url">${escapeHtml(meta?.domain || domain)}</span></span>${coverHtml}</a>`;
     }
 
     case 'table': {
       if (!recurse || !b.has_children) return '';
-      const tableHtml = await fetchChildrenRecursive(b.id);
+      const tableHtml = await fetchChildrenRecursive(b.id, options);
       const hasColHeader = b.table.has_column_header;
       const hasRowHeader = b.table.has_row_header;
       const cls = `notion-table${hasColHeader ? ' has-col-header' : ''}${hasRowHeader ? ' has-row-header' : ''}`;

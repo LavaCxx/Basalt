@@ -1,6 +1,6 @@
 ---
 import type { CurrentItem } from '../../lib/types';
-import { getCurrentItems, setRuntimeEnvAndClearCache } from '../../lib/api';
+import { getCurrentItems, initRuntime } from '../../lib/api';
 import { mockCurrentItems } from '../../lib/mock-data';
 import { mediaTypeLabels } from '../../lib/media-config';
 
@@ -12,7 +12,7 @@ interface Props {
 // Inject Cloudflare runtime env if available
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
 if (runtimeEnv) {
-  setRuntimeEnvAndClearCache(runtimeEnv);
+  initRuntime(runtimeEnv);
 }
 
 // Fetch current items - with fallback to mock data on error

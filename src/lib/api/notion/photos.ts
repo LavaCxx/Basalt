@@ -1,10 +1,11 @@
 /**
  * Photo fetching from Notion
+ * (KV caching removed — data now lives in D1, populated by the sync worker)
  */
 
 import type { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
 import type { FeedItem } from '../../types';
-import { getNotionClient, getPhotosDatabaseId, CACHE_KEYS, CACHE_TTL_SECONDS, withKVCache, isKVAvailable } from './client';
+import { getNotionClient, getPhotosDatabaseId } from './client';
 import { type NotionPhotoProperties, getPlainText, getCoverImage } from './properties';
 
 /**
@@ -12,7 +13,7 @@ import { type NotionPhotoProperties, getPlainText, getCoverImage } from './prope
  */
 export async function fetchPhotos(options?: {
   pageSize?: number;
-  startCursor?: string;
+  startCursor?: string | null;
 }): Promise<{ photos: FeedItem[]; hasMore: boolean; nextCursor: string | null }> {
   const dbId = getPhotosDatabaseId();
   if (!dbId) {
@@ -26,7 +27,7 @@ export async function fetchPhotos(options?: {
     filter: { property: '发布', checkbox: { equals: true } },
     sorts: [{ timestamp: 'created_time', direction: 'descending' }],
     page_size: options?.pageSize || 20,
-    start_cursor: options?.startCursor,
+    start_cursor: options?.startCursor || undefined,
   };
 
   const response = await notion.databases.query(query);
@@ -56,16 +57,9 @@ export async function fetchPhotos(options?: {
 }
 
 /**
- * Get all photos with pagination + KV cache
+ * Get all photos with pagination
  */
 export async function getAllPhotos(): Promise<FeedItem[]> {
-  if (isKVAvailable()) {
-    return withKVCache<FeedItem[]>(CACHE_KEYS.PHOTOS, fetchAllPhotosInternal, CACHE_TTL_SECONDS);
-  }
-  return fetchAllPhotosInternal();
-}
-
-async function fetchAllPhotosInternal(): Promise<FeedItem[]> {
   const all: FeedItem[] = [];
   let hasMore = true;
   let cursor: string | null = null;
@@ -73,7 +67,7 @@ async function fetchAllPhotosInternal(): Promise<FeedItem[]> {
   while (hasMore) {
     const { photos, hasMore: more, nextCursor } = await fetchPhotos({
       pageSize: 100,
-      startCursor: cursor || undefined,
+      startCursor: cursor,
     });
     all.push(...photos);
     hasMore = more;

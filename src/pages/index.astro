@@ -2,15 +2,15 @@
 import Layout from '../layouts/Layout.astro';
 import Sidebar from '../components/ui/Sidebar.astro';
 import FeedList from '../components/islands/FeedList';
-import { getFeedItems, setRuntimeEnvAndClearCache } from '../lib/api';
+import { getFeedItems, initRuntime } from '../lib/api';
 
-// Inject Cloudflare runtime env if available
+// Initialize D1 binding from Cloudflare runtime env
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
 if (runtimeEnv) {
-  setRuntimeEnvAndClearCache(runtimeEnv);
+  initRuntime(runtimeEnv);
 }
 
-// Fetch feed items server-side
+// Fetch feed items server-side (reads from D1)
 let feedItems: any[] = [];
 try {
   feedItems = await getFeedItems();

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getFeedItems, setRuntimeEnvAndClearCache } from '../../lib/api';
+import { getFeedItems, initRuntime } from '../../lib/api';
 
 export const prerender = false;
 
@@ -7,7 +7,7 @@ export const GET: APIRoute = async (context) => {
   try {
     const runtimeEnv = (context as any).runtime?.env || (context.locals as any)?.runtime?.env;
     if (runtimeEnv) {
-      setRuntimeEnvAndClearCache(runtimeEnv);
+      initRuntime(runtimeEnv);
     }
 
     const items = await getFeedItems();

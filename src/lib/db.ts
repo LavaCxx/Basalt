@@ -1,0 +1,276 @@
+/**
+ * D1 database read module for the Astro/Cloudflare Pages app.
+ *
+ * All page-level data access now goes through this module, reading from D1
+ * instead of making real-time API calls to third-party sources.
+ */
+
+import type { FeedItem, FeedItemType, ContentSource, ArchiveGroup, ArchiveItem, CurrentItem } from './types';
+
+// ============================================================
+// D1 binding access
+// ============================================================
+
+interface D1Result {
+  results: any[];
+  success: boolean;
+  meta?: any;
+}
+
+interface D1PreparedStatement {
+  bind(...values: any[]): D1PreparedStatement;
+  first(): Promise<any>;
+  all(): Promise<D1Result>;
+  run(): Promise<D1Result>;
+}
+
+interface D1DatabaseLike {
+  prepare(sql: string): D1PreparedStatement;
+}
+
+let _runtimeDB: D1DatabaseLike | null = null;
+
+/**
+ * Set the D1 binding from Cloudflare runtime env (called from pages/API routes).
+ */
+export function setRuntimeDB(env: Record<string, any>): void {
+  if (env?.DB) {
+    _runtimeDB = env.DB;
+  }
+}
+
+/**
+ * Check if D1 is available.
+ */
+export function isDBAvailable(): boolean {
+  return _runtimeDB !== null;
+}
+
+function getDB(): D1DatabaseLike {
+  if (!_runtimeDB) {
+    throw new Error('D1 database binding is not available. Call setRuntimeDB() first.');
+  }
+  return _runtimeDB;
+}
+
+// ============================================================
+// Row → FeedItem mapping
+// ============================================================
+
+function rowToFeedItem(row: any): FeedItem {
+  const metadata = row.metadata_json ? JSON.parse(row.metadata_json) : undefined;
+  const item: FeedItem = {
+    id: row.id,
+    type: row.type as FeedItemType,
+    source: row.source as ContentSource,
+    title: row.title || undefined,
+    content: row.content || '',
+    date: new Date(row.date),
+    url: row.url || undefined,
+    image: row.image || undefined,
+    metadata,
+  };
+  return item;
+}
+
+// ============================================================
+// Query functions
+// ============================================================
+
+/**
+ * Get all feed items, optionally filtered by type, sorted by date descending.
+ */
+export async function queryItems(options?: {
+  types?: FeedItemType[];
+  limit?: number;
+}): Promise<FeedItem[]> {
+  const db = getDB();
+
+  let sql = 'SELECT * FROM items';
+  const params: any[] = [];
+  const conditions: string[] = [];
+
+  if (options?.types && options.types.length > 0) {
+    const placeholders = options.types.map(() => '?').join(',');
+    conditions.push(`type IN (${placeholders})`);
+    params.push(...options.types);
+  }
+
+  if (conditions.length > 0) {
+    sql += ' WHERE ' + conditions.join(' AND ');
+  }
+
+  sql += ' ORDER BY date DESC';
+
+  if (options?.limit) {
+    sql += ' LIMIT ?';
+    params.push(options.limit);
+  }
+
+  const stmt = db.prepare(sql);
+  const bound = params.length > 0 ? stmt.bind(...params) : stmt;
+  const result = await bound.all();
+
+  return result.results.map(rowToFeedItem);
+}
+
+/**
+ * Get a single article by slug (URL suffix), including full HTML body.
+ */
+export async function queryArticleBySlug(slug: string): Promise<FeedItem | null> {
+  const db = getDB();
+
+  // Match by URL ending or ID
+  const row = await db
+    .prepare(
+      `SELECT i.*, b.html, b.reading_time
+       FROM items i
+       LEFT JOIN article_bodies b ON i.id = b.item_id
+       WHERE i.type = 'article' AND (i.url LIKE ? OR i.id = ?)
+       LIMIT 1`
+    )
+    .bind(`%/${slug}`, slug)
+    .first();
+
+  if (!row) return null;
+
+  const item = rowToFeedItem(row);
+
+  // Merge body HTML into content and reading_time into metadata
+  if (row.html) {
+    item.content = row.html;
+  }
+  if (row.reading_time && item.metadata) {
+    (item.metadata as any).readingTime = row.reading_time;
+  } else if (row.reading_time) {
+    item.metadata = { readingTime: row.reading_time } as any;
+  }
+
+  return item;
+}
+
+/**
+ * Get all article slugs for route generation.
+ */
+export async function queryAllArticleSlugs(): Promise<string[]> {
+  const db = getDB();
+
+  const result = await db
+    .prepare(`SELECT url, id FROM items WHERE type = 'article' ORDER BY date DESC`)
+    .all();
+
+  return result.results.map((row: any) => {
+    const url = row.url || '';
+    const slug = url.split('/').pop() || row.id;
+    return slug;
+  });
+}
+
+/**
+ * Get archive items grouped by year.
+ */
+export async function queryArchiveGroups(): Promise<ArchiveGroup[]> {
+  const db = getDB();
+
+  const result = await db
+    .prepare(
+      `SELECT id, title, date, type, url FROM items
+       ORDER BY date DESC`
+    )
+    .all();
+
+  const grouped: Record<number, ArchiveItem[]> = {};
+
+  for (const row of result.results) {
+    const year = new Date(row.date).getFullYear();
+    if (!grouped[year]) grouped[year] = [];
+
+    grouped[year].push({
+      id: row.id,
+      title: row.title || 'Untitled',
+      date: new Date(row.date),
+      type: row.type as FeedItemType,
+      url: row.url || '',
+    });
+  }
+
+  const groups: ArchiveGroup[] = Object.keys(grouped)
+    .map(Number)
+    .sort((a, b) => b - a)
+    .map((year) => ({
+      year,
+      items: grouped[year],
+      count: grouped[year].length,
+    }));
+
+  return groups;
+}
+
+/**
+ * Get photos grouped by year.
+ */
+export async function queryPhotosByYear(): Promise<Record<number, FeedItem[]>> {
+  const db = getDB();
+
+  const result = await db
+    .prepare(
+      `SELECT * FROM items WHERE type = 'photo' ORDER BY date DESC`
+    )
+    .all();
+
+  const grouped: Record<number, FeedItem[]> = {};
+
+  for (const row of result.results) {
+    const item = rowToFeedItem(row);
+    const year = item.date.getFullYear();
+    if (!grouped[year]) grouped[year] = [];
+    grouped[year].push(item);
+  }
+
+  // Sort years descending
+  const sorted: Record<number, FeedItem[]> = {};
+  for (const year of Object.keys(grouped).map(Number).sort((a, b) => b - a)) {
+    sorted[year] = grouped[year];
+  }
+
+  return sorted;
+}
+
+/**
+ * Get "currently consuming" items (in-progress media from Douban).
+ */
+export async function queryCurrentItems(): Promise<CurrentItem[]> {
+  const db = getDB();
+
+  const result = await db
+    .prepare(
+      `SELECT * FROM items
+       WHERE type = 'media' AND source = 'douban'
+       ORDER BY date DESC
+       LIMIT 10`
+    )
+    .all();
+
+  const currentItems: CurrentItem[] = [];
+
+  for (const row of result.results) {
+    const metadata = row.metadata_json ? JSON.parse(row.metadata_json) : {};
+    // Only include items that are "in progress"
+    if (metadata.status !== 'in_progress') continue;
+
+    currentItems.push({
+      type: metadata.mediaType === 'book' ? 'reading'
+        : metadata.mediaType === 'music' ? 'listening'
+        : 'watching',
+      mediaType: metadata.mediaType,
+      title: row.title || '',
+      cover: row.image || undefined,
+      date: new Date(row.date),
+      url: row.url || undefined,
+    });
+
+    if (currentItems.length >= 5) break;
+  }
+
+  return currentItems;
+}

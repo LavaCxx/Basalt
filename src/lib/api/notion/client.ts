@@ -1,20 +1,10 @@
 /**
  * Notion client initialization and env helpers
+ * (KV caching removed — data now lives in D1, populated by the sync worker)
  */
 
 import { Client } from '@notionhq/client';
 import { getEnv } from '../env';
-import { withKVCache, isKVAvailable } from '../../kv-cache';
-
-// Cache TTL: 1 hour
-export const CACHE_TTL_SECONDS = 3600;
-
-// Cache keys
-export const CACHE_KEYS = {
-  ARTICLES: 'notion:articles:all',
-  PHOTOS: 'notion:photos:all',
-  ARTICLE_PREFIX: 'notion:article:',
-};
 
 // Lazy-initialized Notion client
 let _notion: InstanceType<typeof Client> | null = null;
@@ -37,6 +27,3 @@ export function getArticlesDatabaseId() {
 export function getPhotosDatabaseId() {
   return getEnv('NOTION_PHOTOS_DATABASE_ID');
 }
-
-/** Re-export KV cache utilities for convenience */
-export { withKVCache, isKVAvailable };

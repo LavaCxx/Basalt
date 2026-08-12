@@ -1,12 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ArchiveList from '../components/islands/ArchiveList';
-import { getArchiveItems, setRuntimeEnvAndClearCache } from '../lib/api';
+import { getArchiveItems, initRuntime } from '../lib/api';
 
-// Inject Cloudflare runtime env if available
+// Initialize D1 binding from Cloudflare runtime env
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
 if (runtimeEnv) {
-  setRuntimeEnvAndClearCache(runtimeEnv);
+  initRuntime(runtimeEnv);
 }
 
 let archiveGroups: any[] = [];

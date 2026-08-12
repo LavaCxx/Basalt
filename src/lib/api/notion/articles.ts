@@ -1,19 +1,20 @@
 /**
  * Article fetching from Notion
+ * (KV caching removed — data now lives in D1, populated by the sync worker)
  */
 
 import type { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
 import type { FeedItem, ArticleMetadata } from '../../types';
-import { getNotionClient, getArticlesDatabaseId, CACHE_KEYS, CACHE_TTL_SECONDS, withKVCache, isKVAvailable } from './client';
+import { getNotionClient, getArticlesDatabaseId } from './client';
 import { type NotionArticleProperties, getPlainText, getCoverImage } from './properties';
-import { fetchBlockChildren, calculateReadingTime } from './blocks-to-html';
+import { fetchBlockChildren, calculateReadingTime, type BlockRenderOptions } from './blocks-to-html';
 
 /**
  * Fetch articles from Notion database
  */
 export async function fetchArticles(options?: {
   pageSize?: number;
-  startCursor?: string;
+  startCursor?: string | null;
 }): Promise<{ articles: FeedItem[]; hasMore: boolean; nextCursor: string | null }> {
   const dbId = getArticlesDatabaseId();
   if (!dbId) {
@@ -27,7 +28,7 @@ export async function fetchArticles(options?: {
     filter: { property: '发布', checkbox: { equals: true } },
     sorts: [{ timestamp: 'created_time', direction: 'descending' }],
     page_size: options?.pageSize || 10,
-    start_cursor: options?.startCursor,
+    start_cursor: options?.startCursor || undefined,
   };
 
   const response = await notion.databases.query(query);
@@ -59,17 +60,13 @@ export async function fetchArticles(options?: {
 }
 
 /**
- * Fetch a single article with full content (with KV cache)
+ * Fetch a single article with full content.
+ * Pass renderOptions to enable bookmark link enrichment during sync.
  */
-export async function fetchArticle(pageId: string): Promise<FeedItem | null> {
-  const cacheKey = `${CACHE_KEYS.ARTICLE_PREFIX}${pageId}`;
-  if (isKVAvailable()) {
-    return withKVCache<FeedItem | null>(cacheKey, () => fetchArticleInternal(pageId), CACHE_TTL_SECONDS);
-  }
-  return fetchArticleInternal(pageId);
-}
-
-async function fetchArticleInternal(pageId: string): Promise<FeedItem | null> {
+export async function fetchArticle(
+  pageId: string,
+  renderOptions?: BlockRenderOptions
+): Promise<FeedItem | null> {
   try {
     const notion = getNotionClient();
     const page = await notion.pages.retrieve({ page_id: pageId });
@@ -81,11 +78,11 @@ async function fetchArticleInternal(pageId: string): Promise<FeedItem | null> {
     const featured = props.精选?.checkbox ?? props.Featured?.checkbox ?? false;
     const date = new Date((page as any).created_time);
     const image = getCoverImage(props.封面?.files || props.Cover?.files);
-    const slug = getPlainText(props.Slug?.rich_text || props.slug?.rich_text) || page.id;
-    const content = await fetchBlockChildren(pageId);
+    const slug = getPlainText(props.Slug?.rich_text || props.slug?.rich_text) || pageId;
+    const content = await fetchBlockChildren(pageId, renderOptions);
 
     return {
-      id: page.id,
+      id: (page as any).id,
       type: 'article',
       title,
       content,
@@ -102,16 +99,9 @@ async function fetchArticleInternal(pageId: string): Promise<FeedItem | null> {
 }
 
 /**
- * Get all articles with pagination + KV cache
+ * Get all articles with pagination
  */
 export async function getAllArticles(): Promise<FeedItem[]> {
-  if (isKVAvailable()) {
-    return withKVCache<FeedItem[]>(CACHE_KEYS.ARTICLES, fetchAllArticlesInternal, CACHE_TTL_SECONDS);
-  }
-  return fetchAllArticlesInternal();
-}
-
-async function fetchAllArticlesInternal(): Promise<FeedItem[]> {
   const all: FeedItem[] = [];
   let hasMore = true;
   let cursor: string | null = null;
@@ -119,7 +109,7 @@ async function fetchAllArticlesInternal(): Promise<FeedItem[]> {
   while (hasMore) {
     const { articles, hasMore: more, nextCursor } = await fetchArticles({
       pageSize: 100,
-      startCursor: cursor || undefined,
+      startCursor: cursor,
     });
     all.push(...articles);
     hasMore = more;

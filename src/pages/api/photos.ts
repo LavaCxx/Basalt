@@ -1,6 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getAllPhotos } from '../../lib/api/notion';
-import { setRuntimeEnvAndClearCache } from '../../lib/api';
+import { getPhotosByYear, initRuntime } from '../../lib/api';
 
 export const prerender = false;
 
@@ -8,11 +7,13 @@ export const GET: APIRoute = async (context) => {
   try {
     const runtimeEnv = (context as any).runtime?.env || (context.locals as any)?.runtime?.env;
     if (runtimeEnv) {
-      setRuntimeEnvAndClearCache(runtimeEnv);
+      initRuntime(runtimeEnv);
     }
 
-    const photos = await getAllPhotos();
-    return new Response(JSON.stringify(photos), {
+    const photoGroups = await getPhotosByYear();
+    // Flatten for backwards-compatible API response
+    const allPhotos = Object.values(photoGroups).flat();
+    return new Response(JSON.stringify(allPhotos), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
