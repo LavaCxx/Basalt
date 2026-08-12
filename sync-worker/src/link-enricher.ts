@@ -21,12 +21,25 @@ interface D1Database {
 
 /**
  * Fetch OG metadata for a single URL.
- * Uses a custom User-Agent to improve compatibility with sites that block Cloudflare IPs.
+ * Uses browser-like headers to improve compatibility with sites that block bots.
+ * Has special handling for bilibili.com (uses API instead of scraping HTML).
  * Returns null on any failure — the caller falls back to domain + favicon.
  */
 export async function fetchLinkMetadata(url: string): Promise<BookmarkMeta | null> {
+  let domain = '';
+  try {
+    domain = new URL(url).hostname;
+  } catch {
+    domain = url;
+  }
+
+  // Special handling for bilibili — scrape HTML doesn't work from CF Workers
+  if (domain.includes('bilibili.com')) {
+    return await enrichBilibili(url, domain);
+  }
+
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 5000);
+  const timer = setTimeout(() => controller.abort(), 8000);
 
   let response: Response;
   try {
@@ -34,7 +47,15 @@ export async function fetchLinkMetadata(url: string): Promise<BookmarkMeta | nul
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
       },
       signal: controller.signal,
       redirect: 'follow',
@@ -60,50 +81,40 @@ export async function fetchLinkMetadata(url: string): Promise<BookmarkMeta | nul
     return null;
   }
 
-  // Only parse the first 200KB to avoid huge responses
-  html = html.slice(0, 200_000);
+  // Only parse the first 500KB to avoid huge responses
+  html = html.slice(0, 500_000);
 
-  let domain = '';
-  try {
-    domain = new URL(url).hostname;
-  } catch {
-    domain = url;
-  }
+  // If the HTML is too short, likely a bot-block page
+  if (html.length < 200) return null;
 
   const meta: BookmarkMeta = { domain };
 
   // Extract OG tags and other meta tags
-  // og:title
-  const ogTitle = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']*)["']/i);
-  if (ogTitle?.[1]) {
-    meta.title = ogTitle[1].trim();
+  const ogTitle = extractMetaContent(html, 'og:title');
+  if (ogTitle) {
+    meta.title = ogTitle;
   } else {
     const titleTag = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-    if (titleTag?.[1]) meta.title = titleTag[1].trim();
+    if (titleTag?.[1]) meta.title = decodeEntities(titleTag[1].trim());
   }
 
-  // og:description
-  const ogDesc = html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']*)["']/i);
-  if (ogDesc?.[1]) {
-    meta.description = ogDesc[1].trim();
+  const ogDesc = extractMetaContent(html, 'og:description');
+  if (ogDesc) {
+    meta.description = ogDesc;
   } else {
-    const metaDesc = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i);
-    if (metaDesc?.[1]) meta.description = metaDesc[1].trim();
+    const metaDesc = extractMetaContent(html, 'description', true);
+    if (metaDesc) meta.description = metaDesc;
   }
 
-  // og:image
-  const ogImage = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']*)["']/i);
-  if (ogImage?.[1]) {
-    const raw = ogImage[1].trim();
-    // Resolve relative URLs
+  const ogImage = extractMetaContent(html, 'og:image');
+  if (ogImage) {
     try {
-      meta.image = new URL(raw, url).href;
+      meta.image = new URL(ogImage, url).href;
     } catch {
-      meta.image = raw;
+      meta.image = ogImage;
     }
   }
 
-  // favicon: look for <link rel="icon"> or <link rel="shortcut icon">
   const iconLink = html.match(/<link[^>]+rel=["'](?:shortcut )?icon["'][^>]+href=["']([^"']*)["']/i)
     || html.match(/<link[^>]+href=["']([^"']*)["'][^>]+rel=["'](?:shortcut )?icon["']/i);
   if (iconLink?.[1]) {
@@ -114,11 +125,103 @@ export async function fetchLinkMetadata(url: string): Promise<BookmarkMeta | nul
       meta.favicon = raw;
     }
   } else {
-    // Fallback to Google favicon service
     meta.favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
   }
 
   return meta;
+}
+
+/**
+ * Special handling for bilibili.com URLs.
+ * B站 blocks HTML scraping from CF Workers, but the API is accessible.
+ */
+async function enrichBilibili(url: string, domain: string): Promise<BookmarkMeta | null> {
+  const meta: BookmarkMeta = {
+    domain,
+    favicon: 'https://www.bilibili.com/favicon.ico',
+  };
+
+  // Extract BV ID from URL
+  const bvMatch = url.match(/\/video\/(BV[\w]+)/i);
+  if (!bvMatch) {
+    // Not a video URL (e.g. homepage), return minimal metadata
+    meta.title = '哔哩哔哩 (゜-゜)つロ 干杯~-bilibili';
+    meta.description = '哔哩哔哩（bilibili.com）是国内知名的视频弹幕网站，这里有及时的动漫新番，活跃的ACG氛围，有创意的Up主。大家可以在这里找到许多欢乐。';
+    return meta;
+  }
+
+  const bvid = bvMatch[1];
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const response = await fetch(
+      `https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`,
+      {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+          'Referer': 'https://www.bilibili.com/',
+        },
+        signal: controller.signal,
+      }
+    );
+
+    if (!response.ok) return meta;
+
+    const json = await response.json() as any;
+
+    if (json.code === 0 && json.data) {
+      meta.title = json.data.title;
+      meta.description = json.data.desc || json.data.title;
+      // Upgrade http to https for cover image
+      if (json.data.pic) {
+        meta.image = (json.data.pic as string).replace(/^http:/, 'https:');
+      }
+    }
+  } catch {
+    // Return minimal metadata on failure
+  } finally {
+    clearTimeout(timer);
+  }
+
+  return meta;
+}
+
+/**
+ * Extract meta tag content by property/name attribute.
+ */
+function extractMetaContent(html: string, key: string, useName = false): string | undefined {
+  const attr = useName ? 'name' : 'property';
+  const patterns = [
+    new RegExp(`<meta[^>]+${attr}=["']${escapeRegex(key)}["'][^>]+content=["']([^"']*)["']`, 'i'),
+    new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+${attr}=["']${escapeRegex(key)}["']`, 'i'),
+  ];
+
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match?.[1]) {
+      const text = match[1].trim();
+      if (text) return decodeEntities(text);
+    }
+  }
+
+  return undefined;
+}
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&nbsp;/g, ' ');
 }
 
 /**
@@ -157,21 +260,25 @@ async function collectBookmarkUrls(blockId: string): Promise<string[]> {
 
 /**
  * For a given Notion page, ensure all bookmark URLs have metadata in D1.
- * Fetches OG metadata for any URLs not yet stored.
+ * Fetches OG metadata for any URLs not yet stored (or stored with null title).
  */
 export async function ensureBookmarksEnriched(db: D1Database, pageId: string): Promise<void> {
   const urls = await collectBookmarkUrls(pageId);
   if (urls.length === 0) return;
 
-  // Check which URLs are already in D1
+  // Check which URLs already have non-null title in D1
   const placeholders = urls.map(() => '?').join(',');
   const existing = await db
-    .prepare(`SELECT url FROM link_metadata WHERE url IN (${placeholders})`)
+    .prepare(`SELECT url, title FROM link_metadata WHERE url IN (${placeholders})`)
     .bind(...urls)
     .all();
 
-  const knownUrls = new Set(existing.results.map((r: any) => r.url));
-  const newUrls = urls.filter((u) => !knownUrls.has(u));
+  const knownWithTitle = new Set(
+    existing.results
+      .filter((r: any) => r.title !== null)
+      .map((r: any) => r.url)
+  );
+  const newUrls = urls.filter((u) => !knownWithTitle.has(u));
 
   if (newUrls.length === 0) return;
 

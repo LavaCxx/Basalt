@@ -169,6 +169,49 @@ function colorWrapper(blockData: any): { cls: string; open: string; close: strin
   return { cls: fullCls, open: `<span class="${fullCls}">`, close: '</span>' };
 }
 
+
+/**
+ * Convert a video URL to an embeddable iframe URL.
+ * Supports YouTube, Bilibili, Vimeo, and other common video platforms.
+ * Returns null for URLs that can't be embedded as iframes.
+ */
+function getVideoEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, '');
+
+    // YouTube: youtube.com/watch?v=ID or youtu.be/ID
+    if (host === 'youtube.com') {
+      const vid = u.searchParams.get('v');
+      if (vid) return `https://www.youtube.com/embed/${vid}`;
+    }
+    if (host === 'youtu.be') {
+      const vid = u.pathname.slice(1);
+      if (vid) return `https://www.youtube.com/embed/${vid}`;
+    }
+
+    // Bilibili: bilibili.com/video/BVxxxx
+    if (host === 'bilibili.com' || host === 'm.bilibili.com') {
+      const match = u.pathname.match(/\/video\/(BV\w+)/);
+      if (match) return `https://player.bilibili.com/player.html?bvid=${match[1]}&high_quality=1&autoplay=0`;
+    }
+    if (host === 'b23.tv') {
+      // Short links need following; can't embed directly
+      return null;
+    }
+
+    // Vimeo
+    if (host === 'vimeo.com') {
+      const vid = u.pathname.split('/').filter(Boolean)[0];
+      if (vid) return `https://player.vimeo.com/video/${vid}`;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function blockToHtml(
   block: GetBlockResponse,
   recurse = true,
@@ -219,6 +262,35 @@ export async function blockToHtml(
 
     case 'divider':
       return '<hr />';
+
+    case 'video': {
+      const videoData = b.video;
+      let videoUrl = '';
+      let isExternal = false;
+      if (videoData.type === 'external') {
+        videoUrl = safeUrl(videoData.external.url) || '';
+        isExternal = true;
+      } else if (videoData.type === 'file') {
+        videoUrl = safeUrl(videoData.file.url) || '';
+      }
+      if (!videoUrl) return '';
+      // For external links (YouTube, Bilibili, etc.), try to embed via iframe
+      const embedUrl = getVideoEmbedUrl(videoUrl);
+      const caption = richTextToHtml(videoData.caption || []);
+      if (embedUrl) {
+        return `<div class="video-embed"><iframe src="${embedUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe></div>${caption ? `<p class="video-caption">${caption}</p>` : ''}`;
+      }
+      // Direct video file
+      return `<div class="video-embed"><video controls preload="metadata"><source src="${videoUrl}" /></video></div>${caption ? `<p class="video-caption">${caption}</p>` : ''}`;
+    }
+
+    case 'embed': {
+      const embedUrl = safeUrl(b.embed.url);
+      if (!embedUrl) return '';
+      const caption = richTextToHtml(b.embed.caption || []);
+      const iframeEmbedUrl = getVideoEmbedUrl(embedUrl) || embedUrl;
+      return `<div class="video-embed"><iframe src="${iframeEmbedUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe></div>${caption ? `<p class="video-caption">${caption}</p>` : ''}`;
+    }
 
     case 'callout': {
       const calloutText = richTextToHtml(b.callout.rich_text);
