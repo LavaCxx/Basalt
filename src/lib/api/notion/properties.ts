@@ -33,8 +33,6 @@ export interface NotionPhotoProperties {
   Title?: { title: RichTextItemResponse[] };
   日期?: { date: { start: string } | null };
   Date?: { date: { start: string } | null };
-  相册?: { select: { name: string } | null };
-  Album?: { select: { name: string } | null };
   地点?: { rich_text: RichTextItemResponse[] };
   Location?: { rich_text: RichTextItemResponse[] };
   图片?: { files: { type: string; file?: { url: string }; external?: { url: string } }[] };

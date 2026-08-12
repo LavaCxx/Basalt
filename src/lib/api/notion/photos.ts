@@ -25,7 +25,7 @@ export async function fetchPhotos(options?: {
   const query: QueryDatabaseParameters = {
     database_id: dbId,
     filter: { property: '发布', checkbox: { equals: true } },
-    sorts: [{ timestamp: 'created_time', direction: 'descending' }],
+    sorts: [{ property: '日期', direction: 'descending' }],
     page_size: options?.pageSize || 20,
     start_cursor: options?.startCursor || undefined,
   };
@@ -35,8 +35,8 @@ export async function fetchPhotos(options?: {
   const photos: FeedItem[] = response.results.map((page) => {
     const props = (page as any).properties as NotionPhotoProperties;
     const title = getPlainText(props.标题?.title || props.Title?.title);
-    const date = new Date((page as any).created_time);
-    const album = props.相册?.select?.name || props.Album?.select?.name;
+    const dateStr = props.日期?.date?.start || props.Date?.date?.start;
+    const date = dateStr ? new Date(dateStr) : new Date((page as any).created_time);
     const location = getPlainText(props.地点?.rich_text || props.Location?.rich_text);
     const image = getCoverImage(props.图片?.files || props.Image?.files);
 
@@ -49,7 +49,7 @@ export async function fetchPhotos(options?: {
       source: 'notion' as const,
       url: `/photos/${page.id}`,
       image,
-      metadata: { album, location },
+      metadata: { location },
     };
   });
 
