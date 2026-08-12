@@ -33,6 +33,21 @@ export const GET: APIRoute = async (context) => {
     results.push(`Cleared: ${key}`);
   }
 
+  // Also clear all individual article caches (notion:article:*)
+  try {
+    const listResult = await ((runtimeEnv?.NOTION_CACHE || (globalThis as any)?.Astro?.runtime?.env?.NOTION_CACHE) as KVNamespace)?.list();
+    if (listResult) {
+      for (const entry of listResult.keys) {
+        if (entry.name.startsWith('notion:article:')) {
+          await kvDelete(entry.name);
+          results.push(`Cleared: ${entry.name}`);
+        }
+      }
+    }
+  } catch (e) {
+    results.push(`Article cache list/clear error: ${String(e)}`);
+  }
+
   return new Response(JSON.stringify({
     success: true,
     cleared: results,
