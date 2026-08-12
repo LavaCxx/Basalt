@@ -231,7 +231,7 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
       let domain = '';
       try { domain = new URL(url).hostname; } catch { domain = url; }
       const favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
-      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title">${displayText}</span><span class="notion-bookmark-meta"><img class="notion-bookmark-icon" src="${escapeHtml(favicon)}" alt="" width="16" height="16" loading="lazy" /><span class="notion-bookmark-url">${escapeHtml(domain)}</span></span></span></a>`;
+      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title"><img class="notion-bookmark-icon" src="${escapeHtml(favicon)}" alt="" width="16" height="16" loading="lazy" />${displayText}</span><span class="notion-bookmark-url">${escapeHtml(url)}</span></span></a>`;
     }
 
     case 'table': {
