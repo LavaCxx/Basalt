@@ -16,6 +16,27 @@ const LANG_MAP: Record<string, string> = {
   md: 'markdown',
 };
 
+/** Display labels for code block language tag */
+const LANG_LABELS: Record<string, string> = {
+  javascript: 'JavaScript',
+  typescript: 'TypeScript',
+  bash: 'Bash',
+  python: 'Python',
+  json: 'JSON',
+  html: 'HTML',
+  css: 'CSS',
+  markdown: 'Markdown',
+  jsx: 'JSX',
+  tsx: 'TSX',
+  yaml: 'YAML',
+  plain: 'Text',
+};
+
+/** Get display label for a language id */
+function getLangLabel(lang: string): string {
+  return LANG_LABELS[lang] || (lang.charAt(0).toUpperCase() + lang.slice(1));
+}
+
 /** Shiki highlighter singleton — uses pure JS regex engine (no WASM) for Cloudflare compatibility */
 let _highlighterPromise: Promise<ReturnType<typeof createHighlighter>> | null = null;
 
@@ -147,11 +168,13 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
       const lang = b.code.language;
       const mappedLang = LANG_MAP[lang] || lang;
       const code = b.code.rich_text.map((t: RichTextItemResponse) => t.plain_text).join('');
+      const label = getLangLabel(mappedLang);
       try {
         const highlighter = await getHighlighter();
-        return highlighter.codeToHtml(code, { lang: mappedLang, theme: 'github-light' });
+        const highlighted = highlighter.codeToHtml(code, { lang: mappedLang, theme: 'github-light' });
+        return `<div class="code-block" data-lang="${escapeHtml(label)}">${highlighted}</div>`;
       } catch {
-        return `<pre><code class="language-${lang}">${escapeHtml(code)}</code></pre>`;
+        return `<div class="code-block" data-lang="${escapeHtml(label)}"><pre><code class="language-${escapeHtml(lang)}">${escapeHtml(code)}</code></pre></div>`;
       }
     }
 
@@ -169,7 +192,15 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
 
     case 'callout': {
       const calloutText = richTextToHtml(b.callout.rich_text);
-      return `<aside class="callout">${calloutText}</aside>`;
+      const icon = b.callout.icon;
+      let iconHtml = '';
+      if (icon?.type === 'emoji') {
+        iconHtml = `<span class="callout-icon">${escapeHtml(icon.emoji)}</span>`;
+      } else if (icon?.type === 'external' && icon.external?.url) {
+        const iconUrl = safeUrl(icon.external.url);
+        if (iconUrl) iconHtml = `<img class="callout-icon" src="${iconUrl}" alt="" />`;
+      }
+      return `<aside class="callout">${iconHtml}<div class="callout-content">${calloutText}</div></aside>`;
     }
 
     case 'toggle': {
@@ -197,7 +228,10 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
       if (!safeHref) return '';
       const caption = richTextToHtml(b.bookmark.caption || []);
       let displayText = caption || escapeHtml(url);
-      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title">${displayText}</span><span class="notion-bookmark-url">${escapeHtml(url)}</span></span></a>`;
+      let domain = '';
+      try { domain = new URL(url).hostname; } catch { domain = url; }
+      const favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
+      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title">${displayText}</span><span class="notion-bookmark-meta"><img class="notion-bookmark-icon" src="${escapeHtml(favicon)}" alt="" width="16" height="16" loading="lazy" /><span class="notion-bookmark-url">${escapeHtml(domain)}</span></span></span></a>`;
     }
 
     case 'table': {

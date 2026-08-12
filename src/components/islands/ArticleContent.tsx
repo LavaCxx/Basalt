@@ -38,6 +38,31 @@ export default function ArticleContent(props: ArticleContentProps) {
         });
         (img as HTMLElement).style.cursor = 'pointer';
       });
+
+      // Inject copy buttons into code blocks
+      const codeBlocks = container.querySelectorAll('.article-content-html .code-block');
+      codeBlocks.forEach((block) => {
+        const btn = document.createElement('button');
+        btn.className = 'code-copy-btn';
+        btn.textContent = '复制';
+        btn.addEventListener('click', async () => {
+          const code = block.querySelector('code');
+          if (!code) return;
+          try {
+            await navigator.clipboard.writeText(code.textContent || '');
+            btn.textContent = '已复制';
+            btn.classList.add('copied');
+            setTimeout(() => {
+              btn.textContent = '复制';
+              btn.classList.remove('copied');
+            }, 2000);
+          } catch {
+            btn.textContent = '复制失败';
+            setTimeout(() => { btn.textContent = '复制'; }, 2000);
+          }
+        });
+        block.appendChild(btn);
+      });
     }, 0);
   });
 
@@ -92,10 +117,6 @@ export default function ArticleContent(props: ArticleContentProps) {
         }
         .article-content-html img {
           cursor: pointer;
-          transition: transform 0.2s;
-        }
-        .article-content-html img:hover {
-          transform: scale(1.01);
         }
 
         /* Code blocks — light gray theme, let Shiki bg show */
@@ -120,7 +141,7 @@ export default function ArticleContent(props: ArticleContentProps) {
         /* Inline code (outside pre) — Notion style: gray bg + red text */
         .article-content-html :not(pre) > code {
           font-family: var(--font-mono);
-          background: var(--color-background-alt, #ededf0);
+          background: #ededf0;
           color: #e16259;
           padding: 0.15em 0.4em;
           border-radius: 0.25rem;
