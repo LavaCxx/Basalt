@@ -63,6 +63,36 @@ export default function ArticleContent(props: ArticleContentProps) {
         });
         block.appendChild(btn);
       });
+
+      // Lazy-load bookmark metadata for bookmarks without a title/description
+      const bookmarks = container.querySelectorAll<HTMLElement>('.article-content-html .notion-bookmark[data-url]');
+      bookmarks.forEach((bm) => {
+        const url = bm.dataset.url;
+        if (!url) return;
+        const titleEl = bm.querySelector('.notion-bookmark-title');
+        const hasDesc = bm.querySelector('.notion-bookmark-desc');
+        // Skip if title already looks fetched (not just the domain)
+        if (titleEl && titleEl.textContent && titleEl.textContent.trim() !== new URL(url).hostname && hasDesc) return;
+
+        fetch(`/api/og?url=${encodeURIComponent(url)}`)
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.title) {
+              const iconHtml = '<img class="notion-bookmark-icon" src="' + bm.querySelector('.notion-bookmark-icon')?.getAttribute('src') + '" alt="" width="16" height="16" loading="lazy" />';
+              if (titleEl) titleEl.innerHTML = iconHtml + data.title;
+            }
+            if (data.description) {
+              const urlEl = bm.querySelector('.notion-bookmark-url');
+              if (urlEl && !hasDesc) {
+                const desc = document.createElement('span');
+                desc.className = 'notion-bookmark-desc';
+                desc.textContent = data.description;
+                urlEl.insertAdjacentElement('beforebegin', desc);
+              }
+            }
+          })
+          .catch(() => {});
+      });
     }, 0);
   });
 

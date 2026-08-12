@@ -272,12 +272,12 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
       try { domain = new URL(url).hostname; } catch { domain = url; }
       const favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
 
-      // Try to fetch page title and description
+      // Try server-side fetch first; client will lazy-load via /api/og if it fails
       const meta = await fetchUrlMetadata(url).catch(() => null);
-      const title = caption || meta?.title || escapeHtml(url);
+      const title = caption || meta?.title || '';
       const description = meta?.description || '';
 
-      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title"><img class="notion-bookmark-icon" src="${escapeHtml(favicon)}" alt="" width="16" height="16" loading="lazy" />${title}</span>${description ? `<span class="notion-bookmark-desc">${escapeHtml(description)}</span>` : ''}<span class="notion-bookmark-url">${escapeHtml(domain)}</span></span></a>`;
+      return `<a href="${safeHref}" class="notion-bookmark" data-url="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title"><img class="notion-bookmark-icon" src="${escapeHtml(favicon)}" alt="" width="16" height="16" loading="lazy" />${title ? title : escapeHtml(domain)}</span>${description ? `<span class="notion-bookmark-desc">${escapeHtml(description)}</span>` : ''}<span class="notion-bookmark-url">${escapeHtml(domain)}</span></span></a>`;
     }
 
     case 'table': {
