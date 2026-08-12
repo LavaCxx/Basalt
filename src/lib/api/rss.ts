@@ -192,46 +192,41 @@ export async function fetchDoubanFeed(): Promise<FeedItem[]> {
 }
 
 async function fetchDoubanFeedInternal(rssUrl: string): Promise<FeedItem[]> {
-  try {
-    const feed = await fetchAndParseRSS(rssUrl);
+  const feed = await fetchAndParseRSS(rssUrl);
 
-    const items: FeedItem[] = feed.items
-      .map((item) => {
-        const parsed = parseDoubanItem(item);
-        if (!parsed) return null;
+  const items: FeedItem[] = feed.items
+    .map((item) => {
+      const parsed = parseDoubanItem(item);
+      if (!parsed) return null;
 
-        const metadata: MediaMetadata = {
-          mediaType: parsed.mediaType,
-          rating: parsed.rating,
-          maxRating: parsed.maxRating,
-          review: parsed.review,
-          status: parsed.status === 'reading' || parsed.status === 'watching' || parsed.status === 'listening'
-            ? 'in_progress'
-            : parsed.status.includes('want')
-              ? 'wishlist'
-              : 'completed',
-        };
+      const metadata: MediaMetadata = {
+        mediaType: parsed.mediaType,
+        rating: parsed.rating,
+        maxRating: parsed.maxRating,
+        review: parsed.review,
+        status: parsed.status === 'reading' || parsed.status === 'watching' || parsed.status === 'listening'
+          ? 'in_progress'
+          : parsed.status.includes('want')
+            ? 'wishlist'
+            : 'completed',
+      };
 
-        return {
-          id: item.guid || item.link || `douban-${Date.now()}-${Math.random()}`,
-          type: 'media' as const,
-          title: parsed.title,
-          content: parsed.review || '',
-          date: parsed.date,
-          source: 'douban' as const,
-          url: item.link,
-          image: parsed.cover,
-          metadata,
-        };
-      })
-      .filter((item): item is FeedItem => item !== null)
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
+      return {
+        id: item.guid || item.link || `douban-${Date.now()}-${Math.random()}`,
+        type: 'media' as const,
+        title: parsed.title,
+        content: parsed.review || '',
+        date: parsed.date,
+        source: 'douban' as const,
+        url: item.link,
+        image: parsed.cover,
+        metadata,
+      };
+    })
+    .filter((item): item is FeedItem => item !== null)
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
 
-    return items;
-  } catch (error) {
-    console.error('Error fetching Douban RSS:', error);
-    return [];
-  }
+  return items;
 }
 
 /**

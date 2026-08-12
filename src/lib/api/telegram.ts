@@ -29,53 +29,48 @@ async function fetchViaRSSHub(options?: {
     return [];
   }
 
-  try {
-    const rssUrl = `${RSSHUB_INSTANCE}/telegram/channel/${TELEGRAM_CHANNEL_USERNAME}`;
-    const feed = await fetchAndParseRSS(rssUrl);
+  const rssUrl = `${RSSHUB_INSTANCE}/telegram/channel/${TELEGRAM_CHANNEL_USERNAME}`;
+  const feed = await fetchAndParseRSS(rssUrl);
 
-    // Extract channel name from feed title (e.g., "环形废墟 - Telegram Channel")
-    const feedTitle = feed.title || '';
-    const channelName = feedTitle.replace(/ - Telegram Channel$/i, '').trim() || TELEGRAM_CHANNEL_USERNAME;
+  // Extract channel name from feed title (e.g., "环形废墟 - Telegram Channel")
+  const feedTitle = feed.title || '';
+  const channelName = feedTitle.replace(/ - Telegram Channel$/i, '').trim() || TELEGRAM_CHANNEL_USERNAME;
 
-    const items: FeedItem[] = feed.items
-      .slice(0, options?.limit || 20)
-      .map((item) => {
-        const content = item.contentSnippet || item.content || item.description || '';
-        const date = item.pubDate || item.isoDate ? new Date(item.pubDate || item.isoDate!) : new Date();
+  const items: FeedItem[] = feed.items
+    .slice(0, options?.limit || 20)
+    .map((item) => {
+      const content = item.contentSnippet || item.content || item.description || '';
+      const date = item.pubDate || item.isoDate ? new Date(item.pubDate || item.isoDate!) : new Date();
 
-        // Extract images from content
-        const imgMatch = (item.content || '').match(/<img[^>]+src=["']([^"']+)["']/i);
-        const image = imgMatch ? imgMatch[1] : undefined;
+      // Extract images from content
+      const imgMatch = (item.content || '').match(/<img[^>]+src=["']([^"']+)["']/i);
+      const image = imgMatch ? imgMatch[1] : undefined;
 
-        // Extract attachments
-        const attachments: MediaAttachment[] = [];
-        if (image) {
-          attachments.push({ type: 'image', url: image });
-        }
+      // Extract attachments
+      const attachments: MediaAttachment[] = [];
+      if (image) {
+        attachments.push({ type: 'image', url: image });
+      }
 
-        const metadata: MicroblogMetadata = {
-          platform: 'telegram',
-          channel: channelName,
-          attachments: attachments.length > 0 ? attachments : undefined,
-        };
+      const metadata: MicroblogMetadata = {
+        platform: 'telegram',
+        channel: channelName,
+        attachments: attachments.length > 0 ? attachments : undefined,
+      };
 
-        return {
-          id: item.guid || `telegram-${Date.now()}-${Math.random()}`,
-          type: 'microblog' as const,
-          content: content.replace(/\n/g, '<br />'),
-          date,
-          source: 'telegram' as const,
-          url: item.link,
-          image,
-          metadata,
-        };
-      });
+      return {
+        id: item.guid || `telegram-${Date.now()}-${Math.random()}`,
+        type: 'microblog' as const,
+        content: content.replace(/\n/g, '<br />'),
+        date,
+        source: 'telegram' as const,
+        url: item.link,
+        image,
+        metadata,
+      };
+    });
 
-    return items;
-  } catch (error) {
-    console.error('Error fetching Telegram messages via RSSHub:', error);
-    return [];
-  }
+  return items;
 }
 
 /**
