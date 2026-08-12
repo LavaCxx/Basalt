@@ -51,7 +51,8 @@ export function parseArticleContent(html: string): { blocks: ContentBlock[]; pho
   /** Check if an <img> is a functional icon (not article content) */
   const isFunctionalIcon = (img: Element): boolean => {
     return img.classList.contains('notion-bookmark-icon')
-      || img.classList.contains('callout-icon');
+      || img.classList.contains('callout-icon')
+      || !!img.closest('.notion-bookmark-cover');
   };
 
   const processNode = (node: Node) => {
@@ -91,7 +92,7 @@ export function parseArticleContent(html: string): { blocks: ContentBlock[]; pho
           }
         }
       } else {
-        const hasImages = element.querySelector('img:not(.notion-bookmark-icon):not(.callout-icon)') !== null;
+        const hasImages = element.querySelector('img:not(.notion-bookmark-icon):not(.callout-icon):not(.notion-bookmark-cover img)') !== null;
         if (!hasImages) {
           currentHtml += element.outerHTML;
         } else {
