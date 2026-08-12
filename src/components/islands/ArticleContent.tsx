@@ -64,38 +64,6 @@ export default function ArticleContent(props: ArticleContentProps) {
         block.appendChild(btn);
       });
 
-      // Lazy-load bookmark metadata via microlink.io (client-side, CORS-enabled)
-      const bookmarks = container.querySelectorAll<HTMLElement>('.article-content-html .notion-bookmark[data-url]');
-      bookmarks.forEach((bm) => {
-        const url = bm.dataset.url;
-        if (!url) return;
-        const titleEl = bm.querySelector('.notion-bookmark-title');
-        const hasDesc = bm.querySelector('.notion-bookmark-desc');
-        let domain = '';
-        try { domain = new URL(url).hostname; } catch { domain = url; }
-        // Skip if already has real title and description
-        if (titleEl && titleEl.textContent && titleEl.textContent.trim() !== domain && hasDesc) return;
-
-        fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`)
-          .then((r) => r.json())
-          .then((data) => {
-            if (data.status !== 'success') return;
-            const iconSrc = bm.querySelector('.notion-bookmark-icon')?.getAttribute('src') || '';
-            if (data.data?.title && titleEl) {
-              titleEl.innerHTML = `<img class="notion-bookmark-icon" src="${iconSrc}" alt="" width="16" height="16" loading="lazy" />${data.data.title}`;
-            }
-            if (data.data?.description) {
-              const urlEl = bm.querySelector('.notion-bookmark-url');
-              if (urlEl && !bm.querySelector('.notion-bookmark-desc')) {
-                const desc = document.createElement('span');
-                desc.className = 'notion-bookmark-desc';
-                desc.textContent = data.data.description;
-                urlEl.insertAdjacentElement('beforebegin', desc);
-              }
-            }
-          })
-          .catch(() => {});
-      });
     }, 0);
   });
 

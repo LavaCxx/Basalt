@@ -227,12 +227,24 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
       const url = b.bookmark.url;
       const safeHref = safeUrl(url);
       if (!safeHref) return '';
-      const caption = richTextToHtml(b.bookmark.caption || []);
+      const captionRaw = b.bookmark.caption || [];
+      const captionText = captionRaw.map((t: any) => t.plain_text).join('');
       let domain = '';
       try { domain = new URL(url).hostname; } catch { domain = url; }
       const favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
 
-      return `<a href="${safeHref}" class="notion-bookmark" data-url="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title"><img class="notion-bookmark-icon" src="${escapeHtml(favicon)}" alt="" width="16" height="16" loading="lazy" />${escapeHtml(domain)}</span><span class="notion-bookmark-url">${escapeHtml(domain)}</span></span></a>`;
+      // Split caption into title and description by newline
+      let title = escapeHtml(domain);
+      let description = '';
+      if (captionText) {
+        const parts = captionText.split('\n');
+        title = escapeHtml(parts[0].trim());
+        if (parts.length > 1 && parts[1].trim()) {
+          description = escapeHtml(parts.slice(1).join(' ').trim());
+        }
+      }
+
+      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title"><img class="notion-bookmark-icon" src="${escapeHtml(favicon)}" alt="" width="16" height="16" loading="lazy" />${title}</span>${description ? `<span class="notion-bookmark-desc">${description}</span>` : ''}<span class="notion-bookmark-url">${escapeHtml(domain)}</span></span></a>`;
     }
 
     case 'table': {
