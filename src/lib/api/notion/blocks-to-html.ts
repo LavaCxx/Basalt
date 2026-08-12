@@ -133,7 +133,7 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
       const lang = b.code.language;
       const code = b.code.rich_text.map((t: RichTextItemResponse) => t.plain_text).join('');
       try {
-        return await codeToHtml(code, { lang: LANG_MAP[lang] || lang, theme: 'github-dark' });
+        return await codeToHtml(code, { lang: LANG_MAP[lang] || lang, theme: 'github-light' });
       } catch {
         return `<pre><code class="language-${lang}">${escapeHtml(code)}</code></pre>`;
       }
@@ -172,7 +172,7 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
       if (recurse && b.has_children) {
         inner = await fetchChildrenRecursive(b.id);
       }
-      return `<div class="notion-todo"><input type="checkbox" disabled${checked ? ' checked' : ''} /><span class="${checked ? 'notion-todo-checked' : ''}">${text}</span>${inner}</div>`;
+      return `<div class="notion-todo"><input type="checkbox" disabled${checked ? ' checked' : ''} /><span class="${checked ? 'notion-todo-checked' : ''}">${text}</span>${inner ? `<div class="notion-todo-children">${inner}</div>` : ''}</div>`;
     }
 
     case 'bookmark': {

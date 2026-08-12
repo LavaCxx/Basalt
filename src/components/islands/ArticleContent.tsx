@@ -98,7 +98,7 @@ export default function ArticleContent(props: ArticleContentProps) {
           transform: scale(1.01);
         }
 
-        /* Code blocks — let Shiki's github-dark background show through */
+        /* Code blocks — light gray theme, let Shiki bg show */
         .article-content-html pre,
         .article-content-html .shiki {
           border-radius: 0.5rem;
@@ -107,16 +107,24 @@ export default function ArticleContent(props: ArticleContentProps) {
           margin: 1.5rem 0;
           font-size: 0.875rem;
           line-height: 1.6;
+          border: 1px solid var(--color-border, #e5e5e5);
         }
 
-        /* Inline code (outside pre) keeps light background */
+        /* Shiki: keep its own background, override only in dark mode */
+        .dark .article-content-html .shiki,
+        .dark .article-content-html .shiki span {
+          color: var(--color-dark-text-secondary, #a3a3a3) !important;
+          background-color: var(--color-dark-background-alt, #141414) !important;
+        }
+
+        /* Inline code (outside pre) — Notion style: gray bg + red text */
         .article-content-html :not(pre) > code {
           font-family: var(--font-mono);
           background: var(--color-background-alt, #f5f5f7);
-          color: var(--color-text-primary);
-          padding: 0.125rem 0.375rem;
+          color: #e16259;
+          padding: 0.15em 0.4em;
           border-radius: 0.25rem;
-          font-size: 0.875em;
+          font-size: 0.85em;
         }
       `}</style>
     </div>
