@@ -366,12 +366,11 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.prose-basalt .notion-bookmark-icon,
-.prose-basalt .notion-bookmark-title img {
+.prose-basalt .notion-bookmark-icon {
   flex-shrink: 0;
-  width: 16px !important;
-  height: 16px !important;
-  max-width: 16px !important;
+  width: 16px;
+  height: 16px;
+  max-width: 16px;
   border-radius: 2px;
 }
 .prose-basalt .notion-bookmark-url {
@@ -413,12 +412,11 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.article-content-html .notion-bookmark-icon,
-.article-content-html .notion-bookmark-title img {
+.article-content-html .notion-bookmark-icon {
   flex-shrink: 0;
-  width: 16px !important;
-  height: 16px !important;
-  max-width: 16px !important;
+  width: 16px;
+  height: 16px;
+  max-width: 16px;
   border-radius: 2px;
 }
 .article-content-html .notion-bookmark-url {

@@ -48,22 +48,38 @@ export function parseArticleContent(html: string): { blocks: ContentBlock[]; pho
     }
   };
 
+  /** Check if an <img> is a functional icon (not article content) */
+  const isFunctionalIcon = (img: Element): boolean => {
+    return img.classList.contains('notion-bookmark-icon')
+      || img.classList.contains('callout-icon');
+  };
+
   const processNode = (node: Node) => {
     if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as Element;
 
-      if (element.tagName === 'FIGURE' || element.tagName === 'IMG') {
+      if (element.tagName === 'IMG' && !isFunctionalIcon(element)) {
         flushHtml();
-
-        const imgs = element.tagName === 'IMG'
-          ? [element as HTMLImageElement]
-          : Array.from(element.querySelectorAll('img'));
-
-        for (const img of imgs) {
+        const img = element as HTMLImageElement;
+        const src = img.getAttribute('src') || '';
+        const alt = img.getAttribute('alt') || '';
+        const title = img.closest('figure')?.querySelector('figcaption')?.textContent || '';
+        if (src) {
+          currentPhotos.push({
+            id: `article-img-${photoId++}`,
+            src,
+            thumbnail: src,
+            alt,
+            title,
+          });
+        }
+      } else if (element.tagName === 'FIGURE') {
+        flushHtml();
+        for (const img of Array.from(element.querySelectorAll('img'))) {
+          if (isFunctionalIcon(img)) continue;
           const src = img.getAttribute('src') || '';
           const alt = img.getAttribute('alt') || '';
           const title = img.closest('figure')?.querySelector('figcaption')?.textContent || '';
-
           if (src) {
             currentPhotos.push({
               id: `article-img-${photoId++}`,
@@ -75,7 +91,7 @@ export function parseArticleContent(html: string): { blocks: ContentBlock[]; pho
           }
         }
       } else {
-        const hasImages = element.querySelector('img') !== null;
+        const hasImages = element.querySelector('img:not(.notion-bookmark-icon):not(.callout-icon)') !== null;
         if (!hasImages) {
           currentHtml += element.outerHTML;
         } else {
