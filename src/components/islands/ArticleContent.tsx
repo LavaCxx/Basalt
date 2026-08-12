@@ -120,7 +120,7 @@ export default function ArticleContent(props: ArticleContentProps) {
         /* Inline code (outside pre) — Notion style: gray bg + red text */
         .article-content-html :not(pre) > code {
           font-family: var(--font-mono);
-          background: var(--color-background-alt, #f5f5f7);
+          background: var(--color-background-alt, #ededf0);
           color: #e16259;
           padding: 0.15em 0.4em;
           border-radius: 0.25rem;

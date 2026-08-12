@@ -3,7 +3,7 @@
  */
 
 import type { GetBlockResponse, RichTextItemResponse } from '@notionhq/client/build/src/api-endpoints';
-import { codeToHtml } from 'shiki';
+import { createHighlighter, createJavaScriptRegexEngine } from 'shiki';
 import { getNotionClient } from './client';
 import { escapeHtml, safeUrl } from './properties';
 
@@ -15,6 +15,20 @@ const LANG_MAP: Record<string, string> = {
   yml: 'yaml',
   md: 'markdown',
 };
+
+/** Shiki highlighter singleton — uses pure JS regex engine (no WASM) for Cloudflare compatibility */
+let _highlighterPromise: Promise<ReturnType<typeof createHighlighter>> | null = null;
+
+async function getHighlighter() {
+  if (!_highlighterPromise) {
+    _highlighterPromise = createHighlighter({
+      langs: ['javascript', 'typescript', 'bash', 'python', 'json', 'html', 'css', 'markdown', 'jsx', 'tsx', 'yaml'],
+      themes: ['github-light'],
+      engine: createJavaScriptRegexEngine(),
+    });
+  }
+  return _highlighterPromise;
+}
 
 /** Notion color → CSS class name */
 const COLOR_MAP: Record<string, string> = {
@@ -131,9 +145,11 @@ export async function blockToHtml(block: GetBlockResponse, recurse = true): Prom
 
     case 'code': {
       const lang = b.code.language;
+      const mappedLang = LANG_MAP[lang] || lang;
       const code = b.code.rich_text.map((t: RichTextItemResponse) => t.plain_text).join('');
       try {
-        return await codeToHtml(code, { lang: LANG_MAP[lang] || lang, theme: 'github-light' });
+        const highlighter = await getHighlighter();
+        return highlighter.codeToHtml(code, { lang: mappedLang, theme: 'github-light' });
       } catch {
         return `<pre><code class="language-${lang}">${escapeHtml(code)}</code></pre>`;
       }
