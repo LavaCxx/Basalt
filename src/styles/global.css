@@ -265,6 +265,247 @@ body {
   padding: 0;
 }
 
+/* ===== Notion Block Styles ===== */
+
+/* To-do items */
+.prose-basalt .notion-todo {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.prose-basalt .notion-todo input[type="checkbox"] {
+  margin-top: 0.35em;
+  accent-color: var(--color-text-primary);
+}
+.prose-basalt .notion-todo-checked {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+/* Toggle / collapsible */
+.prose-basalt .notion-toggle {
+  margin: 1rem 0;
+  border-left: 2px solid var(--color-border-subtle, #e5e5e5);
+  padding-left: 1rem;
+}
+.prose-basalt .notion-toggle summary {
+  cursor: pointer;
+  font-weight: 500;
+  list-style: none;
+}
+.prose-basalt .notion-toggle summary::-webkit-details-marker {
+  display: none;
+}
+.prose-basalt .notion-toggle summary::before {
+  content: '▸ ';
+  color: var(--color-text-muted);
+  transition: transform 0.15s;
+  display: inline-block;
+}
+.prose-basalt .notion-toggle[open] summary::before {
+  transform: rotate(90deg);
+}
+.prose-basalt .notion-toggle > *:not(summary) {
+  margin-top: 0.75em;
+}
+
+/* Bookmark card */
+.prose-basalt .notion-bookmark {
+  display: flex;
+  text-decoration: none;
+  border: 1px solid var(--color-border, #e5e5e5);
+  border-radius: 0.375rem;
+  overflow: hidden;
+  transition: background 0.15s;
+  margin: 1rem 0;
+}
+.prose-basalt .notion-bookmark:hover {
+  background: var(--color-background-alt, #f5f5f7);
+}
+.prose-basalt .notion-bookmark-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  flex: 1;
+  min-width: 0;
+}
+.prose-basalt .notion-bookmark-title {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prose-basalt .notion-bookmark-url {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Table */
+.prose-basalt .notion-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+.prose-basalt .notion-table td {
+  border: 1px solid var(--color-border, #e5e5e5);
+  padding: 0.5rem 0.75rem;
+}
+.prose-basalt .notion-table tr:nth-child(even) td {
+  background: var(--color-background-alt, #f5f5f7);
+}
+.prose-basalt .notion-table.has-col-header tr:first-child td,
+.prose-basalt .notion-table.has-row-header tr td:first-child {
+  font-weight: 600;
+  background: var(--color-border-subtle, #f0f0f0);
+}
+
+/* Inline colors */
+.prose-basalt .notion-red { color: #e16259; }
+.prose-basalt .notion-blue { color: #4473d7; }
+.prose-basalt .notion-green { color: #448361; }
+.prose-basalt .notion-yellow { color: #cb9234; }
+.prose-basalt .notion-purple { color: #8947ad; }
+.prose-basalt .notion-pink { color: #c44488; }
+.prose-basalt .notion-orange { color: #d9730d; }
+.prose-basalt .notion-brown { color: #926046; }
+.prose-basalt .notion-gray { color: #9b9a97; }
+
+/* Background colors */
+.prose-basalt .notion-red-bg { background: rgba(225, 98, 89, 0.15); }
+.prose-basalt .notion-blue-bg { background: rgba(68, 115, 215, 0.15); }
+.prose-basalt .notion-green-bg { background: rgba(68, 131, 97, 0.15); }
+.prose-basalt .notion-yellow-bg { background: rgba(203, 146, 52, 0.2); }
+.prose-basalt .notion-purple-bg { background: rgba(137, 71, 173, 0.15); }
+.prose-basalt .notion-pink-bg { background: rgba(196, 68, 136, 0.15); }
+.prose-basalt .notion-orange-bg { background: rgba(217, 115, 13, 0.15); }
+.prose-basalt .notion-brown-bg { background: rgba(146, 96, 70, 0.15); }
+.prose-basalt .notion-gray-bg { background: rgba(155, 154, 151, 0.15); }
+
+/* ===== Article Content HTML (innerHTML-injected) ===== */
+/* These mirror .prose-basalt but target the actual content container */
+
+.article-content-html {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--color-text-primary);
+}
+
+.article-content-html > * + * {
+  margin-top: 1.5em;
+}
+
+.article-content-html h1,
+.article-content-html h2,
+.article-content-html h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+}
+
+.article-content-html h1 { font-size: 1.75rem; }
+.article-content-html h2 { font-size: 1.5rem; }
+.article-content-html h3 { font-size: 1.25rem; }
+
+.article-content-html a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-border, #e5e5e5);
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color 0.2s;
+}
+
+.article-content-html a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* Inline code */
+.article-content-html code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--color-background-alt, #f5f5f7);
+  color: var(--color-text-primary);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+/* Code blocks — inline code reset inside pre */
+.article-content-html pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.875rem;
+  color: inherit;
+}
+
+.article-content-html blockquote {
+  font-style: italic;
+  padding: 0.5rem 1.5rem;
+  border-left: 3px solid var(--color-text-primary);
+  color: var(--color-text-secondary);
+  margin: 1.5rem 0;
+}
+
+/* Callout — Notion-style card */
+.article-content-html .callout,
+.prose-basalt .callout {
+  background: var(--color-background-alt, #f5f5f7);
+  border-left: 3px solid var(--color-text-primary);
+  border-radius: 0.375rem;
+  padding: 0.875rem 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.article-content-html ul,
+.article-content-html ol {
+  padding-left: 1.75rem;
+  margin: 1rem 0;
+}
+
+.article-content-html ul { list-style: disc; }
+.article-content-html ol { list-style: decimal; }
+
+.article-content-html li {
+  margin-top: 0.5em;
+}
+
+.article-content-html hr {
+  border: none;
+  border-top: 1px solid var(--color-border, #e5e5e5);
+  margin: 2.5rem 0;
+}
+
+.article-content-html img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.375rem;
+}
+
+.article-content-html figure {
+  margin: 1.5rem 0;
+}
+
+.article-content-html figcaption {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Dark mode code blocks — ensure Shiki github-dark blends */
+.dark .article-content-html pre,
+.dark .article-content-html .shiki {
+  border-color: var(--color-dark-border, #262626) !important;
+}
+
 /* ===== Media Type Badges ===== */
 .media-badge {
   display: inline-flex;

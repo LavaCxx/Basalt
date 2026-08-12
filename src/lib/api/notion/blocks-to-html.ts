@@ -16,10 +16,32 @@ const LANG_MAP: Record<string, string> = {
   md: 'markdown',
 };
 
+/** Notion color → CSS class name */
+const COLOR_MAP: Record<string, string> = {
+  red: 'notion-red',
+  blue: 'notion-blue',
+  green: 'notion-green',
+  yellow: 'notion-yellow',
+  purple: 'notion-purple',
+  pink: 'notion-pink',
+  orange: 'notion-orange',
+  brown: 'notion-brown',
+  gray: 'notion-gray',
+};
+
 /**
  * Fetch block children and convert to HTML
  */
 export async function fetchBlockChildren(blockId: string): Promise<string> {
+  return fetchChildrenRecursive(blockId);
+}
+
+/**
+ * Recursively fetch block children and convert to HTML.
+ * Groups consecutive bulleted/numbered items into <ul>/<ol>.
+ *
+ */
+async function fetchChildrenRecursive(blockId: string): Promise<string> {
   const notion = getNotionClient();
   const blocks = await notion.blocks.children.list({
     block_id: blockId,
@@ -27,10 +49,46 @@ export async function fetchBlockChildren(blockId: string): Promise<string> {
   });
 
   const htmlParts: string[] = [];
+  let listType: 'ul' | 'ol' | null = null;
+  let listItems: string[] = [];
+
+  const flushList = () => {
+    if (listType && listItems.length > 0) {
+      htmlParts.push(`<${listType}>${listItems.join('')}</${listType}>`);
+      listType = null;
+      listItems = [];
+    }
+  };
+
   for (const block of blocks.results) {
-    const html = await blockToHtml(block);
+    const b = block as any;
+
+    // Always group consecutive list items into <ul>/<ol>
+    if (b.type === 'bulleted_list_item' || b.type === 'numbered_list_item') {
+      const expectedType = b.type === 'bulleted_list_item' ? 'ul' : 'ol';
+      if (listType !== expectedType) {
+        flushList();
+        listType = expectedType;
+      }
+
+      // Recursively render nested children inside list items
+      let inner = '';
+      if (b.has_children) {
+        inner = await fetchChildrenRecursive(b.id);
+      }
+      const itemContent = richTextToHtml(b[b.type].rich_text);
+      listItems.push(`<li>${itemContent}${inner ? `${inner}` : ''}</li>`);
+      continue;
+    }
+
+    // Non-list block — close any open list first
+    flushList();
+
+    const html = await blockToHtml(block, true);
     if (html) htmlParts.push(html);
   }
+
+  flushList();
 
   return htmlParts.join('\n');
 }
@@ -38,12 +96,26 @@ export async function fetchBlockChildren(blockId: string): Promise<string> {
 /**
  * Convert a Notion block to HTML
  */
-export async function blockToHtml(block: GetBlockResponse): Promise<string> {
+/** Apply block-level color as a CSS class wrapper if needed */
+function colorWrapper(blockData: any): { cls: string; open: string; close: string } {
+  const color = blockData?.color;
+  if (!color || color === 'default') return { cls: '', open: '', close: '' };
+  const isBackground = color.endsWith('_background');
+  const baseColor = isBackground ? color.replace('_background', '') : color;
+  const cls = COLOR_MAP[baseColor];
+  if (!cls) return { cls: '', open: '', close: '' };
+  const fullCls = isBackground ? `${cls}-bg` : cls;
+  return { cls: fullCls, open: `<span class="${fullCls}">`, close: '</span>' };
+}
+
+export async function blockToHtml(block: GetBlockResponse, recurse = true): Promise<string> {
   const b = block as any;
 
   switch (b.type) {
-    case 'paragraph':
-      return `<p>${richTextToHtml(b.paragraph.rich_text)}</p>`;
+    case 'paragraph': {
+      const pw = colorWrapper(b.paragraph);
+      return `<p>${pw.open}${richTextToHtml(b.paragraph.rich_text)}${pw.close}</p>`;
+    }
     case 'heading_1':
       return `<h1>${richTextToHtml(b.heading_1.rich_text)}</h1>`;
     case 'heading_2':
@@ -61,7 +133,7 @@ export async function blockToHtml(block: GetBlockResponse): Promise<string> {
       const lang = b.code.language;
       const code = b.code.rich_text.map((t: RichTextItemResponse) => t.plain_text).join('');
       try {
-        return await codeToHtml(code, { lang: LANG_MAP[lang] || lang, theme: 'github-light' });
+        return await codeToHtml(code, { lang: LANG_MAP[lang] || lang, theme: 'github-dark' });
       } catch {
         return `<pre><code class="language-${lang}">${escapeHtml(code)}</code></pre>`;
       }
@@ -84,8 +156,48 @@ export async function blockToHtml(block: GetBlockResponse): Promise<string> {
       return `<aside class="callout">${calloutText}</aside>`;
     }
 
-    case 'toggle':
-      return `<details><summary>${richTextToHtml(b.toggle.rich_text)}</summary></details>`;
+    case 'toggle': {
+      const summary = richTextToHtml(b.toggle.rich_text);
+      let inner = '';
+      if (recurse && b.has_children) {
+        inner = await fetchChildrenRecursive(b.id);
+      }
+      return `<details class="notion-toggle"><summary>${summary}</summary>${inner}</details>`;
+    }
+
+    case 'to_do': {
+      const checked = b.to_do.checked;
+      const text = richTextToHtml(b.to_do.rich_text);
+      let inner = '';
+      if (recurse && b.has_children) {
+        inner = await fetchChildrenRecursive(b.id);
+      }
+      return `<div class="notion-todo"><input type="checkbox" disabled${checked ? ' checked' : ''} /><span class="${checked ? 'notion-todo-checked' : ''}">${text}</span>${inner}</div>`;
+    }
+
+    case 'bookmark': {
+      const url = b.bookmark.url;
+      const safeHref = safeUrl(url);
+      if (!safeHref) return '';
+      const caption = richTextToHtml(b.bookmark.caption || []);
+      let displayText = caption || escapeHtml(url);
+      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title">${displayText}</span><span class="notion-bookmark-url">${escapeHtml(url)}</span></span></a>`;
+    }
+
+    case 'table': {
+      if (!recurse || !b.has_children) return '';
+      const tableHtml = await fetchChildrenRecursive(b.id);
+      const hasColHeader = b.table.has_column_header;
+      const hasRowHeader = b.table.has_row_header;
+      const cls = `notion-table${hasColHeader ? ' has-col-header' : ''}${hasRowHeader ? ' has-row-header' : ''}`;
+      return `<table class="${cls}">${tableHtml}</table>`;
+    }
+
+    case 'table_row': {
+      const cells = b.table_row.cells as RichTextItemResponse[][];
+      const tds = cells.map((cell) => `<td>${richTextToHtml(cell)}</td>`).join('');
+      return `<tr>${tds}</tr>`;
+    }
 
     default:
       if (b[b.type]?.rich_text) {
@@ -113,7 +225,18 @@ export function richTextToHtml(richText: RichTextItemResponse[]): string {
 
       if (text.href) {
         const href = safeUrl(text.href);
-        if (href) content = `<a href="${href}">${content}</a>`;
+        if (href) content = `<a href="${href}" target="_blank" rel="noopener noreferrer">${content}</a>`;
+      }
+
+      const color = text.annotations?.color;
+      if (color && color !== 'default') {
+        const isBackground = color.endsWith('_background');
+        const baseColor = isBackground ? color.replace('_background', '') : color;
+        const cls = COLOR_MAP[baseColor];
+        if (cls) {
+          const wrapperClass = isBackground ? `${cls}-bg` : cls;
+          content = `<span class="${wrapperClass}">${content}</span>`;
+        }
       }
 
       return content;

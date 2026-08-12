@@ -98,34 +98,25 @@ export default function ArticleContent(props: ArticleContentProps) {
           transform: scale(1.01);
         }
 
-        /* Code block base styles */
-        .article-content-html pre {
-          background: #faf9f6;
-          border: 1px solid var(--color-border-subtle, #e5e5e5);
-          border-radius: 0.375rem;
-          padding: 1rem 1.25rem;
+        /* Code blocks — let Shiki's github-dark background show through */
+        .article-content-html pre,
+        .article-content-html .shiki {
+          border-radius: 0.5rem;
+          padding: 1.25rem 1.5rem;
           overflow-x: auto;
           margin: 1.5rem 0;
-        }
-        .article-content-html code {
-          font-family: var(--font-mono);
           font-size: 0.875rem;
           line-height: 1.6;
-          background: transparent;
-          padding: 0;
         }
 
-        /* Shiki highlighted code */
-        .article-content-html .shiki {
-          background: #faf9f6 !important;
-          border: 1px solid var(--color-border-subtle, #e5e5e5);
-          border-radius: 0.375rem;
-          padding: 1rem 1.25rem;
-          overflow-x: auto;
-          margin: 1.5rem 0;
-        }
-        .article-content-html .shiki code {
-          background: transparent;
+        /* Inline code (outside pre) keeps light background */
+        .article-content-html :not(pre) > code {
+          font-family: var(--font-mono);
+          background: var(--color-background-alt, #f5f5f7);
+          color: var(--color-text-primary);
+          padding: 0.125rem 0.375rem;
+          border-radius: 0.25rem;
+          font-size: 0.875em;
         }
       `}</style>
     </div>
