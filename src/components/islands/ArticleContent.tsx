@@ -22,21 +22,42 @@ export default function ArticleContent(props: ArticleContentProps) {
   onMount(() => {
     const { blocks: parsedBlocks, photos } = parseArticleContent(props.content);
     setBlocks(parsedBlocks);
-    setAllPhotos(photos);
 
-    // Attach click handlers to images for lightbox
     setTimeout(() => {
       const container = document.querySelector('.article-content-wrapper');
       if (!container) return;
 
-      const images = container.querySelectorAll('.article-content-html img');
-      images.forEach((img, index) => {
+      // Collect all content images from the DOM (gallery + column + inline)
+      const allImages = Array.from(
+        container.querySelectorAll<HTMLElement>('.article-content-html img')
+      ).filter((img) =>
+        !img.classList.contains('notion-bookmark-icon')
+        && !img.classList.contains('callout-icon')
+        && !img.closest('.notion-bookmark-cover')
+      );
+
+      const domPhotos: PhotoItem[] = allImages.map((img, index) => {
+        const src = img.getAttribute('src') || '';
+        const alt = img.getAttribute('alt') || '';
+        const title = img.closest('figure')?.querySelector('figcaption')?.textContent || '';
+        return {
+          id: `dom-img-${index}`,
+          src,
+          thumbnail: src,
+          alt,
+          title,
+        };
+      });
+      setAllPhotos(domPhotos);
+
+      // Attach click handlers to images for lightbox
+      allImages.forEach((img, index) => {
         img.addEventListener('click', () => {
           setLightboxIndex(index);
           setLightboxOpen(true);
           document.body.style.overflow = 'hidden';
         });
-        (img as HTMLElement).style.cursor = 'pointer';
+        img.style.cursor = 'pointer';
       });
 
       // Inject copy buttons into code blocks
