@@ -431,6 +431,34 @@ body {
   }
 }
 
+/* Notion columns (multi-column layouts) */
+.prose-basalt .notion-columns,
+.article-content-html .notion-columns {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin: 1.5rem 0;
+}
+.prose-basalt .notion-column,
+.article-content-html .notion-column {
+  flex: 1;
+  min-width: 0;
+}
+.prose-basalt .notion-column > :first-child,
+.article-content-html .notion-column > :first-child {
+  margin-top: 0;
+}
+.prose-basalt .notion-column > :last-child,
+.article-content-html .notion-column > :last-child {
+  margin-bottom: 0;
+}
+@media (max-width: 640px) {
+  .prose-basalt .notion-columns,
+  .article-content-html .notion-columns {
+    flex-direction: column;
+  }
+}
+
 /* Table */
 /* Table */
 .prose-basalt .notion-table {

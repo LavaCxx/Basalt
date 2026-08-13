@@ -389,6 +389,18 @@ export async function blockToHtml(
       return `<tr>${tds}</tr>`;
     }
 
+    case 'column_list': {
+      if (!recurse || !b.has_children) return '';
+      const html = await fetchChildrenRecursive(b.id, options);
+      return `<div class="notion-columns">${html}</div>`;
+    }
+
+    case 'column': {
+      if (!recurse || !b.has_children) return '';
+      const html = await fetchChildrenRecursive(b.id, options);
+      return `<div class="notion-column">${html}</div>`;
+    }
+
     default:
       if (b[b.type]?.rich_text) {
         return `<p>${richTextToHtml(b[b.type].rich_text)}</p>`;
