@@ -390,9 +390,10 @@ body {
 .prose-basalt .notion-bookmark-icon,
 .article-content-html .notion-bookmark-icon {
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  max-width: 16px;
+  width: 16px !important;
+  height: 16px !important;
+  max-width: 16px !important;
+  margin: 0 !important;
   border-radius: 3px;
 }
 .prose-basalt .notion-bookmark-title,
