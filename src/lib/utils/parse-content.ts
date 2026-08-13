@@ -59,6 +59,14 @@ export function parseArticleContent(html: string): { blocks: ContentBlock[]; pho
     if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as Element;
 
+      // Columns: keep as raw HTML so multi-column layout is preserved
+      if (element.classList.contains('notion-columns')) {
+        flushHtml();
+        flushPhotos();
+        currentHtml += element.outerHTML;
+        return;
+      }
+
       if (element.tagName === 'IMG' && !isFunctionalIcon(element)) {
         flushHtml();
         const img = element as HTMLImageElement;
