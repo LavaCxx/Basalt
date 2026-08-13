@@ -77,17 +77,19 @@ export default function ArchiveList(props: ArchiveListProps) {
                 <For each={group.items}>
                   {(item) => (
                     <li class="group">
-                      <a
-                        href={item.url}
-                        class="flex items-baseline gap-4 py-3 border-b border-border-subtle group-hover:underline underline-offset-4 transition-colors"
-                      >
+                      <div class="flex items-baseline gap-4 py-3 border-b border-border-subtle transition-colors">
                         <time class="text-sm text-text-muted w-16 flex-shrink-0">
                           {formatDate(item.date)}
                         </time>
-                        <h3 class="text-text-primary group-hover:underline transition-colors flex-1">
-                          {item.title}
+                        <h3 class="text-text-primary transition-colors flex-1">
+                          <a
+                            href={item.url}
+                            class="hover:underline underline-offset-4"
+                          >
+                            {item.title}
+                          </a>
                         </h3>
-                      </a>
+                      </div>
                     </li>
                   )}
                 </For>
