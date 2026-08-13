@@ -11,7 +11,7 @@ const numStore = (key: string, def: number) =>
     decode: Number,
   });
 
-const opacityStore = numStore("bg-opacity", 0.05);
+const opacityStore = numStore("bg-opacity", 0.03);
 const thresholdStore = numStore("bg-threshold", 140);
 const speedStore = numStore("bg-speed", 0.10);
 const resStore = numStore("bg-resolution", 1200);
@@ -184,15 +184,17 @@ export default function OneBitBackground() {
               <span class="onebit-val">{resolution()}px</span>
             </label>
             <button class="onebit-reset" onClick={() => {
-              opacityStore.set(0.05); thresholdStore.set(140);
+              opacityStore.set(0.03); thresholdStore.set(140);
               speedStore.set(0.10); resStore.set(1200);
             }}>重置默认</button>
             <div class="onebit-fps">{fps()} FPS</div>
           </div>
+       </Show>
+        <Show when={import.meta.env.DEV}>
+          <button class="onebit-toggle" onClick={() => setPanelOpen(!panelOpen())} aria-label="背景设置">
+            <span>▦</span>
+          </button>
         </Show>
-        <button class="onebit-toggle" onClick={() => setPanelOpen(!panelOpen())} aria-label="背景设置">
-          <span>▦</span>
-        </button>
       </div>
     </>
   );
