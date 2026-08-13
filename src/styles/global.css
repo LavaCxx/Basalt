@@ -247,6 +247,10 @@ body {
   border-radius: 0.375rem;
   margin: 2rem 0;
 }
+.prose-basalt figure img,
+.article-content-html figure img {
+  margin: 0;
+}
 
 .prose-basalt hr {
   border: none;
