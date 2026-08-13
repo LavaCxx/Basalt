@@ -72,7 +72,9 @@ const typeLabels: Record<string, string> = {
                 </span>
                 {(item as any).date && (
                   <span class="text-xs text-text-muted">
-                    {(item as any).date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
+                    {((item as any).date as Date).getFullYear() === new Date().getFullYear()
+                    ? (item as any).date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+                    : (item as any).date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </span>
                 )}
               </div>

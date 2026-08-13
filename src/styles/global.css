@@ -727,6 +727,16 @@ body {
   color: var(--color-text-secondary);
 }
 
+.media-badge[data-media="manga"] {
+  background: var(--color-background-alt);
+  color: var(--color-text-secondary);
+}
+
+.media-badge[data-media="anime"] {
+  background: var(--color-background-alt);
+  color: var(--color-text-secondary);
+}
+
 .media-badge[data-status="in_progress"] {
   background: var(--color-background-alt);
   color: var(--color-text-secondary);
