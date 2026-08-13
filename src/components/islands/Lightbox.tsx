@@ -78,7 +78,7 @@ export default function Lightbox(props: LightboxProps) {
 
         <Show when={props.photos.length > 1}>
           <button
-            class="absolute left-4 z-10 p-2 text-white/70 hover:text-white transition-colors"
+            class="absolute left-4 z-10 p-2 text-white/70 hover:text-white transition-colors cursor-pointer"
             onClick={props.onPrevious}
             aria-label="Previous"
           >
@@ -87,7 +87,7 @@ export default function Lightbox(props: LightboxProps) {
             </svg>
           </button>
           <button
-            class="absolute right-4 z-10 p-2 text-white/70 hover:text-white transition-colors"
+            class="absolute right-4 z-10 p-2 text-white/70 hover:text-white transition-colors cursor-pointer"
             onClick={props.onNext}
             aria-label="Next"
           >
