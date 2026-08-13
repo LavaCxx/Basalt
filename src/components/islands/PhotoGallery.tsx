@@ -94,7 +94,7 @@ export default function PhotoGallery(props: PhotoGalleryProps) {
               <img
                 src={photo.thumbnail || photo.src}
                 alt={photo.alt || ''}
-                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                class="w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
               />
