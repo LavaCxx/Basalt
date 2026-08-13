@@ -19,6 +19,9 @@ const {
   withSidebar = false,
 } = Astro.props;
 
+const webmentionUsername = import.meta.env.PUBLIC_WEBMENTION_USERNAME;
+const indieauthGithub = import.meta.env.PUBLIC_INDIEAUTH_GITHUB;
+
 const fullTitle = title === 'Basalt' ? title : `${title} | Basalt`;
 ---
 
@@ -33,6 +36,14 @@ const fullTitle = title === 'Basalt' ? title : `${title} | Basalt`;
     <link rel="alternate" type="application/rss+xml" title="Basalt" href="/rss.xml" />
 
     <title>{fullTitle}</title>
+
+    {webmentionUsername && (
+      <link rel="webmention" href={`https://webmention.io/${webmentionUsername}/webmention`} />
+    )}
+    {webmentionUsername && (
+      <link rel="pingback" href={`https://webmention.io/${webmentionUsername}/xmlrpc`} />
+    )}
+    {indieauthGithub && <link rel="me" href={indieauthGithub} />}
 
     <!-- View Transitions for smooth page navigation -->
     <ViewTransitions />

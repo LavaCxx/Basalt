@@ -12,6 +12,7 @@ import { getArticleBySlug, initRuntime } from '../../lib/api';
 import ArticleContent from '../../components/islands/ArticleContent';
 import TableOfContents from '../../components/islands/TableOfContents';
 import Comments from '../../components/islands/Comments';
+import Webmentions from '../../components/islands/Webmentions';
 
 // Initialize D1 binding from Cloudflare runtime env
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
@@ -72,6 +73,9 @@ const readingTime = (metadata as any)?.readingTime || 5;
       <div class="article-content prose-basalt">
         <ArticleContent content={content} client:load />
       </div>
+
+      {/* Webmentions */}
+      <Webmentions target={Astro.url.href} client:visible />
 
       {/* Comments */}
       <Comments client:load />
