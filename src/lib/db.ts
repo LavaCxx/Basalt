@@ -174,8 +174,9 @@ export async function queryArchiveGroups(): Promise<ArchiveGroup[]> {
 
   const result = await db
     .prepare(
-      `SELECT id, title, date, type, url FROM items
-       ORDER BY date DESC`
+    `SELECT id, title, date, type, url FROM items
+     WHERE type = 'article'
+     ORDER BY date DESC`
     )
     .all();
 
