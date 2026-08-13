@@ -191,16 +191,21 @@ export async function fetchDoubanFeed(): Promise<FeedItem[]> {
       const parsed = parseDoubanItem(item);
       if (!parsed) return null;
 
+      const status: MediaMetadata['status'] = parsed.status === 'reading' || parsed.status === 'watching' || parsed.status === 'listening'
+          ? 'in_progress'
+          : parsed.status.includes('want')
+            ? 'wishlist'
+            : 'completed';
+
+      // Skip in-progress and wishlist — "currently consuming" is tracked in Notion now
+      if (status !== 'completed') return null;
+
       const metadata: MediaMetadata = {
         mediaType: parsed.mediaType,
         rating: parsed.rating,
         maxRating: parsed.maxRating,
         review: parsed.review,
-        status: parsed.status === 'reading' || parsed.status === 'watching' || parsed.status === 'listening'
-          ? 'in_progress'
-          : parsed.status.includes('want')
-            ? 'wishlist'
-            : 'completed',
+        status,
       };
 
       return {
