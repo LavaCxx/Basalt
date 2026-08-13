@@ -371,7 +371,7 @@ export async function blockToHtml(
         ? `<span class="notion-bookmark-cover"><img src="${escapeHtml(meta.image)}" alt="" loading="lazy" /></span>`
         : '';
 
-      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer"><span class="notion-bookmark-text"><span class="notion-bookmark-title"><img class="notion-bookmark-icon" src="${favicon}" alt="" width="16" height="16" loading="lazy" />${title}</span>${description ? `<span class="notion-bookmark-desc">${description}</span>` : ''}<span class="notion-bookmark-url">${escapeHtml(meta?.domain || domain)}</span></span>${coverHtml}</a>`;
+      return `<a href="${safeHref}" class="notion-bookmark" target="_blank" rel="noopener noreferrer">${coverHtml}<span class="notion-bookmark-text"><span class="notion-bookmark-icon-row"><img class="notion-bookmark-icon" src="${favicon}" alt="" width="16" height="16" loading="lazy" /></span><span class="notion-bookmark-title">${title}</span>${description ? `<span class="notion-bookmark-desc">${description}</span>` : ''}<span class="notion-bookmark-url">${escapeHtml(meta?.domain || domain)}</span></span></a>`;
     }
 
     case 'table': {

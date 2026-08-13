@@ -115,18 +115,9 @@ export async function fetchLinkMetadata(url: string): Promise<BookmarkMeta | nul
     }
   }
 
-  const iconLink = html.match(/<link[^>]+rel=["'](?:shortcut )?icon["'][^>]+href=["']([^"']*)["']/i)
-    || html.match(/<link[^>]+href=["']([^"']*)["'][^>]+rel=["'](?:shortcut )?icon["']/i);
-  if (iconLink?.[1]) {
-    const raw = iconLink[1].trim();
-    try {
-      meta.favicon = new URL(raw, url).href;
-    } catch {
-      meta.favicon = raw;
-    }
-  } else {
-    meta.favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
-  }
+  // Always use Google favicon service — scraped favicon URLs frequently 404
+  // (e.g. GitHub's githubassets.com/favicons/favicon returns 404)
+  meta.favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
 
   return meta;
 }
