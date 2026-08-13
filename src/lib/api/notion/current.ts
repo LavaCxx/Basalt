@@ -7,7 +7,7 @@ import type { QueryDatabaseParameters } from '@notionhq/client/build/src/api-end
 import type { RichTextItemResponse } from '@notionhq/client/build/src/api-endpoints';
 import type { FeedItem, MediaMetadata } from '../../types';
 import { getNotionClient, getCurrentDatabaseId } from './client';
-import { getPlainText } from './properties';
+import { getPlainText, getCoverImage } from './properties';
 
 /**
  * Notion "现在在看" database properties (Chinese field names).
@@ -16,7 +16,7 @@ interface NotionCurrentProperties {
   名称?: { title: RichTextItemResponse[] };
   类型?: { select: { name: string } | null };
   状态?: { status: { name: string } | null };
-  封面?: { url: string };
+  封面?: { files: { type: string; file?: { url: string }; external?: { url: string } }[] };
   开始时间?: { date: { start: string } | null };
   结束时间?: { date: { start: string } | null };
 }
@@ -86,7 +86,7 @@ export async function fetchCurrentItems(options?: {
     const title = getPlainText(props.名称?.title);
     const typeStr = props.类型?.select?.name ?? null;
     const statusStr = props.状态?.status?.name ?? null;
-    const cover = props.封面?.url || undefined;
+    const cover = getCoverImage(props.封面?.files);
     const startStr = props.开始时间?.date?.start;
     const endStr = props.结束时间?.date?.start;
 
