@@ -99,7 +99,7 @@ export interface MediaAttachment {
  */
 export interface MediaMetadata {
   /** Type of media */
-  mediaType: 'book' | 'movie' | 'music' | 'game' | 'tv';
+  mediaType: 'book' | 'movie' | 'music' | 'game' | 'tv' | 'manga' | 'anime';
   /** Rating (1-5 or 1-10) */
   rating?: number;
   /** Maximum rating value */
@@ -107,7 +107,7 @@ export interface MediaMetadata {
   /** User's review/notes */
   review?: string;
   /** Status (e.g., "read", "watching", "want to read") */
-  status?: 'completed' | 'in_progress' | 'wishlist';
+  status?: 'completed' | 'in_progress' | 'wishlist' | 'paused';
   /** Author/director/artist */
   creator?: string;
   /** Release year */
@@ -194,7 +194,7 @@ export interface FriendLink {
 export interface CurrentItem {
   type: 'reading' | 'watching' | 'playing' | 'listening';
   /** Media type: book, movie, tv, music, game */
-  mediaType?: 'book' | 'movie' | 'tv' | 'music' | 'game';
+  mediaType?: 'book' | 'movie' | 'tv' | 'music' | 'game' | 'manga' | 'anime';
   title: string;
   author?: string;
   cover?: string;

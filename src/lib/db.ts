@@ -237,7 +237,7 @@ export async function queryPhotosByYear(): Promise<Record<number, FeedItem[]>> {
 }
 
 /**
- * Get "currently consuming" items (in-progress media from Douban).
+ * Get "currently consuming" items (in-progress media from Notion + Douban).
  */
 export async function queryCurrentItems(): Promise<CurrentItem[]> {
   const db = getDB();
@@ -245,9 +245,9 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
   const result = await db
     .prepare(
       `SELECT * FROM items
-       WHERE type = 'media' AND source = 'douban'
+       WHERE type = 'media'
        ORDER BY date DESC
-       LIMIT 10`
+       LIMIT 50`
     )
     .all();
 
@@ -258,18 +258,33 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
     // Only include items that are "in progress"
     if (metadata.status !== 'in_progress') continue;
 
+    const mediaType = metadata.mediaType;
+    let itemType: CurrentItem['type'];
+    switch (mediaType) {
+      case 'book':
+      case 'manga':
+        itemType = 'reading';
+        break;
+      case 'music':
+        itemType = 'listening';
+        break;
+      case 'game':
+        itemType = 'playing';
+        break;
+      default:
+        itemType = 'watching';
+    }
+
     currentItems.push({
-      type: metadata.mediaType === 'book' ? 'reading'
-        : metadata.mediaType === 'music' ? 'listening'
-        : 'watching',
-      mediaType: metadata.mediaType,
+      type: itemType,
+      mediaType,
       title: row.title || '',
       cover: row.image || undefined,
       date: new Date(row.date),
       url: row.url || undefined,
     });
 
-    if (currentItems.length >= 5) break;
+    if (currentItems.length >= 8) break;
   }
 
   return currentItems;

@@ -61,7 +61,7 @@ const typeLabels: Record<string, string> = {
             ) : (
               <div class="w-10 h-14 rounded bg-surface-secondary flex items-center justify-center flex-shrink-0">
                 <span class="text-xs text-text-muted">
-                  {mediaType === 'book' ? '书' : mediaType === 'movie' ? '影' : mediaType === 'tv' ? '剧' : mediaType === 'music' ? '音' : '游'}
+                  {mediaType === 'book' ? '书' : mediaType === 'movie' ? '影' : mediaType === 'tv' ? '剧' : mediaType === 'music' ? '音' : mediaType === 'game' ? '游' : mediaType === 'manga' ? '漫' : mediaType === 'anime' ? '番' : '看'}
                 </span>
               </div>
             )}

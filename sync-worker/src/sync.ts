@@ -127,3 +127,37 @@ export async function syncDouban(db: D1Database, env: Record<string, string>): P
   await deleteStaleItems(db, 'douban', items.map((i) => i.id));
   await updateSyncState(db, 'douban', null);
 }
+
+/**
+ * Sync Notion "现在在看" (currently consuming) items.
+ */
+export async function syncNotionCurrent(db: D1Database, env: Record<string, string>): Promise<void> {
+  setRuntimeEnv(env);
+
+  const { getAllCurrentItems } = await import('../../src/lib/api/notion/current');
+  const allItems: FeedItem[] = await getAllCurrentItems();
+  if (allItems.length === 0) return;
+
+  for (const item of allItems) {
+    await upsertItem(db, item);
+  }
+
+  // Remove items that disappeared from the database.
+  // Notion media items share source='notion' with articles/photos, so we scope
+  // the stale deletion to source='notion' AND type='media' only.
+  const currentIds = allItems.map((i) => i.id);
+  if (currentIds.length > 0) {
+    const BATCH = 100;
+    for (let i = 0; i < currentIds.length; i += BATCH) {
+      const batch = currentIds.slice(i, i + BATCH);
+      const placeholders = batch.map(() => '?').join(',');
+      await db
+        .prepare(
+          `DELETE FROM items WHERE source = 'notion' AND type = 'media' AND id NOT IN (${placeholders})`
+        )
+        .bind(...batch)
+        .run();
+    }
+  }
+  await updateSyncState(db, 'notion:current', null);
+}

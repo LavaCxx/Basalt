@@ -9,7 +9,7 @@
  */
 
 import { setRuntimeEnv } from '../../src/lib/api/env';
-import { syncNotionArticles, syncNotionPhotos, syncTelegram, syncDouban } from './sync';
+import { syncNotionArticles, syncNotionPhotos, syncTelegram, syncDouban, syncNotionCurrent } from './sync';
 
 export interface Env {
   DB: D1Database;
@@ -17,6 +17,7 @@ export interface Env {
   NOTION_API_KEY: string;
   NOTION_ARTICLES_DATABASE_ID: string;
   NOTION_PHOTOS_DATABASE_ID: string;
+  NOTION_CURRENT_DATABASE_ID?: string;
   // Telegram (RSSHub)
   TELEGRAM_CHANNEL_USERNAME?: string;
   RSSHUB_INSTANCE?: string;
@@ -102,6 +103,9 @@ export default {
       { name: 'notion:photos', fn: () => syncNotionPhotos(env.DB, envRecord) },
     ];
 
+    if (env.NOTION_CURRENT_DATABASE_ID) {
+      sources.push({ name: 'notion:current', fn: () => syncNotionCurrent(env.DB, envRecord) });
+    }
     if (env.TELEGRAM_CHANNEL_USERNAME) {
       sources.push({ name: 'telegram', fn: () => syncTelegram(env.DB, envRecord) });
     }
