@@ -1,446 +1,21 @@
-/* Giscus Custom Theme - Basalt Design System */
-/* Inspired by: Linear.app, Craig Mod */
-/* Background: Off-white (#faf9f6), Borders: Ultra-thin (#e5e5e5) */
+/* Basalt Giscus Theme — built-in GitHub theme + code block overrides only */
 
-:root,
-html,
-body {
-  /* Background Colors - Off-white palette */
-  --color-canvas-default: #faf9f6;
-  --color-canvas-subtle: #f5f5f7;
-  --color-canvas-overlay: #ffffff;
+/* === Import Giscus built-in themes (auto-switch by color scheme) === */
+@import url("https://giscus.app/themes/light.css") (prefers-color-scheme: light);
+@import url("https://giscus.app/themes/dark.css") (prefers-color-scheme: dark);
 
-  /* Border Colors - Ultra-thin borders */
-  --color-border-default: #e5e5e5;
-  --color-border-muted: #f0f0f0;
-  --color-border-subtle: #f5f5f5;
-
-  /* Text Colors */
-  --color-fg-default: #1a1a1a;
-  --color-fg-muted: #666666;
-  --color-fg-subtle: #999999;
-
-  /* Accent Colors */
-  --color-accent-fg: #0066ff;
-  --color-accent-emphasis: #0066ff;
-  --color-accent-subtle: rgba(0, 102, 255, 0.1);
-  --color-accent-muted: rgba(0, 102, 255, 0.2);
-
-  /* Button & Input */
-  --color-btn-bg: #f5f5f7;
-  --color-btn-border: #e5e5e5;
-  --color-btn-hover-bg: #ebebec;
-  --color-input-bg: #ffffff;
-  --color-input-border: #e5e5e5;
-
-  /* Timeline & Reactions */
-  --color-timeline-badge-bg: #faf9f6;
-  --color-social-reaction-bg: #f5f5f7;
-  --color-social-reaction-hover-bg: #ebebec;
-
-  /* Shadows - Minimal, geometric */
-  --shadow-small: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-medium: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-large: 0 4px 16px rgba(0, 0, 0, 0.08);
-
-  /* Typography */
-  --font-family: "SN Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+/* === Dark mode: force dark theme when <html class="dark"> === */
+html.dark {
+  --dim-bg: #0d1117;
 }
 
-/* Dark Mode */
-[data-theme="dark"],
-.giscus-dark,
-html.dark,
-body.dark {
-  --color-canvas-default: #0a0a0a;
-  --color-canvas-subtle: #141414;
-  --color-canvas-overlay: #1a1a1a;
-
-  --color-border-default: #262626;
-  --color-border-muted: #1f1f1f;
-  --color-border-subtle: #1a1a1a;
-
-  --color-fg-default: #fafafa;
-  --color-fg-muted: #a3a3a3;
-  --color-fg-subtle: #737373;
-
-  --color-accent-fg: #3399ff;
-  --color-accent-emphasis: #0066ff;
-  --color-accent-subtle: rgba(0, 102, 255, 0.15);
-  --color-accent-muted: rgba(0, 102, 255, 0.25);
-
-  --color-btn-bg: #1f1f1f;
-  --color-btn-border: #262626;
-  --color-btn-hover-bg: #2a2a2a;
-  --color-input-bg: #141414;
-  --color-input-border: #262626;
-
-  --color-timeline-badge-bg: #141414;
-  --color-social-reaction-bg: #1f1f1f;
-  --color-social-reaction-hover-bg: #2a2a2a;
-
-  --shadow-small: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-medium: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-large: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --color-canvas-default: #0a0a0a;
-    --color-canvas-subtle: #141414;
-    --color-canvas-overlay: #1a1a1a;
-
-    --color-border-default: #262626;
-    --color-border-muted: #1f1f1f;
-    --color-border-subtle: #1a1a1a;
-
-    --color-fg-default: #fafafa;
-    --color-fg-muted: #a3a3a3;
-    --color-fg-subtle: #737373;
-
-    --color-accent-fg: #3399ff;
-    --color-accent-emphasis: #0066ff;
-    --color-accent-subtle: rgba(0, 102, 255, 0.15);
-    --color-accent-muted: rgba(0, 102, 255, 0.25);
-
-    --color-btn-bg: #1f1f1f;
-    --color-btn-border: #262626;
-    --color-btn-hover-bg: #2a2a2a;
-    --color-input-bg: #141414;
-    --color-input-border: #262626;
-
-    --color-timeline-badge-bg: #141414;
-    --color-social-reaction-bg: #1f1f1f;
-    --color-social-reaction-hover-bg: #2a2a2a;
-
-    --shadow-small: 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-medium: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-large: 0 4px 16px rgba(0, 0, 0, 0.4);
-  }
-}
-
-/* Base Styles */
-body {
-  font-family: var(--font-family) !important;
-  background-color: var(--color-canvas-default) !important;
-}
-
-/* Comment Box */
-.gsc-comment-box {
-  border: 1px solid var(--color-border-default) !important;
-  border-radius: 6px !important;
-  background: var(--color-canvas-overlay) !important;
-  box-shadow: var(--shadow-small) !important;
-}
-
-.gsc-comment-box-textarea {
-  font-family: var(--font-family) !important;
-  background: var(--color-input-bg) !important;
-  border: 1px solid var(--color-input-border) !important;
-  border-radius: 4px !important;
-  color: var(--color-fg-default) !important;
-}
-
-.gsc-comment-box-textarea:focus {
-  border-color: var(--color-accent-emphasis) !important;
-  box-shadow: 0 0 0 2px var(--color-accent-subtle) !important;
-}
-
-/* Comment Cards */
-.gsc-comment {
-  border: 1px solid var(--color-border-muted) !important;
-  border-radius: 6px !important;
-  background: var(--color-canvas-overlay) !important;
-}
-
-.gsc-comment:hover {
-  border-color: var(--color-border-default) !important;
-}
-
-/* Reaction Buttons */
-.gsc-reactions-button {
-  border: 1px solid var(--color-border-default) !important;
-  border-radius: 4px !important;
-  background: var(--color-social-reaction-bg) !important;
-}
-
-.gsc-reactions-button:hover {
-  background: var(--color-social-reaction-hover-bg) !important;
-  border-color: var(--color-fg-subtle) !important;
-}
-
-/* Buttons */
-.gsc-button {
-  border-radius: 4px !important;
-  font-family: var(--font-family) !important;
-}
-
-.gsc-button-primary {
-  background: var(--color-accent-emphasis) !important;
-  border-color: var(--color-accent-emphasis) !important;
-}
-
-.gsc-button-primary:hover {
-  background: var(--color-accent-fg) !important;
-}
-
-/* Links */
-a {
-  color: var(--color-accent-fg) !important;
-}
-
-a:hover {
-  text-decoration: underline !important;
-}
-
-/* Code Blocks */
-.gsc-comment-content pre,
-.gsc-comment-content code {
-  background: var(--color-canvas-subtle) !important;
-  border-radius: 4px !important;
-  font-family: "SF Mono", "Fira Code", Consolas, monospace !important;
-}
-
-/* Timestamps & Metadata */
-.gsc-comment-metadata {
-  color: var(--color-fg-muted) !important;
-}
-
-.gsc-comment-time {
-  color: var(--color-fg-subtle) !important;
-}
-
-/* Author Names */
-.gsc-comment-author {
-  font-weight: 500 !important;
-  color: var(--color-fg-default) !important;
-}
-
-/* Pagination */
-.gsc-pagination-button {
-  border: 1px solid var(--color-border-default) !important;
-  border-radius: 4px !important;
-  background: var(--color-btn-bg) !important;
-  color: var(--color-fg-default) !important;
-}
-
-.gsc-pagination-button:hover {
-  background: var(--color-btn-hover-bg) !important;
-}
-
-/* Header */
-.gsc-header {
-  border-bottom: 1px solid var(--color-border-muted) !important;
-}
-
-/* Loading Spinner */
-.gsc-loading-spinner {
-  border-color: var(--color-border-default) !important;
-  border-top-color: var(--color-accent-emphasis) !important;
-}
-
-/* Emoji Button & Picker */
-.gsc-emoji-button {
-  border-radius: 4px !important;
-}
-
-/* Emoji Picker Popup - Generic selectors */
-.gsc-emoji-picker,
-.gsc-emoji-picker-container,
-[class*="emoji-picker"],
-[class*="EmojiPicker"],
-em-emoji-picker,
-emoji-picker {
-  background: var(--color-canvas-overlay) !important;
-  border: 1px solid var(--color-border-default) !important;
-  border-radius: 8px !important;
-  box-shadow: var(--shadow-medium) !important;
-}
-
-/* emoji-mart specific */
-em-emoji-picker::part(selector) {
-  background: var(--color-canvas-overlay) !important;
-}
-
-em-emoji-picker::part(search) {
-  background: var(--color-input-bg) !important;
-  border-color: var(--color-input-border) !important;
-}
-
-em-emoji-picker::part(search-input) {
-  background: var(--color-input-bg) !important;
-  color: var(--color-fg-default) !important;
-}
-
-em-emoji-picker::part(category-label) {
-  background: var(--color-canvas-subtle) !important;
-  color: var(--color-fg-muted) !important;
-}
-
-/* Emoji picker categories */
-.gsc-emoji-picker-category,
-[class*="emoji-picker-category"],
-[class*="CategoryLabel"],
-em-emoji-picker::part(category-label) {
-  background: var(--color-canvas-subtle) !important;
-}
-
-/* Emoji picker search */
-.gsc-emoji-picker-search,
-[class*="emoji-picker-search"] input,
-[class*="SearchInput"],
-em-emoji-picker::part(search-input) {
-  background: var(--color-input-bg) !important;
-  border: 1px solid var(--color-input-border) !important;
-  border-radius: 4px !important;
-  color: var(--color-fg-default) !important;
-}
-
-/* Emoji grid */
-em-emoji-picker::part(emoji) {
-  background: transparent !important;
-}
-
-em-emoji-picker::part(emoji):hover {
-  background: var(--color-canvas-subtle) !important;
-  border-radius: 4px !important;
-}
-
-/* Preview section */
-em-emoji-picker::part(preview) {
-  background: var(--color-canvas-subtle) !important;
-  border-top: 1px solid var(--color-border-default) !important;
-}
-
-/* Reactions Emoji Picker Popup */
-.gsc-reactions-picker,
-.gsc-reactions-popup,
-[class*="reactions-picker"],
-[class*="ReactionsPicker"],
-[class*="reaction-picker"],
-.gsc-reactions-button + [role="menu"],
-.gsc-reactions-button + [role="dialog"],
-/* Primer CSS specific */
-.Box,
-.dropdown-menu,
-.SelectMenu,
-.ActionBar,
-.toast {
-  background: var(--color-canvas-overlay) !important;
-  border: 1px solid var(--color-border-default) !important;
-  border-radius: 8px !important;
-  box-shadow: var(--shadow-large) !important;
-}
-
-/* Giscus specific reaction picker container */
-.color-bg-default,
-.color-bg-canvas,
-.color-bg-overlay {
-  background: var(--color-canvas-overlay) !important;
-}
-
-.color-border-default,
-.color-border-muted,
-.color-border-subtle {
-  border-color: var(--color-border-default) !important;
-}
-
-/* Reactions picker individual items */
-.gsc-reactions-picker-item,
-[class*="reactions-picker-item"],
-[class*="reaction-item"],
-.ActionList-item,
-.SelectMenu-item {
-  background: transparent !important;
-  border-radius: 4px !important;
-}
-
-.gsc-reactions-picker-item:hover,
-[class*="reactions-picker-item"]:hover,
-[class*="reaction-item"]:hover,
-.ActionList-item:hover,
-.SelectMenu-item:hover {
-  background: var(--color-canvas-subtle) !important;
-}
-
-/* Social reaction buttons container */
-.social-reaction-summary-item,
-.reaction-summary-item {
-  background: var(--color-social-reaction-bg) !important;
-  border: 1px solid var(--color-border-muted) !important;
-  border-radius: 4px !important;
-}
-
-.social-reaction-summary-item:hover,
-.reaction-summary-item:hover,
-.has-reactions:hover {
-  background: var(--color-social-reaction-hover-bg) !important;
-  border-color: var(--color-border-default) !important;
-}
-
-/* Reaction button popover */
-[role="menu"][class*="Popover"],
-[class*="popover"],
-.Popover {
-  background: var(--color-canvas-overlay) !important;
-  border: 1px solid var(--color-border-default) !important;
-}
-
-.Popover-message {
-  background: var(--color-canvas-overlay) !important;
-  border: 1px solid var(--color-border-default) !important;
-  box-shadow: var(--shadow-large) !important;
-}
-
-/* Generic popup/dropdown fix */
-[role="menu"],
-[role="dialog"],
-[role="listbox"] {
-  background: var(--color-canvas-overlay) !important;
-}
-
-/* Reply Section */
-.gsc-replies {
-  border-left: 2px solid var(--color-border-muted) !important;
-  margin-left: 0.5rem !important;
-  padding-left: 1rem !important;
-}
-
-/* Markdown Content */
-.gsc-comment-content {
-  font-family: var(--font-family) !important;
-  line-height: 1.6 !important;
-  color: var(--color-fg-default) !important;
-}
-
-.gsc-comment-content blockquote {
-  border-left: 2px solid var(--color-border-default) !important;
-  padding-left: 1rem !important;
-  color: var(--color-fg-muted) !important;
-  font-style: italic !important;
-}
-
-/* Sort Options */
-.gsc-sort-options {
-  color: var(--color-fg-muted) !important;
-}
-
-.gsc-sort-option {
-  color: var(--color-fg-subtle) !important;
-}
-
-.gsc-sort-option-active {
-  color: var(--color-fg-default) !important;
-  font-weight: 500 !important;
-}
-
-/* Code Blocks & Syntax Highlighting */
+/* === Code block overrides (light) === */
 .gsc-comment-content pre,
 .markdown pre {
-  background: var(--color-canvas-subtle) !important;
-  border: 1px solid var(--color-border-default) !important;
-  border-radius: 6px !important;
-  padding: 0.75rem 1rem !important;
+  background: #f6f8fa !important;
+  border: 1px solid #d0d7de !important;
+  border-radius: 8px !important;
+  padding: 0.875rem 1rem !important;
   overflow-x: auto !important;
   font-size: 0.85rem !important;
   line-height: 1.5 !important;
@@ -451,74 +26,46 @@ em-emoji-picker::part(preview) {
 .markdown pre code {
   background: transparent !important;
   padding: 0 !important;
+  border: none !important;
   font-size: inherit !important;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
 }
 
-/* Inline code */
+/* === Inline code === */
 .gsc-comment-content code,
 .markdown code {
-  background: var(--color-canvas-subtle) !important;
-  border: 1px solid var(--color-border-muted) !important;
-  border-radius: 4px !important;
-  padding: 0.1rem 0.35rem !important;
+  background: rgba(175, 184, 193, 0.2) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 0.15rem 0.4rem !important;
   font-size: 0.85em !important;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
 }
 
-/* Light mode syntax highlighting (Primer .pl-* classes) */
-.gsc-comment-content .pl-c, .markdown .pl-c { color: #6a737d !important; }          /* comment */
-.gsc-comment-content .pl-c1, .markdown .pl-c1 { color: #005cc5 !important; }       /* constant */
-.gsc-comment-content .pl-k, .markdown .pl-k { color: #d73a49 !important; }         /* keyword */
-.gsc-comment-content .pl-s, .markdown .pl-s { color: #032f62 !important; }         /* string */
-.gsc-comment-content .pl-smi, .markdown .pl-smi { color: #24292e !important; }     /* variable */
-.gsc-comment-content .pl-en, .markdown .pl-en { color: #6f42c1 !important; }       /* entity name */
-.gsc-comment-content .pl-v, .markdown .pl-v { color: #e36209 !important; }         /* variable */
-.gsc-comment-content .pl-ent, .markdown .pl-ent { color: #22863a !important; }     /* entity tag */
-.gsc-comment-content .pl-pds, .markdown .pl-pds { color: #032f62 !important; }     /* string punctuation */
-.gsc-comment-content .pl-e, .markdown .pl-e { color: #cb2431 !important; }         /* error */
+/* === Code block overrides (dark) === */
+[data-theme="dark"] .gsc-comment-content pre,
+[data-theme="dark"] .markdown pre,
+html.dark .gsc-comment-content pre,
+html.dark .markdown pre {
+  background: #161b22 !important;
+  border: 1px solid #30363d !important;
+}
 
-/* Dark mode syntax highlighting */
-[data-theme="dark"] .gsc-comment-content .pl-c,
-[data-theme="dark"] .markdown .pl-c { color: #8b949e !important; }
-[data-theme="dark"] .gsc-comment-content .pl-c1,
-[data-theme="dark"] .markdown .pl-c1 { color: #79c0ff !important; }
-[data-theme="dark"] .gsc-comment-content .pl-k,
-[data-theme="dark"] .markdown .pl-k { color: #ff7b72 !important; }
-[data-theme="dark"] .gsc-comment-content .pl-s,
-[data-theme="dark"] .markdown .pl-s { color: #a5d6ff !important; }
-[data-theme="dark"] .gsc-comment-content .pl-smi,
-[data-theme="dark"] .markdown .pl-smi { color: #c9d1d9 !important; }
-[data-theme="dark"] .gsc-comment-content .pl-en,
-[data-theme="dark"] .markdown .pl-en { color: #d2a8ff !important; }
-[data-theme="dark"] .gsc-comment-content .pl-v,
-[data-theme="dark"] .markdown .pl-v { color: #ffa657 !important; }
-[data-theme="dark"] .gsc-comment-content .pl-ent,
-[data-theme="dark"] .markdown .pl-ent { color: #7ee787 !important; }
-[data-theme="dark"] .gsc-comment-content .pl-pds,
-[data-theme="dark"] .markdown .pl-pds { color: #a5d6ff !important; }
-[data-theme="dark"] .gsc-comment-content .pl-e,
-[data-theme="dark"] .markdown .pl-e { color: #f85149 !important; }
+[data-theme="dark"] .gsc-comment-content code,
+[data-theme="dark"] .markdown code,
+html.dark .gsc-comment-content code,
+html.dark .markdown code {
+  background: rgba(110, 118, 129, 0.4) !important;
+}
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .gsc-comment-content .pl-c,
-  :root:not([data-theme="light"]) .markdown .pl-c { color: #8b949e !important; }
-  :root:not([data-theme="light"]) .gsc-comment-content .pl-c1,
-  :root:not([data-theme="light"]) .markdown .pl-c1 { color: #79c0ff !important; }
-  :root:not([data-theme="light"]) .gsc-comment-content .pl-k,
-  :root:not([data-theme="light"]) .markdown .pl-k { color: #ff7b72 !important; }
-  :root:not([data-theme="light"]) .gsc-comment-content .pl-s,
-  :root:not([data-theme="light"]) .markdown .pl-s { color: #a5d6ff !important; }
-  :root:not([data-theme="light"]) .gsc-comment-content .pl-smi,
-  :root:not([data-theme="light"]) .markdown .pl-smi { color: #c9d1d9 !important; }
-  :root:not([data-theme="light"]) .gsc-comment-content .pl-en,
-  :root:not([data-theme="light"]) .markdown .pl-en { color: #d2a8ff !important; }
-  :root:not([data-theme="light"]) .gsc-comment-content .pl-v,
-  :root:not([data-theme="light"]) .markdown .pl-v { color: #ffa657 !important; }
-  :root:not([data-theme="light"]) .gsc-comment-content .pl-ent,
-  :root:not([data-theme="light"]) .markdown .pl-ent { color: #7ee787 !important; }
-  :root:not([data-theme="light"]) .gsc-comment-content .pl-pds,
-  :root:not([data-theme="light"]) .markdown .pl-pds { color: #a5d6ff !important; }
-  :root:not([data-theme="light"]) .gsc-comment-content .pl-e,
-  :root:not([data-theme="light"]) .markdown .pl-e { color: #f85149 !important; }
+  :root:not([data-theme="light"]) .gsc-comment-content pre,
+  :root:not([data-theme="light"]) .markdown pre {
+    background: #161b22 !important;
+    border: 1px solid #30363d !important;
+  }
+  :root:not([data-theme="light"]) .gsc-comment-content code,
+  :root:not([data-theme="light"]) .markdown code {
+    background: rgba(110, 118, 129, 0.4) !important;
+  }
 }
