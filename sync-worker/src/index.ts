@@ -51,9 +51,12 @@ export default {
     // Sync each source independently — one failure doesn't block the others
     const sources: { name: string; fn: () => Promise<void> }[] = [
       { name: 'notion:articles', fn: () => syncNotionArticles(env.DB, envRecord) },
-      { name: 'notion:photos', fn: () => syncNotionPhotos(env.DB, envRecord) },
-    ];
+     { name: 'notion:photos', fn: () => syncNotionPhotos(env.DB, envRecord) },
+   ];
 
+    if (env.NOTION_CURRENT_DATABASE_ID) {
+      sources.push({ name: 'notion:current', fn: () => syncNotionCurrent(env.DB, envRecord) });
+    }
     if (env.TELEGRAM_CHANNEL_USERNAME) {
       sources.push({ name: 'telegram', fn: () => syncTelegram(env.DB, envRecord) });
     }
