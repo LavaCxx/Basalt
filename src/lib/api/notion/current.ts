@@ -42,13 +42,17 @@ function mapMediaType(type: string | null): MediaMetadata['mediaType'] {
 function mapStatus(status: string | null): MediaMetadata['status'] {
   switch (status) {
     case '在看':
-    case '在进行中':
+    case '进行中':
+    case '在看中':
       return 'in_progress';
     case '已完成':
+    case '已看完':
+    case '看完':
       return 'completed';
     case '搁置':
       return 'paused';
     case '未开始':
+    case '计划中':
     default:
       return 'wishlist';
   }
