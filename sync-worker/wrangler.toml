@@ -2,6 +2,12 @@ name = "basalt-sync"
 main = "src/index.ts"
 compatibility_date = "2024-09-23"
 
+# Non-secret env vars (database IDs are not sensitive)
+[vars]
+NOTION_ARTICLES_DATABASE_ID = "30b9289a3ef080c4b8b8c81663ccf998"
+NOTION_PHOTOS_DATABASE_ID = "3ba9289a3ef08076bffffa0e87ec62de"
+NOTION_CURRENT_DATABASE_ID = "3bb9289a3ef080e9ac51e5870726da6e"
+
 # Cron Trigger — runs every 10 minutes
 [triggers]
 crons = ["*/10 * * * *"]
@@ -13,11 +19,8 @@ database_name = "basalt"
 database_id = "c4180715-68e4-4d01-8cf7-a3e0ce5bb960"
 migrations_dir = "../migrations"
 
-# Secrets (set via `wrangler secret put`):
+# Secrets (set via `wrangler secret put` or Dashboard):
 #   NOTION_API_KEY
-#   NOTION_ARTICLES_DATABASE_ID
-#   NOTION_PHOTOS_DATABASE_ID
-#   NOTION_CURRENT_DATABASE_ID
 #   TELEGRAM_CHANNEL_USERNAME
 #   RSSHUB_INSTANCE (optional)
 #   DOUBAN_USER_RSS (optional)
