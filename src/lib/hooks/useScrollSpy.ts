@@ -84,20 +84,31 @@ export function useScrollSpy(options?: ScrollSpyOptions) {
     const headings = document.querySelectorAll(
       `${headingContainerSelector} h1, ${headingContainerSelector} h2, ${headingContainerSelector} h3`
     );
-    const windowHeight = window.innerHeight;
-    const visible = new Set<string>();
+    const scrollOffset = 120;
+    let activeId: string | null = null;
 
     headings.forEach((heading) => {
       const id = heading.id;
       if (!id || !knownHeadingIds.has(id)) return;
 
       const rect = heading.getBoundingClientRect();
-      if (rect.top < windowHeight - 50 && rect.bottom > -50) {
-        visible.add(id);
+      if (rect.top < scrollOffset) {
+        activeId = id;
       }
     });
 
-    setActiveIds(visible);
+    // If no heading has passed the threshold yet, highlight the first one
+    if (!activeId) {
+      for (const heading of headings) {
+        const id = (heading as Element).id;
+        if (id && knownHeadingIds.has(id)) {
+          activeId = id;
+          break;
+        }
+      }
+    }
+
+    setActiveIds(activeId ? new Set([activeId]) : new Set());
   }
 
   function handleScroll() {
