@@ -433,3 +433,92 @@ em-emoji-picker::part(preview) {
   color: var(--color-fg-default) !important;
   font-weight: 500 !important;
 }
+
+/* Code Blocks & Syntax Highlighting */
+.gsc-comment-content pre,
+.markdown pre {
+  background: var(--color-canvas-subtle) !important;
+  border: 1px solid var(--color-border-default) !important;
+  border-radius: 6px !important;
+  padding: 0.75rem 1rem !important;
+  overflow-x: auto !important;
+  font-size: 0.85rem !important;
+  line-height: 1.5 !important;
+  margin: 0.75rem 0 !important;
+}
+
+.gsc-comment-content pre code,
+.markdown pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+}
+
+/* Inline code */
+.gsc-comment-content code,
+.markdown code {
+  background: var(--color-canvas-subtle) !important;
+  border: 1px solid var(--color-border-muted) !important;
+  border-radius: 4px !important;
+  padding: 0.1rem 0.35rem !important;
+  font-size: 0.85em !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+}
+
+/* Light mode syntax highlighting (Primer .pl-* classes) */
+.gsc-comment-content .pl-c, .markdown .pl-c { color: #6a737d !important; }          /* comment */
+.gsc-comment-content .pl-c1, .markdown .pl-c1 { color: #005cc5 !important; }       /* constant */
+.gsc-comment-content .pl-k, .markdown .pl-k { color: #d73a49 !important; }         /* keyword */
+.gsc-comment-content .pl-s, .markdown .pl-s { color: #032f62 !important; }         /* string */
+.gsc-comment-content .pl-smi, .markdown .pl-smi { color: #24292e !important; }     /* variable */
+.gsc-comment-content .pl-en, .markdown .pl-en { color: #6f42c1 !important; }       /* entity name */
+.gsc-comment-content .pl-v, .markdown .pl-v { color: #e36209 !important; }         /* variable */
+.gsc-comment-content .pl-ent, .markdown .pl-ent { color: #22863a !important; }     /* entity tag */
+.gsc-comment-content .pl-pds, .markdown .pl-pds { color: #032f62 !important; }     /* string punctuation */
+.gsc-comment-content .pl-e, .markdown .pl-e { color: #cb2431 !important; }         /* error */
+
+/* Dark mode syntax highlighting */
+[data-theme="dark"] .gsc-comment-content .pl-c,
+[data-theme="dark"] .markdown .pl-c { color: #8b949e !important; }
+[data-theme="dark"] .gsc-comment-content .pl-c1,
+[data-theme="dark"] .markdown .pl-c1 { color: #79c0ff !important; }
+[data-theme="dark"] .gsc-comment-content .pl-k,
+[data-theme="dark"] .markdown .pl-k { color: #ff7b72 !important; }
+[data-theme="dark"] .gsc-comment-content .pl-s,
+[data-theme="dark"] .markdown .pl-s { color: #a5d6ff !important; }
+[data-theme="dark"] .gsc-comment-content .pl-smi,
+[data-theme="dark"] .markdown .pl-smi { color: #c9d1d9 !important; }
+[data-theme="dark"] .gsc-comment-content .pl-en,
+[data-theme="dark"] .markdown .pl-en { color: #d2a8ff !important; }
+[data-theme="dark"] .gsc-comment-content .pl-v,
+[data-theme="dark"] .markdown .pl-v { color: #ffa657 !important; }
+[data-theme="dark"] .gsc-comment-content .pl-ent,
+[data-theme="dark"] .markdown .pl-ent { color: #7ee787 !important; }
+[data-theme="dark"] .gsc-comment-content .pl-pds,
+[data-theme="dark"] .markdown .pl-pds { color: #a5d6ff !important; }
+[data-theme="dark"] .gsc-comment-content .pl-e,
+[data-theme="dark"] .markdown .pl-e { color: #f85149 !important; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .gsc-comment-content .pl-c,
+  :root:not([data-theme="light"]) .markdown .pl-c { color: #8b949e !important; }
+  :root:not([data-theme="light"]) .gsc-comment-content .pl-c1,
+  :root:not([data-theme="light"]) .markdown .pl-c1 { color: #79c0ff !important; }
+  :root:not([data-theme="light"]) .gsc-comment-content .pl-k,
+  :root:not([data-theme="light"]) .markdown .pl-k { color: #ff7b72 !important; }
+  :root:not([data-theme="light"]) .gsc-comment-content .pl-s,
+  :root:not([data-theme="light"]) .markdown .pl-s { color: #a5d6ff !important; }
+  :root:not([data-theme="light"]) .gsc-comment-content .pl-smi,
+  :root:not([data-theme="light"]) .markdown .pl-smi { color: #c9d1d9 !important; }
+  :root:not([data-theme="light"]) .gsc-comment-content .pl-en,
+  :root:not([data-theme="light"]) .markdown .pl-en { color: #d2a8ff !important; }
+  :root:not([data-theme="light"]) .gsc-comment-content .pl-v,
+  :root:not([data-theme="light"]) .markdown .pl-v { color: #ffa657 !important; }
+  :root:not([data-theme="light"]) .gsc-comment-content .pl-ent,
+  :root:not([data-theme="light"]) .markdown .pl-ent { color: #7ee787 !important; }
+  :root:not([data-theme="light"]) .gsc-comment-content .pl-pds,
+  :root:not([data-theme="light"]) .markdown .pl-pds { color: #a5d6ff !important; }
+  :root:not([data-theme="light"]) .gsc-comment-content .pl-e,
+  :root:not([data-theme="light"]) .markdown .pl-e { color: #f85149 !important; }
+}
