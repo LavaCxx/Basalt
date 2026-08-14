@@ -259,13 +259,16 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
     // Exclude wishlist and paused items
     if (metadata.status === 'wishlist' || metadata.status === 'paused') continue;
 
-    // Show items with no endDate, or endDate within the last 90 days
     const endDateStr = metadata.endDate;
     if (endDateStr) {
+      // Completed items: only show if endDate is within the last 90 days
       const endDate = new Date(endDateStr);
       const ninetyDaysAgo = new Date();
       ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
       if (endDate < ninetyDaysAgo) continue;
+    } else {
+      // No endDate: only show items still in progress
+      if (metadata.status !== 'in_progress') continue;
     }
 
     const mediaType = metadata.mediaType;

@@ -77,15 +77,10 @@ function formatDate(date: Date): string {
                   {mediaTypeLabels[mediaType as keyof typeof mediaTypeLabels] || mediaType}
                 </span>
                 {item.date && (
-                  <span class="text-xs text-text-muted flex items-center gap-1">
-                    {(item as any).endDate ? (
-                      <span class="pixel-indicator">▢</span>
-                    ) : (
-                      <span class="pixel-indicator pixel-indicator-active">█</span>
-                    )}
+                  <span class="text-xs text-text-muted">
                     {item.endDate
                       ? `${formatDate(item.date)} → ${formatDate(item.endDate)}`
-                      : formatDate(item.date)}
+                      : `已进行 ${Math.floor((Date.now() - (item.date as Date).getTime()) / 86400000)} 天`}
                   </span>
                 )}
               </div>
