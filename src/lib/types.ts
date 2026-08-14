@@ -205,6 +205,15 @@ export interface CurrentItem {
   endDate?: Date;
 }
 
+export interface SteamGame {
+  id: number;
+  name: string;
+  cover: string;
+  url: string;
+  playtimeForeverMinutes: number;
+  playtimeTwoWeeksMinutes: number;
+}
+
 /**
  * Archive item for the archives page
  */

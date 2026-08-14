@@ -1,12 +1,14 @@
 ---
-import type { CurrentItem } from '../../lib/types';
+import type { CurrentItem, SteamGame } from '../../lib/types';
 import { getCurrentItems, initRuntime } from '../../lib/api';
 import { mockCurrentItems } from '../../lib/mock-data';
 import { mediaTypeLabels } from '../../lib/media-config';
+import { getSteamGames } from '../../lib/steam';
 
 interface Props {
   currentItems?: CurrentItem[];
   stats?: { articles?: number; photos?: number; microblogs?: number; media?: number };
+  steamGames?: SteamGame[];
 }
 
 // Inject Cloudflare runtime env if available
@@ -27,6 +29,15 @@ try {
 }
 
 currentItems = Astro.props.currentItems || currentItems;
+let steamGames: SteamGame[] = Astro.props.steamGames || [];
+if (!Astro.props.steamGames) {
+  const steamId = runtimeEnv?.STEAM_ID || import.meta.env.PUBLIC_STEAM_ID;
+  try {
+    steamGames = await getSteamGames(steamId, runtimeEnv?.STEAM_API_KEY);
+  } catch (error) {
+    console.error('Failed to fetch Steam games:', error);
+  }
+}
 const stats = Astro.props.stats || {};
 
 const typeLabels: Record<string, string> = {
@@ -40,6 +51,10 @@ function formatDate(date: Date): string {
   return date.getFullYear() === new Date().getFullYear()
     ? date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
     : date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function formatHours(minutes: number): string {
+  return minutes >= 60 ? `${Math.round(minutes / 60)} 小时` : `${minutes} 分钟`;
 }
 
 ---
@@ -106,6 +121,38 @@ function formatDate(date: Date): string {
       </div>
     </section>
   )}
+{steamGames.length > 0 && (
+  <section class="border-t border-border pt-5 mt-5">
+    <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
+      在玩
+    </h3>
+    <div class="space-y-3">
+      {steamGames.map((game) => (
+        <a
+          href={game.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group flex items-center gap-3"
+        >
+          <img
+            src={game.cover}
+            alt={game.name}
+            class="w-16 h-9 object-cover rounded-sm flex-shrink-0"
+            loading="lazy"
+          />
+          <div class="min-w-0 flex-1">
+            <p class="text-sm text-text-primary line-clamp-1 group-hover:underline">
+              {game.name}
+            </p>
+            <p class="text-xs text-text-muted truncate">
+              两周 {formatHours(game.playtimeTwoWeeksMinutes)} · 总计 {formatHours(game.playtimeForeverMinutes)}
+            </p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+)}
  <!-- Stats -->
  <section class="border-t border-border pt-5 mt-5">
    <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
