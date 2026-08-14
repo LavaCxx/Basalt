@@ -112,6 +112,8 @@ export interface MediaMetadata {
   creator?: string;
   /** Release year */
   year?: number;
+  /** End date for media consumption (ISO string) */
+  endDate?: string;
 }
 
 /**
@@ -199,8 +201,8 @@ export interface CurrentItem {
   author?: string;
   cover?: string;
   url?: string;
-  progress?: number; // 0-100 percentage
   date?: Date;
+  endDate?: Date;
 }
 
 /**

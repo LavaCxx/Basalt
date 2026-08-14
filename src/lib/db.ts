@@ -256,8 +256,17 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
 
   for (const row of result.results) {
     const metadata = row.metadata_json ? JSON.parse(row.metadata_json) : {};
-    // Only include items that are "in progress"
-    if (metadata.status !== 'in_progress') continue;
+    // Exclude wishlist and paused items
+    if (metadata.status === 'wishlist' || metadata.status === 'paused') continue;
+
+    // Show items with no endDate, or endDate within the last 90 days
+    const endDateStr = metadata.endDate;
+    if (endDateStr) {
+      const endDate = new Date(endDateStr);
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+      if (endDate < ninetyDaysAgo) continue;
+    }
 
     const mediaType = metadata.mediaType;
     let itemType: CurrentItem['type'];
@@ -276,6 +285,7 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
         itemType = 'watching';
     }
 
+
     currentItems.push({
       type: itemType,
       mediaType,
@@ -283,6 +293,7 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
       cover: row.image || undefined,
       date: new Date(row.date),
       url: row.url || undefined,
+      ...(endDateStr ? { endDate: new Date(endDateStr) } : {}),
     });
 
     if (currentItems.length >= 8) break;

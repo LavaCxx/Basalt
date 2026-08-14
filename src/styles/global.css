@@ -835,6 +835,30 @@ html::view-transition-group(root) {
   background-color: var(--color-background);
 }
 /* ===== 1-bit Dynamic Background ===== */
+.pixel-indicator {
+  display: inline-block;
+  font-family: var(--font-mono);
+  line-height: 1;
+  font-size: 0.625rem;
+  vertical-align: middle;
+}
+
+.pixel-indicator-active {
+  animation: pixel-blink 1s step-end infinite;
+}
+
+@keyframes pixel-blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-indicator-active {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 .onebit-bg-canvas {
   position: fixed;
   inset: 0;

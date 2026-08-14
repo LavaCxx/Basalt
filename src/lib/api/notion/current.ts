@@ -93,7 +93,7 @@ export async function fetchCurrentItems(options?: {
     const mediaType = mapMediaType(typeStr);
     const status = mapStatus(statusStr);
 
-    // Use start date, fallback to end date, fallback to page creation time
+    // Use start date as primary (for sorting), fallback to end date, fallback to page creation time
     const dateStr = startStr || endStr;
     const date = dateStr ? new Date(dateStr) : new Date((page as any).created_time);
 
@@ -101,6 +101,9 @@ export async function fetchCurrentItems(options?: {
       mediaType,
       status,
     };
+    if (endStr) {
+      metadata.endDate = endStr;
+    }
 
     return {
       id: page.id,

@@ -314,7 +314,6 @@ export const mockCurrentItems: CurrentItem[] = [
     title: '思考，快与慢',
     author: '丹尼尔·卡尼曼',
     cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100&q=80',
-    progress: 45,
     date: new Date('2025-02-15'),
   },
   {
@@ -322,8 +321,8 @@ export const mockCurrentItems: CurrentItem[] = [
     mediaType: 'tv',
     title: '幕府将军',
     cover: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=100&q=80',
-    progress: 60,
-    date: new Date('2025-02-12'),
+    date: new Date('2025-01-10'),
+    endDate: new Date('2025-02-08'),
   },
   {
     type: 'listening',
