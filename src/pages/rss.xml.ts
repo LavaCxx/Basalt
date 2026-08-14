@@ -40,7 +40,7 @@ export const GET: APIRoute = async (context) => {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Basalt</title>
+    <title>LavaC</title>
     <link>${escapeXml(site)}</link>
     <description>个人博客与内容聚合</description>
     <language>zh-CN</language>
