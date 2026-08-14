@@ -5,7 +5,7 @@
  * instead of making real-time API calls to third-party sources.
  */
 
-import type { FeedItem, FeedItemType, ContentSource, ArchiveGroup, ArchiveItem, CurrentItem } from './types';
+import type { FeedItem, FeedItemType, ContentSource, ArchiveGroup, ArchiveItem, CurrentItem, SteamSnapshot, SteamStatus } from './types';
 
 // ============================================================
 // D1 binding access
@@ -303,4 +303,33 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
   }
 
   return currentItems;
+}
+
+export async function querySteamSnapshot(): Promise<SteamSnapshot> {
+  const db = getDB();
+  const gameRows = await db
+    .prepare('SELECT * FROM steam_games ORDER BY display_order ASC')
+    .all();
+  const stateRow = await db
+    .prepare('SELECT * FROM steam_state WHERE id = 1')
+    .first();
+
+  const status: SteamStatus = {
+    online: Boolean(stateRow?.online),
+    currentGameId: stateRow?.current_game_id ?? undefined,
+    currentGameName: stateRow?.current_game_name ?? undefined,
+    avatar: stateRow?.avatar ?? undefined,
+  };
+
+  return {
+    games: gameRows.results.map((row: any) => ({
+      id: row.appid,
+      name: row.name,
+      cover: row.cover,
+      url: row.url,
+      playtimeForeverMinutes: row.playtime_forever_minutes,
+      playtimeTwoWeeksMinutes: row.playtime_two_weeks_minutes,
+    })),
+    status,
+  };
 }

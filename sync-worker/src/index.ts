@@ -9,7 +9,7 @@
  */
 
 import { setRuntimeEnv } from '../../src/lib/api/env';
-import { syncNotionArticles, syncNotionPhotos, syncTelegram, syncDouban, syncNotionCurrent } from './sync';
+import { syncNotionArticles, syncNotionPhotos, syncTelegram, syncDouban, syncNotionCurrent, syncSteam } from './sync';
 
 export interface Env {
   DB: D1Database;
@@ -23,6 +23,8 @@ export interface Env {
   RSSHUB_INSTANCE?: string;
   // Douban
   DOUBAN_USER_RSS?: string;
+  STEAM_ID?: string;
+  STEAM_API_KEY?: string;
 }
 
 /**
@@ -62,6 +64,9 @@ export default {
     }
     if (env.DOUBAN_USER_RSS) {
       sources.push({ name: 'douban', fn: () => syncDouban(env.DB, envRecord) });
+    }
+    if (env.STEAM_ID && env.STEAM_API_KEY) {
+      sources.push({ name: 'steam', fn: () => syncSteam(env.DB, envRecord) });
     }
 
     // Run all syncs in parallel (they write to different item types)
@@ -114,6 +119,9 @@ export default {
     }
     if (env.DOUBAN_USER_RSS) {
       sources.push({ name: 'douban', fn: () => syncDouban(env.DB, envRecord) });
+    }
+    if (env.STEAM_ID && env.STEAM_API_KEY) {
+      sources.push({ name: 'steam', fn: () => syncSteam(env.DB, envRecord) });
     }
 
     await Promise.allSettled(

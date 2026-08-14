@@ -1,14 +1,14 @@
 ---
 import type { CurrentItem, SteamStatus, SteamGame } from '../../lib/types';
-import { getCurrentItems, initRuntime } from '../../lib/api';
+import { getCurrentItems, getSteamSnapshot, initRuntime } from '../../lib/api';
 import { mockCurrentItems } from '../../lib/mock-data';
 import { mediaTypeLabels } from '../../lib/media-config';
-import { getSteamGames, getSteamStatus } from '../../lib/steam';
 
 interface Props {
   currentItems?: CurrentItem[];
   stats?: { articles?: number; photos?: number; microblogs?: number; media?: number };
   steamGames?: SteamGame[];
+  steamSnapshot?: SteamSnapshot;
 }
 
 // Inject Cloudflare runtime env if available
@@ -31,14 +31,13 @@ try {
 currentItems = Astro.props.currentItems || currentItems;
 let steamGames: SteamGame[] = Astro.props.steamGames || [];
 let steamStatus: SteamStatus = { online: false };
-if (!Astro.props.steamGames) {
-  const steamId = runtimeEnv?.STEAM_ID || import.meta.env.PUBLIC_STEAM_ID;
-  try {
-    steamGames = await getSteamGames(steamId, runtimeEnv?.STEAM_API_KEY);
-    steamStatus = await getSteamStatus(steamId, runtimeEnv?.STEAM_API_KEY);
-  } catch (error) {
-    console.error('Failed to fetch Steam games:', error);
-  }
+if (Astro.props.steamSnapshot) {
+  steamGames = Astro.props.steamSnapshot.games;
+  steamStatus = Astro.props.steamSnapshot.status;
+} else {
+  const snapshot = await getSteamSnapshot();
+  steamGames = snapshot.games;
+  steamStatus = snapshot.status;
 }
 const orderedSteamGames = [...steamGames].sort((game, otherGame) =>
   isCurrentSteamGame(game, steamStatus) ? -1 : isCurrentSteamGame(otherGame, steamStatus) ? 1 : 0

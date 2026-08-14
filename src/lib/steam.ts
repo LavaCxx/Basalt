@@ -36,6 +36,10 @@ export function getDemoSteamGames(): SteamGame[] {
   return demoGames;
 }
 
+export function getDemoSteamSnapshot(): { games: SteamGame[]; status: SteamStatus } {
+  return { games: demoGames, status: demoStatus };
+}
+
 interface SteamApiPlayer {
   personastate?: number;
   gameid?: string;

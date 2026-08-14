@@ -221,6 +221,11 @@ export interface SteamStatus {
   avatar?: string;
 }
 
+export interface SteamSnapshot {
+  games: SteamGame[];
+  status: SteamStatus;
+}
+
 /**
  * Archive item for the archives page
  */

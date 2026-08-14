@@ -7,6 +7,8 @@
 
 import type { FeedItem, ArchiveGroup, CurrentItem } from '../types';
 import { mockFeedItems, mockArchiveGroups, mockCurrentItems } from '../mock-data';
+import { getDemoSteamSnapshot } from '../steam';
+import type { SteamSnapshot } from '../types';
 
 import {
   setRuntimeDB,
@@ -17,6 +19,7 @@ import {
   queryArchiveGroups,
   queryPhotosByYear,
   queryCurrentItems,
+  querySteamSnapshot,
 } from '../db';
 
 // Re-export env utilities (still needed for Notion client used in sync worker)
@@ -154,6 +157,21 @@ export async function getCurrentItems(): Promise<CurrentItem[]> {
   } catch (error) {
     console.error('Error fetching current items:', error);
     return import.meta.env.DEV ? mockCurrentItems : [];
+  }
+}
+
+export async function getSteamSnapshot(): Promise<SteamSnapshot> {
+  if (!isDBAvailable()) {
+    return import.meta.env.DEV ? getDemoSteamSnapshot() : { games: [], status: { online: false } };
+  }
+
+  try {
+    return await querySteamSnapshot();
+  } catch (error) {
+    console.error('Error fetching Steam snapshot from D1:', error);
+    return import.meta.env.DEV
+      ? getDemoSteamSnapshot()
+      : { games: [], status: { online: false } };
   }
 }
 

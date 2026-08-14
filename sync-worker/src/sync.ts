@@ -8,6 +8,7 @@ import { fetchArticles, fetchArticle } from '../../src/lib/api/notion/articles';
 import { fetchPhotos } from '../../src/lib/api/notion/photos';
 import { getAllTelegramMessages } from '../../src/lib/api/telegram';
 import { fetchDoubanFeed } from '../../src/lib/api/rss';
+import { getSteamGames, getSteamStatus } from '../../src/lib/steam';
 import { calculateReadingTime } from '../../src/lib/api/notion/blocks-to-html';
 import type { FeedItem } from '../../src/lib/types';
 
@@ -160,4 +161,76 @@ export async function syncNotionCurrent(db: D1Database, env: Record<string, stri
     }
   }
   await updateSyncState(db, 'notion:current', null);
+}
+
+export async function syncSteam(db: D1Database, env: Record<string, string>): Promise<void> {
+  const steamId = env.STEAM_ID;
+  const apiKey = env.STEAM_API_KEY;
+  if (!steamId || !apiKey) {
+    throw new Error('Steam sync requires STEAM_ID and STEAM_API_KEY');
+  }
+
+  const [games, status] = await Promise.all([
+    getSteamGames(steamId, apiKey),
+    getSteamStatus(steamId, apiKey),
+  ]);
+
+  for (const [index, game] of games.entries()) {
+    await db
+      .prepare(
+        `INSERT INTO steam_games (
+           appid, name, cover, url, playtime_forever_minutes,
+           playtime_two_weeks_minutes, display_order, updated_at
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+         ON CONFLICT(appid) DO UPDATE SET
+           name = excluded.name,
+           cover = excluded.cover,
+           url = excluded.url,
+           playtime_forever_minutes = excluded.playtime_forever_minutes,
+           playtime_two_weeks_minutes = excluded.playtime_two_weeks_minutes,
+           display_order = excluded.display_order,
+           updated_at = excluded.updated_at`
+      )
+      .bind(
+        game.id,
+        game.name,
+        game.cover,
+        game.url,
+        game.playtimeForeverMinutes,
+        game.playtimeTwoWeeksMinutes,
+        index
+      )
+      .run();
+  }
+
+  if (games.length > 0) {
+    const appIds = games.map((game) => game.id);
+    const placeholders = appIds.map(() => '?').join(',');
+    await db
+      .prepare(`DELETE FROM steam_games WHERE appid NOT IN (${placeholders})`)
+      .bind(...appIds)
+      .run();
+  }
+
+  await db
+    .prepare(
+      `INSERT INTO steam_state (
+         id, online, current_game_id, current_game_name, avatar, synced_at
+       ) VALUES (1, ?, ?, ?, ?, datetime('now'))
+       ON CONFLICT(id) DO UPDATE SET
+         online = excluded.online,
+         current_game_id = excluded.current_game_id,
+         current_game_name = excluded.current_game_name,
+         avatar = excluded.avatar,
+         synced_at = excluded.synced_at`
+    )
+    .bind(
+      status.online ? 1 : 0,
+      status.currentGameId ?? null,
+      status.currentGameName ?? null,
+      status.avatar ?? null
+    )
+    .run();
+
+  await updateSyncState(db, 'steam', null);
 }
