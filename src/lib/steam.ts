@@ -1,9 +1,8 @@
-import type { SteamGame } from './types';
+import type { SteamDemoStatus, SteamGame } from './types';
 
 interface SteamApiGame {
   appid: number;
   name: string;
-  img_logo_url?: string;
   playtime_forever?: number;
   playtime_2weeks?: number;
 }
@@ -27,8 +26,17 @@ const demoGames: SteamGame[] = [
   },
 ];
 
+const demoStatus: SteamDemoStatus = {
+  online: true,
+  currentGameName: 'RimWorld',
+};
+
 export function getDemoSteamGames(): SteamGame[] {
   return demoGames;
+}
+
+export function getDemoSteamStatus(): SteamDemoStatus {
+  return demoStatus;
 }
 
 export async function getSteamGames(
@@ -56,11 +64,10 @@ export async function getSteamGames(
   const data = (await response.json()) as { response?: { games?: SteamApiGame[] } };
   return (data.response?.games || [])
     .slice(0, 3)
-    .filter((game) => game.img_logo_url)
     .map((game) => ({
       id: game.appid,
       name: game.name,
-      cover: `https://media.steampowered.com/steamcommunity/public/images/apps/${game.appid}/${game.img_logo_url}.jpg`,
+      cover: `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${game.appid}/header.jpg`,
       url: `https://store.steampowered.com/app/${game.appid}`,
       playtimeForeverMinutes: game.playtime_forever || 0,
       playtimeTwoWeeksMinutes: game.playtime_2weeks || 0,

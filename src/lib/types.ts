@@ -214,6 +214,12 @@ export interface SteamGame {
   playtimeTwoWeeksMinutes: number;
 }
 
+export interface SteamDemoStatus {
+  online: boolean;
+  currentGameName?: string;
+  avatar?: string;
+}
+
 /**
  * Archive item for the archives page
  */
