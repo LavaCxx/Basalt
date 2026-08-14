@@ -1,9 +1,9 @@
 ---
-import type { CurrentItem, SteamDemoStatus, SteamGame } from '../../lib/types';
+import type { CurrentItem, SteamStatus, SteamGame } from '../../lib/types';
 import { getCurrentItems, initRuntime } from '../../lib/api';
 import { mockCurrentItems } from '../../lib/mock-data';
 import { mediaTypeLabels } from '../../lib/media-config';
-import { getDemoSteamStatus, getSteamGames } from '../../lib/steam';
+import { getSteamGames, getSteamStatus } from '../../lib/steam';
 
 interface Props {
   currentItems?: CurrentItem[];
@@ -30,21 +30,19 @@ try {
 
 currentItems = Astro.props.currentItems || currentItems;
 let steamGames: SteamGame[] = Astro.props.steamGames || [];
-const isSteamDemo = import.meta.env.DEV;
-const steamDemoStatus = getDemoSteamStatus();
+let steamStatus: SteamStatus = { online: false };
 if (!Astro.props.steamGames) {
   const steamId = runtimeEnv?.STEAM_ID || import.meta.env.PUBLIC_STEAM_ID;
   try {
     steamGames = await getSteamGames(steamId, runtimeEnv?.STEAM_API_KEY);
+    steamStatus = await getSteamStatus(steamId, runtimeEnv?.STEAM_API_KEY);
   } catch (error) {
     console.error('Failed to fetch Steam games:', error);
   }
 }
-const orderedSteamGames = isSteamDemo
-  ? [...steamGames].sort((game, otherGame) =>
-      game.name === steamDemoStatus.currentGameName ? -1 : otherGame.name === steamDemoStatus.currentGameName ? 1 : 0
-    )
-  : steamGames;
+const orderedSteamGames = [...steamGames].sort((game, otherGame) =>
+  isCurrentSteamGame(game, steamStatus) ? -1 : isCurrentSteamGame(otherGame, steamStatus) ? 1 : 0
+);
 const stats = Astro.props.stats || {};
 
 const typeLabels: Record<string, string> = {
@@ -64,8 +62,10 @@ function formatHours(minutes: number): string {
   return minutes >= 60 ? `${Math.round(minutes / 60)} 小时` : `${minutes} 分钟`;
 }
 
-function isCurrentSteamGame(game: SteamGame, status: SteamDemoStatus): boolean {
-  return Boolean(status.currentGameName && game.name === status.currentGameName);
+function isCurrentSteamGame(game: SteamGame, status: SteamStatus): boolean {
+  return status.currentGameId === game.id || Boolean(
+    status.currentGameName && game.name === status.currentGameName
+  );
 }
 
 ---
@@ -153,10 +153,10 @@ function isCurrentSteamGame(game: SteamGame, status: SteamDemoStatus): boolean {
           />
           <div class="min-w-0 flex-1">
             <div class="flex min-w-0 items-center gap-2">
-              <p class={`text-sm line-clamp-1 group-hover:underline ${isSteamDemo && isCurrentSteamGame(game, steamDemoStatus) ? 'text-[#6cc644]' : 'text-text-primary'}`}>
+              <p class={`text-sm line-clamp-1 group-hover:underline ${isCurrentSteamGame(game, steamStatus) ? 'text-[#6cc644]' : 'text-text-primary'}`}>
                 {game.name}
               </p>
-              {isSteamDemo && isCurrentSteamGame(game, steamDemoStatus) && (
+              {isCurrentSteamGame(game, steamStatus) && (
                 <span class="flex-shrink-0 text-xs text-[#6cc644]">正在玩</span>
               )}
             </div>

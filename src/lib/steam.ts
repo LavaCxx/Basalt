@@ -1,4 +1,4 @@
-import type { SteamDemoStatus, SteamGame } from './types';
+import type { SteamStatus, SteamGame } from './types';
 
 interface SteamApiGame {
   appid: number;
@@ -26,8 +26,9 @@ const demoGames: SteamGame[] = [
   },
 ];
 
-const demoStatus: SteamDemoStatus = {
+const demoStatus: SteamStatus = {
   online: true,
+  currentGameId: 632360,
   currentGameName: 'RimWorld',
 };
 
@@ -35,9 +36,14 @@ export function getDemoSteamGames(): SteamGame[] {
   return demoGames;
 }
 
-export function getDemoSteamStatus(): SteamDemoStatus {
-  return demoStatus;
+interface SteamApiPlayer {
+  personastate?: number;
+  gameid?: string;
+  gameextrainfo?: string;
+  avatarmedium?: string;
 }
+
+let steamStatusCache: { data: SteamStatus; expiresAt: number } | null = null;
 
 export async function getSteamGames(
   steamId: string | undefined,
@@ -72,4 +78,38 @@ export async function getSteamGames(
       playtimeForeverMinutes: game.playtime_forever || 0,
       playtimeTwoWeeksMinutes: game.playtime_2weeks || 0,
     }));
+}
+
+export async function getSteamStatus(
+  steamId: string | undefined,
+  apiKey?: string
+): Promise<SteamStatus> {
+  if (!steamId || !apiKey) {
+    return import.meta.env.DEV ? demoStatus : { online: false };
+  }
+  if (steamStatusCache && steamStatusCache.expiresAt > Date.now()) {
+    return steamStatusCache.data;
+  }
+
+  const params = new URLSearchParams({
+    key: apiKey,
+    steamids: steamId,
+    format: 'json',
+  });
+  const response = await fetch(
+    `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?${params.toString()}`,
+    { headers: { Accept: 'application/json' } }
+  );
+  if (!response.ok) throw new Error(`Steam player API responded with ${response.status}`);
+
+  const data = (await response.json()) as { response?: { players?: SteamApiPlayer[] } };
+  const player = data.response?.players?.[0];
+  const status: SteamStatus = {
+    online: Boolean(player?.gameextrainfo || (player?.personastate && player.personastate > 0)),
+    currentGameId: player?.gameid ? Number(player.gameid) : undefined,
+    currentGameName: player?.gameextrainfo,
+    avatar: player?.avatarmedium,
+  };
+  steamStatusCache = { data: status, expiresAt: Date.now() + 60_000 };
+  return status;
 }

@@ -214,8 +214,9 @@ export interface SteamGame {
   playtimeTwoWeeksMinutes: number;
 }
 
-export interface SteamDemoStatus {
+export interface SteamStatus {
   online: boolean;
+  currentGameId?: number;
   currentGameName?: string;
   avatar?: string;
 }
