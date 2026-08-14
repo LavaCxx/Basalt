@@ -246,7 +246,7 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
   const result = await db
     .prepare(
       `SELECT * FROM items
-       WHERE type = 'media'
+       WHERE type = 'media' AND source = 'notion'
        ORDER BY date DESC
        LIMIT 50`
     )
