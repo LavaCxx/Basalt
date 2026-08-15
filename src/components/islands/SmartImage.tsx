@@ -39,7 +39,11 @@ export default function SmartImage(props: SmartImageProps) {
       classList={props.classList}
       data-natural-sizing={props.naturalSizing ? 'true' : undefined}
     >
-      <span class={`smart-image-placeholder smart-image-${state()}`} aria-hidden="true">
+      <span
+        class="smart-image-placeholder"
+        classList={{ 'smart-image-loading': state() === 'loading', 'smart-image-error': state() === 'error' }}
+        aria-hidden="true"
+      >
         <Show when={state() === 'loading'}>
           <span class="smart-image-glyph">▤</span>
           <span class="smart-image-label">SCANNING</span>
@@ -80,7 +84,8 @@ export default function SmartImage(props: SmartImageProps) {
       <img
         src={props.src || undefined}
         alt={props.alt}
-        class={`smart-image-img smart-image-${state()}`}
+        class="smart-image-img"
+        classList={{ 'smart-image-loading': state() === 'loading', 'smart-image-loaded': state() === 'loaded', 'smart-image-error': state() === 'error' }}
         loading={props.loading || 'lazy'}
         decoding={props.loading === 'eager' ? 'sync' : 'async'}
         width={props.width}
