@@ -277,6 +277,16 @@ body {
   transition: opacity 0.2s ease-out;
 }
 
+.smart-image[data-natural-sizing='true'] {
+  aspect-ratio: auto;
+}
+
+.smart-image[data-natural-sizing='true'] .smart-image-img {
+  position: static;
+  width: auto;
+  height: auto;
+}
+
 .smart-image > *:not(.smart-image-placeholder):not(img) {
   position: relative;
   z-index: 2;

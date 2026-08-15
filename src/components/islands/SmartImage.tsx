@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show, type JSX } from 'solid-js';
+import { createSignal, Show, type JSX } from 'solid-js';
 
 interface SmartImageProps {
   src?: string | null;
@@ -9,6 +9,7 @@ interface SmartImageProps {
   width?: number | string;
   height?: number | string;
   children?: JSX.Element;
+  naturalSizing?: boolean;
 }
 
 export default function SmartImage(props: SmartImageProps) {
@@ -17,14 +18,17 @@ export default function SmartImage(props: SmartImageProps) {
   );
   let imageRef: HTMLImageElement | undefined;
 
-  onMount(() => {
-    if (imageRef?.complete) {
-      setState(imageRef.naturalWidth > 0 ? 'loaded' : 'error');
-    }
-  });
+  const syncImageState = () => {
+    if (!imageRef) return;
+    setState(imageRef.complete ? (imageRef.naturalWidth > 0 ? 'loaded' : 'error') : 'loading');
+  };
 
   return (
-    <span class={`smart-image ${props.class || ''}`} classList={props.classList}>
+    <span
+      class={`smart-image ${props.class || ''}`}
+      classList={props.classList}
+      data-natural-sizing={props.naturalSizing ? 'true' : undefined}
+    >
       <Show when={state() !== 'loaded'}>
         <span class={`smart-image-placeholder smart-image-${state()}`} aria-hidden="true">
           <Show when={state() === 'loading'}>
@@ -77,6 +81,10 @@ export default function SmartImage(props: SmartImageProps) {
           height={props.height}
           onLoad={() => setState('loaded')}
           onError={() => setState('error')}
+          ref={(node) => {
+            imageRef = node;
+            syncImageState();
+          }}
         />
       </Show>
       {props.children}

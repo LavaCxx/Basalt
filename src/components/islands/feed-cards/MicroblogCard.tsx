@@ -47,6 +47,7 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
                 src={photo.thumbnail}
                 alt={photo.alt}
                 class="rounded"
+                naturalSizing
                 classList={{ 'max-w-xs': photos().length === 1, 'w-24 h-24': photos().length > 1 }}
               />
             )}

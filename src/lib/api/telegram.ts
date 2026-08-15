@@ -34,6 +34,10 @@ export async function fetchViaRSSHub(options?: {
   // Extract channel name from feed title (e.g., "环形废墟 - Telegram Channel")
   const feedTitle = feed.title || '';
   const channelName = feedTitle.replace(/ - Telegram Channel$/i, '').trim() || TELEGRAM_CHANNEL_USERNAME;
+  const currentImages = await fetchCurrentTelegramImages(TELEGRAM_CHANNEL_USERNAME).catch((error) => {
+    console.warn('Failed to refresh Telegram image URLs:', error);
+    return new Map<string, string[]>();
+  });
 
   const items: FeedItem[] = feed.items
     .slice(0, options?.limit || 50)
@@ -42,13 +46,14 @@ export async function fetchViaRSSHub(options?: {
       const date = item.pubDate || item.isoDate ? new Date(item.pubDate || item.isoDate!) : new Date();
 
       // Extract images from content
-      const imgMatch = (item.content || '').match(/<img[^>]+src=["']([^"']+)["']/i);
-      const image = imgMatch ? imgMatch[1] : undefined;
+      const images = currentImages.get(item.link) ||
+        [...(item.content || '').matchAll(/<img[^>]+src=["']([^"']+)["']/gi)].map((match) => match[1]);
+      const image = images[0];
 
       // Extract attachments
       const attachments: MediaAttachment[] = [];
-      if (image) {
-        attachments.push({ type: 'image', url: image });
+      for (const imageUrl of images) {
+        attachments.push({ type: 'image', url: imageUrl });
       }
 
       const metadata: MicroblogMetadata = {
@@ -70,6 +75,43 @@ export async function fetchViaRSSHub(options?: {
     });
 
   return items;
+}
+
+async function fetchCurrentTelegramImages(channelUsername: string): Promise<Map<string, string[]>> {
+  const response = await fetch(`https://t.me/s/${channelUsername}`, {
+    headers: {
+      'User-Agent':
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      Accept: 'text/html,application/xhtml+xml',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Telegram returned HTTP ${response.status}`);
+  }
+
+  const html = await response.text();
+  const imagesByMessage = new Map<string, string[]>();
+  const messagePattern = /<div[^>]+data-post="[^"]+"[\s\S]*?(?=<div[^>]+data-post=|<\/body>|$)/gi;
+  const messages = html.match(messagePattern) || [];
+
+  for (const message of messages) {
+    const messageUrl = message.match(/data-post="([^"]+)"/i)?.[1];
+    if (!messageUrl) continue;
+
+    const images = [
+      ...message.matchAll(/background-image:url\('([^']+)'\)/gi),
+      ...message.matchAll(/<img[^>]+src="([^"]+)"/gi),
+    ]
+      .map((match) => match[1])
+      .filter((url) => /^https:\/\/cdn\d+\.telesco\.pe\//i.test(url));
+
+    if (images.length > 0) {
+      imagesByMessage.set(`https://${messageUrl}`, [...new Set(images)]);
+    }
+  }
+
+  return imagesByMessage;
 }
 
 /**

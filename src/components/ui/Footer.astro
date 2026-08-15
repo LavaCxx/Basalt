@@ -1,11 +1,6 @@
 ---
 const currentYear = new Date().getFullYear();
 
-const links = [
-  { label: 'GitHub', href: 'https://github.com' },
-  { label: 'Twitter', href: 'https://twitter.com' },
-  { label: '订阅', href: '/rss.xml' },
-];
 ---
 
 <footer class="border-t border-border bg-background">
@@ -16,24 +11,11 @@ const links = [
         &copy; {currentYear} LavaC. 保留所有权利.
       </p>
 
-      <!-- Links -->
-      <nav class="flex items-center gap-6">
-        {links.map((link) => (
-          <a
-            href={link.href}
-            class="text-sm text-text-secondary hover:text-text-primary transition-colors"
-            target={link.href.startsWith('http') ? '_blank' : undefined}
-            rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-          >
-            {link.label}
-          </a>
-        ))}
-      </nav>
     </div>
 
     <!-- Built with -->
     <p class="mt-4 text-center text-xs text-text-muted">
-      由 <a href="https://astro.build" class="hover:underline" target="_blank" rel="noopener noreferrer">Astro</a> 与 <a href="https://tailwindcss.com" class="hover:underline" target="_blank" rel="noopener noreferrer">Tailwind CSS</a> 驱动
+      由 <a href="https://astro.build" class="hover:underline" target="_blank" rel="noopener noreferrer">Astro</a> 与 <a href="https://solidjs.com" class="hover:underline" target="_blank" rel="noopener noreferrer">SolidJS</a> 驱动
     </p>
   </div>
 </footer>
