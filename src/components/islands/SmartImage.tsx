@@ -74,7 +74,6 @@ export default function SmartImage(props: SmartImageProps) {
           src={props.src || undefined}
           alt={props.alt}
           class={`smart-image-img smart-image-${state()}`}
-          ref={imageRef}
           loading={props.loading || 'lazy'}
           decoding={props.loading === 'eager' ? 'sync' : 'async'}
           width={props.width}

@@ -46,14 +46,35 @@ export async function fetchViaRSSHub(options?: {
       const date = item.pubDate || item.isoDate ? new Date(item.pubDate || item.isoDate!) : new Date();
 
       // Extract images from content
-      const images = currentImages.get(item.link) ||
-        [...(item.content || '').matchAll(/<img[^>]+src=["']([^"']+)["']/gi)].map((match) => match[1]);
-      const image = images[0];
+      const imageMatches = [...(item.content || '').matchAll(/<img[^>]+>/gi)];
+      const rssImages = imageMatches.map((match) => {
+        const tag = match[0];
+        const url = tag.match(/src=["']([^"']+)["']/i)?.[1];
+        const width = Number(tag.match(/\bwidth=["']([^"']+)["']/i)?.[1]);
+        const height = Number(tag.match(/\bheight=["']([^"']+)["']/i)?.[1]);
+
+        return {
+          url,
+          width: Number.isFinite(width) ? width : undefined,
+          height: Number.isFinite(height) ? height : undefined,
+        };
+      }).filter((image): image is { url: string; width?: number; height?: number } => !!image.url);
+      const refreshedImages = currentImages.get(item.link);
+      const images = refreshedImages?.map((url, index) => {
+        const rssImage = rssImages.find((image) => image.url === url) || rssImages[index];
+        return { ...rssImage, url };
+      }) || rssImages;
+      const image = images[0]?.url;
 
       // Extract attachments
       const attachments: MediaAttachment[] = [];
-      for (const imageUrl of images) {
-        attachments.push({ type: 'image', url: imageUrl });
+      for (const imageInfo of images) {
+        attachments.push({
+          type: 'image',
+          url: imageInfo.url,
+          width: imageInfo.width,
+          height: imageInfo.height,
+        });
       }
 
       const metadata: MicroblogMetadata = {

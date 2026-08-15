@@ -9,6 +9,8 @@ interface PhotoItem {
   src: string;
   thumbnail: string;
   alt: string;
+  width?: number;
+  height?: number;
 }
 
 function getPhotoItems(item: MicroblogFeedItem): PhotoItem[] {
@@ -16,12 +18,27 @@ function getPhotoItems(item: MicroblogFeedItem): PhotoItem[] {
   const photoItems: PhotoItem[] = [];
 
   if (item.image) {
-    photoItems.push({ id: `${item.id}-main`, src: item.image, thumbnail: item.image, alt: item.title || '' });
+    const mainAttachment = attachments.find((attachment) => attachment.type === 'image' && attachment.url === item.image);
+    photoItems.push({
+      id: `${item.id}-main`,
+      src: item.image,
+      thumbnail: item.image,
+      alt: item.title || '',
+      width: mainAttachment?.width,
+      height: mainAttachment?.height,
+    });
   }
 
   for (const att of attachments) {
     if (att.type === 'image' && att.url && !photoItems.some((p) => p.src === att.url)) {
-      photoItems.push({ id: `${item.id}-${att.url.slice(-10)}`, src: att.url, thumbnail: att.thumbnail || att.url, alt: att.alt || '' });
+      photoItems.push({
+        id: `${item.id}-${att.url.slice(-10)}`,
+        src: att.url,
+        thumbnail: att.thumbnail || att.url,
+        alt: att.alt || '',
+        width: att.width,
+        height: att.height,
+      });
     }
   }
 
@@ -47,7 +64,9 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
                 src={photo.thumbnail}
                 alt={photo.alt}
                 class="rounded"
-                naturalSizing
+                naturalSizing={photos().length === 1}
+                width={photo.width}
+                height={photo.height}
                 classList={{ 'max-w-xs': photos().length === 1, 'w-24 h-24': photos().length > 1 }}
               />
             )}

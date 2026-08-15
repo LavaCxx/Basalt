@@ -91,6 +91,8 @@ export interface MediaAttachment {
   type: 'image' | 'video' | 'link';
   url: string;
   thumbnail?: string;
+  width?: number;
+  height?: number;
   alt?: string;
 }
 
