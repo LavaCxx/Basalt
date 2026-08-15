@@ -35,13 +35,17 @@ export default function SmartImage(props: SmartImageProps) {
 
   return (
     <span
-      class={`smart-image ${props.class || ''}`}
+      class={props.class || ''}
       classList={props.classList}
       data-natural-sizing={props.naturalSizing ? 'true' : undefined}
     >
       <span
         class="smart-image-placeholder"
-        classList={{ 'smart-image-loading': state() === 'loading', 'smart-image-error': state() === 'error' }}
+        classList={{
+          'smart-image-loading': state() === 'loading',
+          'smart-image-error': state() === 'error',
+          'smart-image-loaded': state() === 'loaded',
+        }}
         aria-hidden="true"
       >
         <Show when={state() === 'loading'}>

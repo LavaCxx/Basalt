@@ -253,10 +253,8 @@ body {
   animation: smart-image-scan 1.2s steps(4, end) infinite;
 }
 
-.smart-image-loaded .smart-image-placeholder {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
+.smart-image-placeholder.smart-image-loaded {
+  display: none;
 }
 
 .smart-image-img {
