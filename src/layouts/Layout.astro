@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { ViewTransitions } from 'astro:transitions';
+import { ClientRouter } from 'astro:transitions';
 import ThemeToggle from '../components/islands/ThemeToggle';
 import OneBitBackground from '../components/islands/OneBitBackground';
 import Footer from '../components/ui/Footer.astro';
@@ -46,7 +46,7 @@ const fullTitle = title === 'LavaC' ? title : `${title} | LavaC`;
     {indieauthGithub && <link rel="me" href={indieauthGithub} />}
 
     <!-- View Transitions for smooth page navigation -->
-    <ViewTransitions />
+    <ClientRouter />
   </head>
   <body class="min-h-screen bg-background text-text-primary font-ui antialiased">
     <!-- Theme Toggle - Client-side only -->
