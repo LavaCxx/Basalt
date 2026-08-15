@@ -5,6 +5,7 @@
 
 import { Show, onMount, onCleanup } from 'solid-js';
 import { isServer } from 'solid-js/web';
+import SmartImage from './SmartImage';
 
 export interface LightboxPhoto {
   src: string;
@@ -98,9 +99,10 @@ export default function Lightbox(props: LightboxProps) {
         </Show>
 
         <div class="flex flex-col items-center max-w-[90vw] max-h-[90vh]">
-          <img
+          <SmartImage
             src={photo()?.src}
             alt={photo()?.alt || ''}
+            loading="eager"
             class="max-h-[75vh] max-w-full object-contain"
           />
 

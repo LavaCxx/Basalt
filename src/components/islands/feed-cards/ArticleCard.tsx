@@ -1,6 +1,7 @@
 import { Show } from 'solid-js';
 import type { ArticleFeedItem } from '../../../lib/types';
 import SourceBadge from '../SourceBadge';
+import SmartImage from '../SmartImage';
 import { formatDate } from './formatDate';
 
 export default function ArticleCard(props: { item: ArticleFeedItem }) {
@@ -16,7 +17,7 @@ export default function ArticleCard(props: { item: ArticleFeedItem }) {
       <div class="flex gap-4">
         <Show when={item().image}>
           <a href={item().url || '#'} class="block flex-shrink-0">
-            <img src={item().image!} alt={item().title || ''} class="w-32 h-24 rounded-lg object-cover" loading="lazy" />
+            <SmartImage src={item().image} alt={item().title || ''} class="rounded-lg w-32 h-24" />
           </a>
         </Show>
         <div class="flex-1 min-w-0">

@@ -1,6 +1,7 @@
 import { Show, For } from 'solid-js';
 import type { MicroblogFeedItem } from '../../../lib/types';
 import SourceBadge from '../SourceBadge';
+import SmartImage from '../SmartImage';
 import { formatDate } from './formatDate';
 
 interface PhotoItem {
@@ -42,12 +43,11 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
         <div class="mt-3 flex gap-1">
           <For each={photos().slice(0, 3)}>
             {(photo) => (
-              <img
+              <SmartImage
                 src={photo.thumbnail}
                 alt={photo.alt}
-                class="rounded object-cover"
+                class="rounded"
                 classList={{ 'max-w-xs': photos().length === 1, 'w-24 h-24': photos().length > 1 }}
-                loading="lazy"
               />
             )}
           </For>

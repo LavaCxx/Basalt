@@ -13,6 +13,7 @@ import ArticleContent from '../../components/islands/ArticleContent';
 import TableOfContents from '../../components/islands/TableOfContents';
 import Comments from '../../components/islands/Comments';
 import Webmentions from '../../components/islands/Webmentions';
+import SmartImage from '../../components/islands/SmartImage';
 
 // Initialize D1 binding from Cloudflare runtime env
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
@@ -65,7 +66,7 @@ const readingTime = (metadata as any)?.readingTime || 5;
       {/* Cover Image */}
       {image && (
         <figure class="article-cover">
-          <img src={image} alt={title} loading="eager" />
+          <SmartImage src={image} alt={title} loading="eager" class="rounded-md w-full aspect-video" client:load />
         </figure>
       )}
 

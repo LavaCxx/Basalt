@@ -3,6 +3,7 @@ import type { CurrentItem, SteamStatus, SteamGame } from '../../lib/types';
 import { getCurrentItems, getSteamSnapshot, initRuntime } from '../../lib/api';
 import { mockCurrentItems } from '../../lib/mock-data';
 import { mediaTypeLabels } from '../../lib/media-config';
+import SmartImage from '../islands/SmartImage';
 
 interface Props {
   currentItems?: CurrentItem[];
@@ -83,11 +84,11 @@ function isCurrentSteamGame(game: SteamGame, status: SteamStatus): boolean {
           return (
           <div class="flex items-start gap-3">
             {item.cover ? (
-              <img
+              <SmartImage
                 src={item.cover}
                 alt={item.title}
-                class="w-10 h-14 object-cover rounded flex-shrink-0"
-                loading="lazy"
+                class="rounded flex-shrink-0 w-10 h-14"
+                client:visible
               />
             ) : (
               <div class="w-10 h-14 rounded bg-surface-secondary flex items-center justify-center flex-shrink-0">
@@ -144,11 +145,11 @@ function isCurrentSteamGame(game: SteamGame, status: SteamStatus): boolean {
           rel="noopener noreferrer"
           class="group flex items-center gap-3"
         >
-          <img
+          <SmartImage
             src={game.cover}
             alt={game.name}
-            class="w-16 h-9 object-cover rounded-sm flex-shrink-0"
-            loading="lazy"
+            class="rounded-sm flex-shrink-0 w-16 h-9"
+            client:visible
           />
           <div class="min-w-0 flex-1">
             <div class="flex min-w-0 items-center gap-2">

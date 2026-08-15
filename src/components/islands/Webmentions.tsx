@@ -1,4 +1,5 @@
 import { onMount, createSignal, Show, For } from "solid-js";
+import SmartImage from './SmartImage';
 
 interface WebmentionAuthor {
   type?: string;
@@ -154,11 +155,10 @@ export default function Webmentions(props: WebmentionsProps) {
                     </span>
                   }
                 >
-                  <img
-                    class="webmention-avatar"
+                  <SmartImage
                     src={m.authorPhoto!}
                     alt={m.authorName}
-                    loading="lazy"
+                    class="webmention-avatar"
                   />
                 </Show>
                 <div class="webmention-body">
@@ -253,7 +253,6 @@ export default function Webmentions(props: WebmentionsProps) {
           height: 2.5rem;
           border-radius: 50%;
           flex-shrink: 0;
-          object-fit: cover;
         }
 
         .webmention-avatar-placeholder {

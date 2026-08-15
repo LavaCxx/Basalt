@@ -6,6 +6,7 @@
 import { createSignal, For, Show, onCleanup } from 'solid-js';
 import { isServer } from 'solid-js/web';
 import Lightbox from './Lightbox';
+import SmartImage from './SmartImage';
 
 export interface PhotoItem {
   id: string;
@@ -91,12 +92,10 @@ export default function PhotoGallery(props: PhotoGalleryProps) {
               classList={{ [getAspectRatioClass()]: !!getAspectRatioClass() }}
               onClick={() => openLightbox(index())}
             >
-              <img
+              <SmartImage
                 src={photo.thumbnail || photo.src}
                 alt={photo.alt || ''}
-                class="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
+                class="w-full h-full"
               />
 
               <Show when={showInfo() && (photo.title || photo.location)}>

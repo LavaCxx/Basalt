@@ -3,6 +3,7 @@ import type { MediaFeedItem } from '../../../lib/types';
 import type { MediaType } from '../../../lib/media-config';
 import { mediaTypeLabels, getStatusLabel } from '../../../lib/media-config';
 import SourceBadge from '../SourceBadge';
+import SmartImage from '../SmartImage';
 import { formatDate } from './formatDate';
 
 export default function MediaCard(props: { item: MediaFeedItem }) {
@@ -34,11 +35,10 @@ export default function MediaCard(props: { item: MediaFeedItem }) {
       <div class="flex gap-4 items-start">
         <Show when={item().image}>
           <a href={item().url || '#'} class="block flex-shrink-0" target="_blank" rel="noopener">
-            <img
+            <SmartImage
               src={item().image!}
               alt={item().title || ''}
-              class="w-16 h-24 object-cover rounded flex-shrink-0 hover:opacity-80 transition-opacity"
-              loading="lazy"
+              class="w-16 h-24 rounded flex-shrink-0"
             />
           </a>
         </Show>
