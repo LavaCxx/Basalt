@@ -35,8 +35,8 @@ export default function SmartImage(props: SmartImageProps) {
 
   return (
     <span
-      class={props.class || ''}
-      classList={props.classList}
+      class={`smart-image ${props.class || ''}`}
+      classList={{ ...props.classList, 'smart-image-loaded': state() === 'loaded' }}
       data-natural-sizing={props.naturalSizing ? 'true' : undefined}
     >
       <span
