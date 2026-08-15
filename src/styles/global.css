@@ -280,6 +280,7 @@ body {
 .smart-image[data-natural-sizing='true'] {
   width: 100%;
   aspect-ratio: auto;
+  container-type: normal;
 }
 
 .smart-image[data-natural-sizing='true'] .smart-image-img {

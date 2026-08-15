@@ -1,4 +1,4 @@
-import { createSignal, Show, type JSX } from 'solid-js';
+import { createSignal, onCleanup, onMount, Show, type JSX } from 'solid-js';
 
 interface SmartImageProps {
   src?: string | null;
@@ -22,6 +22,16 @@ export default function SmartImage(props: SmartImageProps) {
     if (!imageRef) return;
     setState(imageRef.complete ? (imageRef.naturalWidth > 0 ? 'loaded' : 'error') : 'loading');
   };
+
+  onMount(() => {
+    syncImageState();
+
+    const interval = window.setInterval(() => {
+      if (imageRef?.complete) syncImageState();
+    }, 50);
+
+    onCleanup(() => window.clearInterval(interval));
+  });
 
   return (
     <span
