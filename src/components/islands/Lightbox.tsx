@@ -112,6 +112,7 @@ export default function Lightbox(props: LightboxProps) {
 
   const handlePointerDown = (event: PointerEvent) => {
     if (imageState() !== 'loaded') return;
+    event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
@@ -269,6 +270,7 @@ export default function Lightbox(props: LightboxProps) {
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
+            onDragStart={(event) => event.preventDefault()}
             onWheel={handleWheel}
           >
             <div
