@@ -34,6 +34,7 @@ const MAX_ZOOM = 5;
 const SINGLE_CLICK_ZOOM = 2;
 const DOUBLE_TAP_ZOOM = SINGLE_CLICK_ZOOM;
 const DRAG_THRESHOLD = 8;
+const PRESS_DELAY = 180;
 
 export default function Lightbox(props: LightboxProps) {
   const photo = () => props.photos[props.index];
@@ -47,6 +48,7 @@ export default function Lightbox(props: LightboxProps) {
   let pinchZoom = MIN_ZOOM;
   let lastTap = { time: 0, x: 0, y: 0 };
   let dragged = false;
+  let pointerDownTime = 0;
   const [pointerDown, setPointerDown] = createSignal(false);
   const activePointers = new Map<number, { x: number; y: number }>();
 
@@ -121,6 +123,7 @@ export default function Lightbox(props: LightboxProps) {
       pointerStart = { x: event.clientX, y: event.clientY };
       offsetStart = offset();
       dragged = false;
+      pointerDownTime = Date.now();
       setPointerDown(true);
     }
   };
@@ -147,7 +150,10 @@ export default function Lightbox(props: LightboxProps) {
   };
 
   const handlePointerUp = (event: PointerEvent) => {
-    const canTap = activePointers.size === 1 && !dragged;
+    const canTap =
+      activePointers.size === 1 &&
+      !dragged &&
+      Date.now() - pointerDownTime < PRESS_DELAY;
     if (canTap && event.pointerType === 'touch' && zoom() <= MIN_ZOOM) {
       const now = Date.now();
       const tap = { x: event.clientX, y: event.clientY };
