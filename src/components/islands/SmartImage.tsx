@@ -11,6 +11,7 @@ interface SmartImageProps {
   children?: JSX.Element;
   naturalSizing?: boolean;
   fit?: 'cover' | 'contain';
+  onStateChange?: (state: 'loading' | 'loaded' | 'error') => void;
 }
 
 export default function SmartImage(props: SmartImageProps) {
@@ -21,7 +22,13 @@ export default function SmartImage(props: SmartImageProps) {
 
   const syncImageState = () => {
     if (!imageRef) return;
-    setState(imageRef.complete ? (imageRef.naturalWidth > 0 ? 'loaded' : 'error') : 'loading');
+    const nextState = imageRef.complete
+      ? imageRef.naturalWidth > 0
+        ? 'loaded'
+        : 'error'
+      : 'loading';
+    setState((current) => (current === nextState ? current : nextState));
+    if (nextState !== 'loading') props.onStateChange?.(nextState);
   };
 
   onMount(() => {
@@ -97,8 +104,14 @@ export default function SmartImage(props: SmartImageProps) {
         width={props.width}
         height={props.height}
         style={props.src && state() !== 'error' ? undefined : 'display: none'}
-        onLoad={() => setState('loaded')}
-        onError={() => setState('error')}
+        onLoad={() => {
+          setState('loaded');
+          props.onStateChange?.('loaded');
+        }}
+        onError={() => {
+          setState('error');
+          props.onStateChange?.('error');
+        }}
         ref={(node) => {
           imageRef = node;
           syncImageState();

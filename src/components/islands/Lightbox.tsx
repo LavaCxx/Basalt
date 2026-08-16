@@ -3,7 +3,7 @@
  * Used by PhotoGallery and ArticleContent
  */
 
-import { Show, onMount, onCleanup } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { isServer } from 'solid-js/web';
 import SmartImage from './SmartImage';
 
@@ -29,12 +29,148 @@ interface LightboxProps {
   onNext: () => void;
 }
 
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 5;
+const DOUBLE_TAP_ZOOM = 2;
+
 export default function Lightbox(props: LightboxProps) {
   const photo = () => props.photos[props.index];
+  const [zoom, setZoom] = createSignal(MIN_ZOOM);
+  const [offset, setOffset] = createSignal({ x: 0, y: 0 });
+  const [imageState, setImageState] = createSignal<'loading' | 'loaded' | 'error'>('loading');
+  let viewport: HTMLDivElement | undefined;
+  let pointerStart = { x: 0, y: 0 };
+  let offsetStart = { x: 0, y: 0 };
+  let pinchDistance = 0;
+  let pinchZoom = MIN_ZOOM;
+  let lastTap = { time: 0, x: 0, y: 0 };
+  const activePointers = new Map<number, { x: number; y: number }>();
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  createEffect(() => {
+    props.index;
+    props.open;
+    photo()?.src;
+    setZoom(MIN_ZOOM);
+    setOffset({ x: 0, y: 0 });
+    setImageState('loading');
+  });
+
+  const clampOffset = (nextOffset: { x: number; y: number }, nextZoom = zoom()) => {
+    if (!viewport || nextZoom <= MIN_ZOOM) return { x: 0, y: 0 };
+    const rect = viewport.getBoundingClientRect();
+    const maxX = Math.max(0, (rect.width * nextZoom - rect.width) / 2);
+    const maxY = Math.max(0, (rect.height * nextZoom - rect.height) / 2);
+    return {
+      x: Math.min(maxX, Math.max(-maxX, nextOffset.x)),
+      y: Math.min(maxY, Math.max(-maxY, nextOffset.y)),
+    };
+  };
+
+  const zoomAtPoint = (nextZoomValue: number, point: { x: number; y: number }) => {
+    if (imageState() !== 'loaded' || !viewport) return;
+    const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, nextZoomValue));
+    const currentZoom = zoom();
+    if (nextZoom === currentZoom) return;
+
+    const rect = viewport.getBoundingClientRect();
+    const anchor = {
+      x: point.x - rect.left - rect.width / 2,
+      y: point.y - rect.top - rect.height / 2,
+    };
+    const currentOffset = offset();
+    const nextOffset = {
+      x: currentOffset.x + (currentZoom - nextZoom) * anchor.x,
+      y: currentOffset.y + (currentZoom - nextZoom) * anchor.y,
+    };
+    setZoom(nextZoom);
+    setOffset(nextZoom === MIN_ZOOM ? { x: 0, y: 0 } : clampOffset(nextOffset, nextZoom));
+  };
+
+  const handleWheel = (event: WheelEvent) => {
+    if (imageState() !== 'loaded') return;
+    event.preventDefault();
+    const factor = event.deltaY < 0 ? 1.12 : 1 / 1.12;
+    zoomAtPoint(zoom() * factor, { x: event.clientX, y: event.clientY });
+  };
+
+  const updatePinch = (event: PointerEvent) => {
+    if (activePointers.size < 2) return;
+    const [first, second] = [...activePointers.values()];
+    const distance = Math.hypot(second.x - first.x, second.y - first.y);
+    const midpoint = {
+      x: (first.x + second.x) / 2,
+      y: (first.y + second.y) / 2,
+    };
+    zoomAtPoint(pinchZoom * (distance / pinchDistance), midpoint);
+  };
+
+  const handlePointerDown = (event: PointerEvent) => {
+    if (imageState() !== 'loaded') return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (activePointers.size === 2) {
+      const [first, second] = [...activePointers.values()];
+      pinchDistance = Math.hypot(second.x - first.x, second.y - first.y);
+      pinchZoom = zoom();
+    } else if (activePointers.size === 1) {
+      pointerStart = { x: event.clientX, y: event.clientY };
+      offsetStart = offset();
+    }
+  };
+
+  const handlePointerMove = (event: PointerEvent) => {
+    if (!activePointers.has(event.pointerId)) return;
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (activePointers.size >= 2) {
+      updatePinch(event);
+      return;
+    }
+    if (zoom() <= MIN_ZOOM) return;
+
+    const deltaX = event.clientX - pointerStart.x;
+    const deltaY = event.clientY - pointerStart.y;
+    setOffset(
+      clampOffset({
+        x: offsetStart.x + deltaX,
+        y: offsetStart.y + deltaY,
+      })
+    );
+  };
+
+  const handlePointerUp = (event: PointerEvent) => {
+    if (event.pointerType === 'touch' && activePointers.size === 1 && zoom() <= MIN_ZOOM) {
+      const now = Date.now();
+      const tap = { x: event.clientX, y: event.clientY };
+      if (now - lastTap.time < 300 && Math.hypot(tap.x - lastTap.x, tap.y - lastTap.y) < 32) {
+        lastTap = { time: 0, x: 0, y: 0 };
+        zoomAtPoint(DOUBLE_TAP_ZOOM, tap);
+      } else {
+        lastTap = { time: now, ...tap };
+      }
+    }
+    activePointers.delete(event.pointerId);
+    if (activePointers.size === 1) {
+      const [remaining] = [...activePointers.values()];
+      pointerStart = remaining;
+      offsetStart = offset();
+    }
+  };
+
+  const handleDoubleClick = (event: MouseEvent) => {
+    event.preventDefault();
+    if (zoom() > MIN_ZOOM) {
+      setZoom(MIN_ZOOM);
+      setOffset({ x: 0, y: 0 });
+    } else {
+      zoomAtPoint(DOUBLE_TAP_ZOOM, { x: event.clientX, y: event.clientY });
+    }
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
     if (!props.open) return;
-    switch (e.key) {
+    switch (event.key) {
       case 'Escape':
         props.onClose();
         break;
@@ -44,27 +180,36 @@ export default function Lightbox(props: LightboxProps) {
       case 'ArrowRight':
         props.onNext();
         break;
+      case '+':
+      case '=':
+        zoomAtPoint(zoom() * 1.2, { x: window.innerWidth / 2, y: window.innerHeight / 2 });
+        break;
+      case '-':
+        zoomAtPoint(zoom() / 1.2, { x: window.innerWidth / 2, y: window.innerHeight / 2 });
+        break;
+      case '0':
+        setZoom(MIN_ZOOM);
+        setOffset({ x: 0, y: 0 });
+        break;
     }
   };
 
   onMount(() => {
-    if (!isServer) {
-      document.addEventListener('keydown', handleKeyDown);
-    }
+    if (isServer) return;
+    document.addEventListener('keydown', handleKeyDown);
   });
 
   onCleanup(() => {
-    if (!isServer) {
-      document.removeEventListener('keydown', handleKeyDown);
-    }
+    if (isServer) return;
+    document.removeEventListener('keydown', handleKeyDown);
   });
 
   return (
     <Show when={props.open && props.photos.length > 0}>
       <div
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) props.onClose();
+        class="fixed inset-0 z-50 flex items-center justify-center lightbox-backdrop backdrop-blur-sm"
+        onClick={(event) => {
+          if (event.target === event.currentTarget) props.onClose();
         }}
       >
         <button
@@ -73,7 +218,12 @@ export default function Lightbox(props: LightboxProps) {
           aria-label="Close"
         >
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
 
@@ -99,17 +249,46 @@ export default function Lightbox(props: LightboxProps) {
         </Show>
 
         <div class="flex flex-col items-center max-w-[90vw] max-h-[90vh]">
-          <SmartImage
-            src={photo()?.src}
-            alt={photo()?.alt || ''}
-            loading="eager"
-            naturalSizing
-            fit="contain"
-            class="max-h-[75vh] max-w-full"
-          />
+          <div
+            ref={viewport}
+            class="lightbox-viewport"
+            classList={{ 'lightbox-viewport-zoomed': zoom() > MIN_ZOOM }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            onWheel={handleWheel}
+            onDoubleClick={handleDoubleClick}
+          >
+            <div
+              class="lightbox-frame"
+              style={{
+                transform: `translate3d(${offset().x}px, ${offset().y}px, 0) scale(${zoom()})`,
+                cursor: zoom() > MIN_ZOOM ? 'grab' : 'zoom-in',
+              }}
+            >
+              <SmartImage
+                src={photo()?.src}
+                alt={photo()?.alt || ''}
+                loading="eager"
+                naturalSizing
+                fit="contain"
+                class="max-h-[75vh] max-w-full"
+                onStateChange={setImageState}
+              />
+            </div>
+          </div>
+
+          <div class="mt-3 flex items-center justify-center gap-3 text-xs text-white/45">
+            <span>{zoom().toFixed(1)}x</span>
+            <Show when={zoom() > MIN_ZOOM}>
+              <span aria-hidden="true">·</span>
+              <span>拖拽移动 / 双击复位</span>
+            </Show>
+          </div>
 
           <Show when={photo() && (photo()?.title || photo()?.camera)}>
-            <div class="mt-4 text-center text-white/80 text-sm px-4">
+            <div class="mt-2 text-center text-white/80 text-sm px-4">
               <Show when={photo()?.title}>
                 <p class="font-medium text-white">{photo()?.title}</p>
               </Show>

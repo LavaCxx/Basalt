@@ -309,6 +309,31 @@ body {
   object-fit: contain;
 }
 
+.lightbox-backdrop {
+  background-color: rgb(15 15 18 / 0.96);
+}
+
+.lightbox-viewport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  max-height: 75vh;
+  touch-action: none;
+  user-select: none;
+}
+
+.lightbox-frame {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  outline: 1px solid rgb(0 0 0 / 0.55);
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.7);
+  transition: transform 0.12s ease-out;
+  will-change: transform;
+}
+
 .smart-image > *:not(.smart-image-placeholder):not(img) {
   position: relative;
   z-index: 2;
