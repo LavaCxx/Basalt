@@ -31,7 +31,8 @@ interface LightboxProps {
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 5;
-const DOUBLE_TAP_ZOOM = 2;
+const SINGLE_CLICK_ZOOM = 2;
+const DOUBLE_TAP_ZOOM = SINGLE_CLICK_ZOOM;
 
 export default function Lightbox(props: LightboxProps) {
   const photo = () => props.photos[props.index];
@@ -44,6 +45,7 @@ export default function Lightbox(props: LightboxProps) {
   let pinchDistance = 0;
   let pinchZoom = MIN_ZOOM;
   let lastTap = { time: 0, x: 0, y: 0 };
+  let dragged = false;
   const activePointers = new Map<number, { x: number; y: number }>();
 
   createEffect(() => {
@@ -116,6 +118,7 @@ export default function Lightbox(props: LightboxProps) {
     } else if (activePointers.size === 1) {
       pointerStart = { x: event.clientX, y: event.clientY };
       offsetStart = offset();
+      dragged = false;
     }
   };
 
@@ -131,6 +134,7 @@ export default function Lightbox(props: LightboxProps) {
 
     const deltaX = event.clientX - pointerStart.x;
     const deltaY = event.clientY - pointerStart.y;
+    if (Math.hypot(deltaX, deltaY) > 4) dragged = true;
     setOffset(
       clampOffset({
         x: offsetStart.x + deltaX,
@@ -140,7 +144,8 @@ export default function Lightbox(props: LightboxProps) {
   };
 
   const handlePointerUp = (event: PointerEvent) => {
-    if (event.pointerType === 'touch' && activePointers.size === 1 && zoom() <= MIN_ZOOM) {
+    const canTap = activePointers.size === 1 && !dragged;
+    if (canTap && event.pointerType === 'touch' && zoom() <= MIN_ZOOM) {
       const now = Date.now();
       const tap = { x: event.clientX, y: event.clientY };
       if (now - lastTap.time < 300 && Math.hypot(tap.x - lastTap.x, tap.y - lastTap.y) < 32) {
@@ -149,22 +154,19 @@ export default function Lightbox(props: LightboxProps) {
       } else {
         lastTap = { time: now, ...tap };
       }
+    } else if (canTap && event.pointerType === 'mouse' && event.button === 0) {
+      if (zoom() > MIN_ZOOM) {
+        setZoom(MIN_ZOOM);
+        setOffset({ x: 0, y: 0 });
+      } else {
+        zoomAtPoint(SINGLE_CLICK_ZOOM, { x: event.clientX, y: event.clientY });
+      }
     }
     activePointers.delete(event.pointerId);
     if (activePointers.size === 1) {
       const [remaining] = [...activePointers.values()];
       pointerStart = remaining;
       offsetStart = offset();
-    }
-  };
-
-  const handleDoubleClick = (event: MouseEvent) => {
-    event.preventDefault();
-    if (zoom() > MIN_ZOOM) {
-      setZoom(MIN_ZOOM);
-      setOffset({ x: 0, y: 0 });
-    } else {
-      zoomAtPoint(DOUBLE_TAP_ZOOM, { x: event.clientX, y: event.clientY });
     }
   };
 
@@ -258,7 +260,6 @@ export default function Lightbox(props: LightboxProps) {
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
             onWheel={handleWheel}
-            onDblClick={handleDoubleClick}
           >
             <div
               class="lightbox-frame"
