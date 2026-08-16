@@ -33,6 +33,7 @@ const MIN_ZOOM = 1;
 const MAX_ZOOM = 5;
 const SINGLE_CLICK_ZOOM = 2;
 const DOUBLE_TAP_ZOOM = SINGLE_CLICK_ZOOM;
+const DRAG_THRESHOLD = 8;
 
 export default function Lightbox(props: LightboxProps) {
   const photo = () => props.photos[props.index];
@@ -46,6 +47,7 @@ export default function Lightbox(props: LightboxProps) {
   let pinchZoom = MIN_ZOOM;
   let lastTap = { time: 0, x: 0, y: 0 };
   let dragged = false;
+  const [pointerDown, setPointerDown] = createSignal(false);
   const activePointers = new Map<number, { x: number; y: number }>();
 
   createEffect(() => {
@@ -119,6 +121,7 @@ export default function Lightbox(props: LightboxProps) {
       pointerStart = { x: event.clientX, y: event.clientY };
       offsetStart = offset();
       dragged = false;
+      setPointerDown(true);
     }
   };
 
@@ -134,7 +137,7 @@ export default function Lightbox(props: LightboxProps) {
 
     const deltaX = event.clientX - pointerStart.x;
     const deltaY = event.clientY - pointerStart.y;
-    if (Math.hypot(deltaX, deltaY) > 4) dragged = true;
+    if (Math.hypot(deltaX, deltaY) > DRAG_THRESHOLD) dragged = true;
     setOffset(
       clampOffset({
         x: offsetStart.x + deltaX,
@@ -163,6 +166,7 @@ export default function Lightbox(props: LightboxProps) {
       }
     }
     activePointers.delete(event.pointerId);
+    if (activePointers.size === 0) setPointerDown(false);
     if (activePointers.size === 1) {
       const [remaining] = [...activePointers.values()];
       pointerStart = remaining;
@@ -265,7 +269,12 @@ export default function Lightbox(props: LightboxProps) {
               class="lightbox-frame"
               style={{
                 transform: `translate3d(${offset().x}px, ${offset().y}px, 0) scale(${zoom()})`,
-                cursor: zoom() > MIN_ZOOM ? 'grab' : 'zoom-in',
+                cursor:
+                  zoom() > MIN_ZOOM
+                    ? pointerDown()
+                      ? 'grabbing'
+                      : 'grab'
+                    : 'zoom-in',
               }}
             >
               <SmartImage
