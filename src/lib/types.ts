@@ -82,6 +82,21 @@ export interface MicroblogMetadata {
   replies?: number;
   /** Associated media attachments */
   attachments?: MediaAttachment[];
+  /** Telegram-generated link preview card */
+  linkPreview?: TelegramLinkPreview;
+}
+
+export interface TelegramLinkPreview {
+  /** Destination URL shown by Telegram */
+  url: string;
+  /** Publisher/site label */
+  siteName?: string;
+  /** Link preview title */
+  title?: string;
+  /** Link preview description */
+  description?: string;
+  /** Stable internal image proxy URL */
+  image?: string;
 }
 
 /**

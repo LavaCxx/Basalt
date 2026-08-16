@@ -48,6 +48,14 @@ function getPhotoItems(item: MicroblogFeedItem): PhotoItem[] {
 export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
   const item = () => props.item;
   const photos = () => getPhotoItems(item());
+  const linkPreview = () => item().metadata?.linkPreview;
+  const previewHost = () => {
+    try {
+      return linkPreview()?.url ? new URL(linkPreview()!.url).hostname : undefined;
+    } catch {
+      return undefined;
+    }
+  };
 
   return (
     <div class="py-4 border-b border-border-subtle">
@@ -55,7 +63,39 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
         <SourceBadge source={item().source} channel={item().metadata?.channel} />
         <time class="ml-auto">{formatDate(item().date)}</time>
       </div>
-      <p class="text-text-primary leading-relaxed">{item().content}</p>
+      <p class="text-text-primary leading-relaxed whitespace-pre-line">{item().content}</p>
+      <Show when={linkPreview()}>
+        <a
+          href={linkPreview()!.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="telegram-link-preview mt-3 group/preview"
+        >
+          <div class="telegram-link-preview-content">
+            <Show when={linkPreview()!.siteName}>
+              <span class="telegram-link-preview-site">{linkPreview()!.siteName}</span>
+            </Show>
+            <Show when={linkPreview()!.title}>
+              <span class="telegram-link-preview-title">{linkPreview()!.title}</span>
+            </Show>
+            <Show when={linkPreview()!.description}>
+              <span class="telegram-link-preview-description">{linkPreview()!.description}</span>
+            </Show>
+            <Show when={previewHost()}>
+              <span class="telegram-link-preview-url">{previewHost()}</span>
+            </Show>
+          </div>
+          <Show when={linkPreview()!.image}>
+            <span class="telegram-link-preview-cover">
+              <SmartImage
+                src={linkPreview()!.image}
+                alt={linkPreview()!.title || linkPreview()!.url}
+                class="w-full h-full"
+              />
+            </span>
+          </Show>
+        </a>
+      </Show>
       <Show when={photos().length >= 1}>
         <div class="mt-3 flex gap-1">
           <For each={photos().slice(0, 3)}>

@@ -8,7 +8,13 @@ const imageContentTypes = new Set([
   'image/avif',
 ]);
 
-function extractCurrentImages(html: string): string[] {
+function extractImagesByClass(html: string, className: string): string[] {
+  return [
+    ...html.matchAll(new RegExp(`<[^>]+class=["'][^"']*${className}[^"']*["'][^>]*>[\\s\\S]*?</`, 'gi')),
+  ].flatMap((match) => extractTelescopeImageUrls(match[0]));
+}
+
+function extractTelescopeImageUrls(html: string): string[] {
   return [
     ...html.matchAll(/background-image:url\('([^']+)'\)/gi),
     ...html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi),
@@ -17,9 +23,25 @@ function extractCurrentImages(html: string): string[] {
     .filter((url) => /^https:\/\/cdn\d+\.telesco\.pe\/file\//i.test(url));
 }
 
+function extractCurrentImages(html: string, variant?: string | null): string[] {
+  if (variant === 'preview') return extractImagesByClass(html, 'tgme_widget_message_link_preview');
+  if (variant === 'media') return extractImagesByClass(html, 'tgme_widget_message_(?:photo|video)(?:_wrap)?');
+
+  // Legacy references are positional across every image in the embed.
+  return extractTelescopeImageUrls(html);
+}
+
 export async function GET({ url }: { url: URL }): Promise<Response> {
   const messageUrl = url.searchParams.get('message');
   const index = Number(url.searchParams.get('index') || '0');
+  const variant = url.searchParams.get('variant');
+
+  if (variant && variant !== 'media' && variant !== 'preview') {
+    return new Response('Invalid Telegram image variant', {
+      status: 400,
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  }
 
   if (!messageUrl || !Number.isInteger(index) || index < 0 || index > 9) {
     return new Response('Invalid Telegram image reference', {
@@ -58,7 +80,7 @@ export async function GET({ url }: { url: URL }): Promise<Response> {
       });
     }
 
-    const currentImages = extractCurrentImages(await pageResponse.text());
+    const currentImages = extractCurrentImages(await pageResponse.text(), variant);
     const imageUrl = currentImages[index];
     if (!imageUrl) {
       return new Response('Telegram image not found', {
