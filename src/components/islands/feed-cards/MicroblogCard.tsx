@@ -1,4 +1,4 @@
-import { Show, For } from 'solid-js';
+import { Show, For, type JSX } from 'solid-js';
 import type { MicroblogFeedItem } from '../../../lib/types';
 import SourceBadge from '../SourceBadge';
 import SmartImage from '../SmartImage';
@@ -11,6 +11,48 @@ interface PhotoItem {
   alt: string;
   width?: number;
   height?: number;
+}
+
+const urlPattern = /https?:\/\/[^\s<>"')\]]+/gi;
+
+function linkifyTelegramText(text: string): JSX.Element {
+  const nodes: JSX.Element[] = [];
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = urlPattern.exec(text))) {
+    if (match.index > cursor) {
+      nodes.push(text.slice(cursor, match.index));
+    }
+
+    let href = match[0];
+    const trailingPunctuation = href.match(/[.,;:!?]+$/);
+    if (trailingPunctuation) href = href.slice(0, -trailingPunctuation[0].length);
+
+    let label = href;
+    try {
+      label = decodeURI(href);
+    } catch {
+      // Keep the raw URL when it contains an invalid escape sequence.
+    }
+
+    nodes.push(
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-accent break-all hover:underline underline-offset-4"
+      >
+        {label}
+      </a>
+    );
+
+    cursor = match.index + href.length;
+    urlPattern.lastIndex = cursor;
+  }
+
+  if (cursor < text.length) nodes.push(text.slice(cursor));
+  return nodes;
 }
 
 function getPhotoItems(item: MicroblogFeedItem): PhotoItem[] {
@@ -48,6 +90,8 @@ function getPhotoItems(item: MicroblogFeedItem): PhotoItem[] {
 export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
   const item = () => props.item;
   const photos = () => getPhotoItems(item());
+  const content = () =>
+    item().source === 'telegram' ? linkifyTelegramText(item().content) : item().content;
   const linkPreview = () => item().metadata?.linkPreview;
   const previewHost = () => {
     try {
@@ -63,7 +107,7 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
         <SourceBadge source={item().source} channel={item().metadata?.channel} />
         <time class="ml-auto">{formatDate(item().date)}</time>
       </div>
-      <p class="text-text-primary leading-relaxed whitespace-pre-line">{item().content}</p>
+      <p class="text-text-primary leading-relaxed whitespace-pre-line">{content()}</p>
       <Show when={linkPreview()}>
         <a
           href={linkPreview()!.url}
