@@ -258,7 +258,7 @@ export default function Lightbox(props: LightboxProps) {
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
             onWheel={handleWheel}
-            onDoubleClick={handleDoubleClick}
+            onDblClick={handleDoubleClick}
           >
             <div
               class="lightbox-frame"
