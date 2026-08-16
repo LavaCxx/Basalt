@@ -128,6 +128,12 @@ export interface PhotoMetadata {
   album?: string;
   /** Location */
   location?: string;
+  /** Stable reference for a Notion-hosted photo */
+  notionImage?: {
+    pageId: string;
+    property: string;
+    index: number;
+  };
   /** Camera used */
   camera?: string;
   /** Lens used */

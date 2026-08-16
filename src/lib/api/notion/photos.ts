@@ -38,7 +38,13 @@ export async function fetchPhotos(options?: {
     const dateStr = props.日期?.date?.start || props.Date?.date?.start;
     const date = dateStr ? new Date(dateStr) : new Date((page as any).created_time);
     const location = getPlainText(props.地点?.rich_text || props.Location?.rich_text);
-    const image = getCoverImage(props.图片?.files || props.Image?.files);
+    const imageFiles = props.图片?.files || props.Image?.files || [];
+    const image = getCoverImage(imageFiles);
+    const imageIndex = image
+      ? imageFiles.findIndex((file) =>
+          file.type === 'file' ? file.file?.url === image : file.external?.url === image
+        )
+      : -1;
 
     return {
       id: page.id,
@@ -49,7 +55,18 @@ export async function fetchPhotos(options?: {
       source: 'notion' as const,
       url: `/photos/${page.id}`,
       image,
-      metadata: { location },
+      metadata: {
+        location,
+        ...(image && imageIndex >= 0
+          ? {
+              notionImage: {
+                pageId: page.id,
+                property: props.图片?.files ? '图片' : 'Image',
+                index: imageIndex,
+              },
+            }
+          : {}),
+      },
     };
   });
 

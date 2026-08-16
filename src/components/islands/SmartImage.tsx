@@ -10,6 +10,7 @@ interface SmartImageProps {
   height?: number | string;
   children?: JSX.Element;
   naturalSizing?: boolean;
+  fit?: 'cover' | 'contain';
 }
 
 export default function SmartImage(props: SmartImageProps) {
@@ -38,6 +39,7 @@ export default function SmartImage(props: SmartImageProps) {
       class={`smart-image ${props.class || ''}`}
       classList={{ ...props.classList, 'smart-image-loaded': state() === 'loaded' }}
       data-natural-sizing={props.naturalSizing ? 'true' : undefined}
+      data-fit={props.fit}
     >
       <span
         class="smart-image-placeholder"

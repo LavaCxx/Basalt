@@ -59,6 +59,14 @@ function getDB(): D1DatabaseLike {
 
 function rowToFeedItem(row: any): FeedItem {
   const metadata = row.metadata_json ? JSON.parse(row.metadata_json) : undefined;
+  if (row.type === 'photo' && row.source === 'notion' && row.image) {
+    if (metadata?.notionImage?.pageId) {
+      const { pageId, property, index } = metadata.notionImage;
+      row.image = `/api/notion-image?page=${encodeURIComponent(pageId)}&property=${encodeURIComponent(property)}&index=${Number.isInteger(index) ? index : 0}`;
+    } else if (isExpiringNotionFileUrl(row.image)) {
+      row.image = `/api/notion-image?page=${encodeURIComponent(row.id)}&property=%E5%9B%BE%E7%89%87&index=0`;
+    }
+  }
   const item: FeedItem = {
     id: row.id,
     type: row.type as FeedItemType,
@@ -71,6 +79,18 @@ function rowToFeedItem(row: any): FeedItem {
     metadata,
   };
   return item;
+}
+
+function isExpiringNotionFileUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.hostname === 'prod-files-secure.s3.us-west-2.amazonaws.com' &&
+      url.searchParams.has('X-Amz-Signature')
+    );
+  } catch {
+    return false;
+  }
 }
 
 // ============================================================

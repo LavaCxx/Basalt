@@ -287,6 +287,28 @@ body {
   height: auto;
 }
 
+.smart-image[data-fit='contain'] {
+  aspect-ratio: auto;
+  display: inline-block;
+  max-width: min(90vw, 40rem);
+  max-height: 75vh;
+}
+
+.smart-image[data-fit='contain'] .smart-image-placeholder {
+  position: static;
+  width: min(90vw, 40rem);
+  aspect-ratio: 16 / 9;
+}
+
+.smart-image[data-fit='contain'] .smart-image-img {
+  position: static;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: inherit;
+  object-fit: contain;
+}
+
 .smart-image > *:not(.smart-image-placeholder):not(img) {
   position: relative;
   z-index: 2;

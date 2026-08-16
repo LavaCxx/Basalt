@@ -103,7 +103,9 @@ export default function Lightbox(props: LightboxProps) {
             src={photo()?.src}
             alt={photo()?.alt || ''}
             loading="eager"
-            class="max-h-[75vh] max-w-full object-contain"
+            naturalSizing
+            fit="contain"
+            class="max-h-[75vh] max-w-full"
           />
 
           <Show when={photo() && (photo()?.title || photo()?.camera)}>
