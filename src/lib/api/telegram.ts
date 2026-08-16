@@ -64,14 +64,16 @@ export async function fetchViaRSSHub(options?: {
         const rssImage = rssImages.find((image) => image.url === url) || rssImages[index];
         return { ...rssImage, url };
       }) || rssImages;
-      const image = images[0]?.url;
+      const image = images[0]
+        ? `/api/telegram-image?message=${encodeURIComponent(item.link)}&index=0`
+        : undefined;
 
       // Extract attachments
       const attachments: MediaAttachment[] = [];
-      for (const imageInfo of images) {
+      for (const [index, imageInfo] of images.entries()) {
         attachments.push({
           type: 'image',
-          url: imageInfo.url,
+          url: `/api/telegram-image?message=${encodeURIComponent(item.link)}&index=${index}`,
           width: imageInfo.width,
           height: imageInfo.height,
         });
