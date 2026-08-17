@@ -38,7 +38,7 @@ const fullTitle = title === 'LavaC' ? title : `${title} | LavaC`;
     <title>{fullTitle}</title>
 
     {webmentionUsername && (
-      <link rel="webmention" href={`https://webmention.io/${webmentionUsername}/webmention`} />
+      <link rel="webmention" href={`https://webmention.io/d/${webmentionUsername}/webmention`} />
     )}
     {webmentionUsername && (
       <link rel="pingback" href={`https://webmention.io/${webmentionUsername}/xmlrpc`} />
