@@ -1132,6 +1132,32 @@ html::view-transition-group(root) {
   background: var(--color-bg-muted, #f3f4f6);
 }
 
+.prose-basalt .music-embed,
+.article-content-html .music-embed {
+  width: 100%;
+  height: 6rem;
+  margin: 1.5rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--color-bg-muted);
+}
+
+.prose-basalt .music-embed.playlist,
+.prose-basalt .music-embed.album,
+.article-content-html .music-embed.playlist,
+.article-content-html .music-embed.album {
+  height: 24rem;
+}
+
+.prose-basalt .music-embed iframe,
+.article-content-html .music-embed iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .prose-basalt .video-embed iframe,
 .article-content-html .video-embed iframe {
   position: absolute;

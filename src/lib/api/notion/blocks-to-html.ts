@@ -212,6 +212,35 @@ function getVideoEmbedUrl(url: string): string | null {
   }
 }
 
+function getNeteaseMusicEmbed(url: string): { url: string; kind: 'song' | 'playlist' | 'album' } | null {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, '');
+    if (host !== 'music.163.com') return null;
+
+    const hashParams = parsed.hash.startsWith('#/')
+      ? new URLSearchParams(parsed.hash.slice(2).split('?')[1] || '')
+      : null;
+    const id = parsed.searchParams.get('id') || hashParams?.get('id');
+    if (!id || !/^\d+$/.test(id)) return null;
+
+    const path = parsed.hash ? parsed.hash.slice(2).split('?')[0] : parsed.pathname;
+    if (path === 'song') {
+      return { url: `https://music.163.com/outchain/player?type=2&id=${id}`, kind: 'song' };
+    }
+    if (path === 'playlist') {
+      return { url: `https://music.163.com/outchain/player?type=0&id=${id}`, kind: 'playlist' };
+    }
+    if (path === 'album') {
+      return { url: `https://music.163.com/outchain/player?type=1&id=${id}`, kind: 'album' };
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function blockToHtml(
   block: GetBlockResponse,
   recurse = true,
@@ -288,6 +317,10 @@ export async function blockToHtml(
       const embedUrl = safeUrl(b.embed.url);
       if (!embedUrl) return '';
       const caption = richTextToHtml(b.embed.caption || []);
+      const musicEmbed = getNeteaseMusicEmbed(embedUrl);
+      if (musicEmbed) {
+        return `<div class="music-embed ${musicEmbed.kind}"><iframe src="${musicEmbed.url}" frameborder="0" loading="lazy"></iframe></div>${caption ? `<p class="video-caption">${caption}</p>` : ''}`;
+      }
       const iframeEmbedUrl = getVideoEmbedUrl(embedUrl) || embedUrl;
       return `<div class="video-embed"><iframe src="${iframeEmbedUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe></div>${caption ? `<p class="video-caption">${caption}</p>` : ''}`;
     }
