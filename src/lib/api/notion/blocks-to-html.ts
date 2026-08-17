@@ -305,7 +305,11 @@ export async function blockToHtml(
       if (!videoUrl) return '';
       // For external links (YouTube, Bilibili, etc.), try to embed via iframe
       const embedUrl = getVideoEmbedUrl(videoUrl);
+      const musicEmbed = embedUrl ? null : getNeteaseMusicEmbed(videoUrl);
       const caption = richTextToHtml(videoData.caption || []);
+      if (musicEmbed) {
+        return `<div class="music-embed ${musicEmbed.kind}"><iframe src="${musicEmbed.url}" frameborder="0" loading="lazy"></iframe></div>${caption ? `<p class="video-caption">${caption}</p>` : ''}`;
+      }
       if (embedUrl) {
         return `<div class="video-embed"><iframe src="${embedUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe></div>${caption ? `<p class="video-caption">${caption}</p>` : ''}`;
       }
