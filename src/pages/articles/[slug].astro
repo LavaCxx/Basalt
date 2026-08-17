@@ -31,18 +31,25 @@ if (!article) {
 const { title, content, date, image, metadata } = article;
 const tags = (metadata as any)?.tags || [];
 const readingTime = (metadata as any)?.readingTime || 5;
+const canonicalUrl = `https://blog.lavac.cc/articles/${slug}`;
+const publishedDate = date instanceof Date ? date : new Date(date);
 ---
 
-<Layout title={title} description={(metadata as any)?.excerpt || title}>
+<Layout title={title} description={(metadata as any)?.excerpt || title} canonical={canonicalUrl}>
   <div class="article-layout">
     {/* Main content */}
-    <article class="article-page">
+    <article class="article-page h-entry">
+      <data class="u-url" value={canonicalUrl}></data>
+      <a class="p-author h-card" href="https://blog.lavac.cc" hidden>
+        <data class="p-name" value="LavaC"></data>
+        <img class="u-photo" src="/avatar.jpg" alt="" />
+      </a>
       {/* Header - Minimal */}
       <header class="article-header">
-        <h1 class="article-title">{title}</h1>
+        <h1 class="article-title p-name">{title}</h1>
         <div class="article-meta">
-          <time datetime={date instanceof Date ? date.toISOString() : String(date)}>
-            {(date instanceof Date ? date : new Date(date)).toLocaleDateString('zh-CN', {
+          <time class="dt-published" datetime={publishedDate.toISOString()}>
+            {publishedDate.toLocaleDateString('zh-CN', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
@@ -71,7 +78,7 @@ const readingTime = (metadata as any)?.readingTime || 5;
       )}
 
       {/* Content */}
-      <div class="article-content prose-basalt">
+      <div class="article-content prose-basalt e-content">
         <ArticleEnhancements client:only="solid-js" />
         <div class="article-content-html" set:html={content} />
       </div>
