@@ -1135,19 +1135,15 @@ html::view-transition-group(root) {
 .prose-basalt .music-embed,
 .article-content-html .music-embed {
   width: 100%;
-  height: 6rem;
+  height: auto;
   margin: 1.5rem 0;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  background: var(--color-bg-muted);
 }
 
 .prose-basalt .music-embed.playlist,
 .prose-basalt .music-embed.album,
 .article-content-html .music-embed.playlist,
 .article-content-html .music-embed.album {
-  height: 24rem;
+  height: auto;
 }
 
 .prose-basalt .music-embed iframe,
