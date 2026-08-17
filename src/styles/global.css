@@ -13,13 +13,13 @@
   --color-accent: #1a1a1a;
   --color-accent-hover: #333333;
 
-  /* Dark mode colors */
-  --color-dark-background: #0a0a0a;
-  --color-dark-background-alt: #141414;
-  --color-dark-border: #262626;
-  --color-dark-text-primary: #fafafa;
-  --color-dark-text-secondary: #a3a3a3;
-  --color-dark-text-muted: #737373;
+  /* Dark mode colors - soft blue-gray */
+  --color-dark-background: #15181d;
+  --color-dark-background-alt: #1d2128;
+  --color-dark-border: #333a45;
+  --color-dark-text-primary: #d9dee6;
+  --color-dark-text-secondary: #a8b0bc;
+  --color-dark-text-muted: #79828f;
 
   /* Font families - SN Pro for EN/UI, system fonts for CN */
  --font-sans: "SN Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
@@ -83,7 +83,7 @@ body {
   --color-background: var(--color-dark-background);
   --color-background-alt: var(--color-dark-background-alt);
   --color-border: var(--color-dark-border);
-  --color-border-subtle: #1a1a1a;
+  --color-border-subtle: #232830;
   --color-text-primary: var(--color-dark-text-primary);
   --color-text-secondary: var(--color-dark-text-secondary);
   --color-text-muted: var(--color-dark-text-muted);
@@ -833,7 +833,7 @@ body {
 /* Dark mode — give code blocks a slightly lighter border */
 .dark .article-content-html pre,
 .dark .article-content-html .shiki {
-  border: 1px solid var(--color-dark-border, #262626);
+  border: 1px solid var(--color-dark-border, #333a45);
 }
 
 /* Code block toolbar — language label + copy button */
@@ -1037,10 +1037,6 @@ html::view-transition-group(root) {
   image-rendering: crisp-edges;
 }
 
-.dark .onebit-bg-canvas {
-  /* 暗色模式：白色像素微微透出在深色背景上 */
-}
-
 /* ===== 1-bit Background Control Panel ===== */
 .onebit-panel {
   position: fixed;
@@ -1165,6 +1161,28 @@ html::view-transition-group(root) {
 }
 
 /* ===== Telegram link preview card ===== */
+.telegram-inline-link {
+  font-family: var(--font-mono);
+  font-size: 0.9375em;
+  color: #8a5a2b;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.telegram-inline-link:hover,
+.telegram-inline-link:focus-visible {
+  color: #b07c45;
+}
+
+.dark .telegram-inline-link {
+  color: #d0a678;
+}
+
+.dark .telegram-inline-link:hover,
+.dark .telegram-inline-link:focus-visible {
+  color: #e9c99c;
+}
+
 .telegram-link-preview {
   display: flex;
   align-items: stretch;

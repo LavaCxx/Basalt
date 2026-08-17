@@ -156,8 +156,8 @@ export default function ArticleContent(props: ArticleContentProps) {
         /* Shiki: keep its own background, override only in dark mode */
         .dark .article-content-html .shiki,
         .dark .article-content-html .shiki span {
-          color: var(--color-dark-text-secondary, #a3a3a3) !important;
-          background-color: var(--color-dark-background-alt, #141414) !important;
+          color: var(--color-dark-text-secondary, #a8b0bc) !important;
+          background-color: var(--color-dark-background-alt, #1d2128) !important;
         }
 
         /* Inline code (outside pre) — Notion style: gray bg + red text */

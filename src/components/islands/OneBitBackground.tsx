@@ -11,7 +11,7 @@ const numStore = (key: string, def: number) =>
     decode: Number,
   });
 
-const opacityStore = numStore("bg-opacity", 0.03);
+const opacityStore = numStore("bg-opacity", 0.025);
 const thresholdStore = numStore("bg-threshold", 140);
 const speedStore = numStore("bg-speed", 0.10);
 const resStore = numStore("bg-resolution", 1200);
@@ -98,6 +98,8 @@ export default function OneBitBackground() {
       const sp = speed();
       const th = threshold();
       const t = (now - startTime) * 0.001 * sp;
+      const pixelOn = document.documentElement.classList.contains("dark") ? 0 : 255;
+      const pixelOff = pixelOn ? 0 : 255;
 
       // ===== 优化：合并为单次遍历（灰度 + Bayer 抖动同时完成）=====
       const invW = 1 / w;
@@ -120,7 +122,7 @@ export default function OneBitBackground() {
 
           // Bayer 4x4 抖动内联
           const bayer = (B4[by4 * 4 + (x % 4)] / B4_MAX) * 255 - 128;
-          const result = v * 255 + bayer > th ? 255 : 0;
+          const result = v * 255 + bayer > th ? pixelOn : pixelOff;
 
           const i = (y * w + x) * 4;
           data[i] = data[i + 1] = data[i + 2] = result;
@@ -184,7 +186,7 @@ export default function OneBitBackground() {
               <span class="onebit-val">{resolution()}px</span>
             </label>
             <button class="onebit-reset" onClick={() => {
-              opacityStore.set(0.03); thresholdStore.set(140);
+              opacityStore.set(0.025); thresholdStore.set(140);
               speedStore.set(0.10); resStore.set(1200);
             }}>重置默认</button>
             <div class="onebit-fps">{fps()} FPS</div>
