@@ -214,7 +214,7 @@ function getVideoEmbedUrl(url: string): string | null {
 
 function getNeteaseMusicEmbed(url: string): { url: string; kind: 'song' | 'playlist' | 'album' } | null {
   try {
-    const parsed = new URL(url);
+    const parsed = new URL(url.replace(/&amp;/g, '&'));
     const host = parsed.hostname.replace(/^www\./, '');
     if (host !== 'music.163.com') return null;
 
