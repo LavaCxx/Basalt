@@ -85,7 +85,12 @@ export async function getArticleBySlug(slug: string): Promise<FeedItem | null> {
     return await queryArticleBySlug(slug);
   } catch (error) {
     console.error(`Error fetching article ${slug}:`, error);
-    return null;
+    if (!import.meta.env.DEV) return null;
+    return (
+      mockFeedItems.find(
+        (item) => item.type === 'article' && item.url?.endsWith(slug)
+      ) || null
+    );
   }
 }
 
