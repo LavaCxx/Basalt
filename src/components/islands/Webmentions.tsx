@@ -98,6 +98,9 @@ export default function Webmentions(props: WebmentionsProps) {
   const [mentions, setMentions] = createSignal<ParsedMention[]>([]);
   const [loading, setLoading] = createSignal(true);
   const [error, setError] = createSignal(false);
+  const [sourceUrl, setSourceUrl] = createSignal("");
+  const [submitting, setSubmitting] = createSignal(false);
+  const [formMessage, setFormMessage] = createSignal("");
 
   onMount(async () => {
     const username = import.meta.env.PUBLIC_WEBMENTION_USERNAME;
@@ -121,6 +124,34 @@ export default function Webmentions(props: WebmentionsProps) {
     }
   });
 
+  const submitWebmention = async (event: SubmitEvent) => {
+    event.preventDefault();
+    const username = import.meta.env.PUBLIC_WEBMENTION_USERNAME;
+    const source = sourceUrl().trim();
+    if (!username || !props.target || !source) return;
+
+    setSubmitting(true);
+    setFormMessage("");
+    try {
+      const body = new URLSearchParams({ source, target: props.target });
+      const res = await fetch(`https://webmention.io/d/${username}/webmention`, {
+        method: "POST",
+        body,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error) {
+        throw new Error(data.error_description || data.error || `HTTP ${res.status}`);
+      }
+      setFormMessage("已提交，等待 webmention.io 验证处理。");
+      setSourceUrl("");
+    } catch (submitError) {
+      const message = submitError instanceof Error ? submitError.message : "提交失败";
+      setFormMessage(`提交失败：${message}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <section class="webmentions-section">
       <h2 class="webmentions-heading">
@@ -141,6 +172,29 @@ export default function Webmentions(props: WebmentionsProps) {
       <Show when={!loading() && !error() && mentions().length === 0}>
         <p class="webmentions-status">暂无 Webmentions</p>
       </Show>
+
+      <form class="webmention-form" onSubmit={submitWebmention}>
+        <label class="webmention-form-label" for="webmention-source">
+          引用了这篇文章？填写你的文章 URL 手动发送 Webmention
+        </label>
+        <div class="webmention-form-row">
+          <input
+            id="webmention-source"
+            class="webmention-input"
+            type="url"
+            value={sourceUrl()}
+            onInput={(event) => setSourceUrl(event.currentTarget.value)}
+            placeholder="https://example.com/post"
+            required
+          />
+          <button class="webmention-submit" type="submit" disabled={submitting()}>
+            {submitting() ? "发送中…" : "发送"}
+          </button>
+        </div>
+        <Show when={formMessage()}>
+          <p class="webmention-form-message">{formMessage()}</p>
+        </Show>
+      </form>
 
       <Show when={!loading() && !error() && mentions().length > 0}>
         <ul class="webmentions-list">
@@ -227,6 +281,76 @@ export default function Webmentions(props: WebmentionsProps) {
         .webmentions-status {
           font-family: var(--font-sans);
           font-size: 0.875rem;
+          color: var(--color-text-muted);
+        }
+
+        .webmention-form {
+          margin: 1.5rem 0 2rem;
+        }
+
+        .webmention-form-label {
+          display: block;
+          font-family: var(--font-sans);
+          font-size: 0.75rem;
+          color: var(--color-text-muted);
+          margin-bottom: 0.5rem;
+        }
+
+        .webmention-form-row {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .webmention-input {
+          flex: 1;
+          min-width: 0;
+          height: 2.25rem;
+          padding: 0 0.75rem;
+          font-family: var(--font-sans);
+          font-size: 0.8125rem;
+          color: var(--color-text-primary);
+          background: var(--color-background);
+          border: 1px solid var(--color-border-subtle, #e5e5e5);
+          border-radius: 0.375rem;
+          outline: none;
+          transition: border-color 0.2s;
+        }
+
+        .webmention-input::placeholder {
+          color: var(--color-text-muted);
+        }
+
+        .webmention-input:focus {
+          border-color: var(--color-text-secondary);
+        }
+
+        .webmention-submit {
+          height: 2.25rem;
+          padding: 0 1rem;
+          font-family: var(--font-sans);
+          font-size: 0.8125rem;
+          font-weight: 500;
+          color: var(--color-text-primary);
+          background: var(--color-background-alt, transparent);
+          border: 1px solid var(--color-border-subtle, #e5e5e5);
+          border-radius: 0.375rem;
+          cursor: pointer;
+          transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+        }
+
+        .webmention-submit:hover:not(:disabled) {
+          background: var(--color-border, transparent);
+        }
+
+        .webmention-submit:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+
+        .webmention-form-message {
+          margin: 0.5rem 0 0;
+          font-family: var(--font-sans);
+          font-size: 0.75rem;
           color: var(--color-text-muted);
         }
 
