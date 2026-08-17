@@ -41,7 +41,7 @@ function linkifyTelegramText(text: string): JSX.Element {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        class="text-accent break-all hover:underline underline-offset-4"
+        class="telegram-inline-link"
       >
         {label}
       </a>

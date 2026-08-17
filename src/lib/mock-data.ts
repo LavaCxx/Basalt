@@ -115,7 +115,7 @@ const response = await notion.databases.query({
   {
     id: 'micro-1',
     type: 'microblog',
-    content: '终于搭好了我的数字花园。再也不用把笔记散落在十个不同的 App 里了。目标：写一次，发到处，不维护。',
+    content: '终于搭好了我的数字花园。参考 https://example.com/digital-garden/a-very-long-path?q=1 再也不用把笔记散落在十个不同的 App 里了。目标：写一次，发到处，不维护。',
     date: new Date('2025-02-18'),
     source: 'telegram',
     metadata: {

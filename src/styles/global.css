@@ -1161,6 +1161,28 @@ html::view-transition-group(root) {
 }
 
 /* ===== Telegram link preview card ===== */
+.telegram-inline-link {
+  font-family: var(--font-mono);
+  font-size: 0.9375em;
+  color: #8a5a2b;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.telegram-inline-link:hover,
+.telegram-inline-link:focus-visible {
+  color: #b07c45;
+}
+
+.dark .telegram-inline-link {
+  color: #d0a678;
+}
+
+.dark .telegram-inline-link:hover,
+.dark .telegram-inline-link:focus-visible {
+  color: #e9c99c;
+}
+
 .telegram-link-preview {
   display: flex;
   align-items: stretch;
