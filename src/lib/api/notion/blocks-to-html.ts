@@ -235,6 +235,13 @@ function getNeteaseMusicEmbed(url: string): { url: string; kind: 'song' | 'playl
       return { url: `https://music.163.com/outchain/player?type=1&id=${id}`, kind: 'album' };
     }
 
+    if (path === 'outchain/player') {
+      const type = parsed.searchParams.get('type');
+      if (type === '0') return { url: parsed.toString(), kind: 'playlist' };
+      if (type === '1') return { url: parsed.toString(), kind: 'album' };
+      if (type === '2') return { url: parsed.toString(), kind: 'song' };
+    }
+
     return null;
   } catch {
     return null;

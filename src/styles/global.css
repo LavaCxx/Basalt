@@ -1146,6 +1146,11 @@ html::view-transition-group(root) {
   height: auto;
 }
 
+.prose-basalt .music-embed.album iframe,
+.article-content-html .music-embed.album iframe {
+  height: 430px;
+}
+
 .prose-basalt .music-embed iframe,
 .article-content-html .music-embed iframe {
   display: block;
