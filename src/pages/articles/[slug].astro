@@ -72,7 +72,7 @@ const readingTime = (metadata as any)?.readingTime || 5;
 
       {/* Content */}
       <div class="article-content prose-basalt">
-        <ArticleEnhancements client:load />
+        <ArticleEnhancements client:only="solid-js" />
         <div class="article-content-html" set:html={content} />
       </div>
 
