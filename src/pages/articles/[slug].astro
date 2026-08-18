@@ -25,7 +25,7 @@ const { slug } = Astro.params;
 const article = await getArticleBySlug(slug as string);
 
 if (!article) {
-  return Astro.redirect('/404');
+  return Astro.rewrite('/404');
 }
 
 const { title, content, date, image, metadata } = article;

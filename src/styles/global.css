@@ -98,6 +98,261 @@ body {
   background-image: radial-gradient(circle, var(--color-dark-border) 1px, transparent 1px);
 }
 
+/* ===== RISO Paper Theme ===== */
+.riso {
+  --color-background: #f2f8e9;
+  --color-background-alt: #e3f1d7;
+  --color-border: #9dbca4;
+  --color-border-subtle: #bcd6bf;
+  --color-text-primary: #173227;
+  --color-text-secondary: #2b4b3b;
+  --color-text-muted: #42604f;
+  --color-accent: #17855b;
+  --color-accent-hover: #116746;
+  --riso-plate-a: rgba(63, 154, 103, 0.18);
+  --riso-plate-b: rgba(24, 60, 44, 0.09);
+  --riso-offset-shadow: 4px 3px 0 var(--riso-plate-a), -2px 5px 0 var(--riso-plate-b);
+}
+
+.riso body {
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(rgba(18, 58, 41, 0.055) 1px, transparent 1.15px),
+    radial-gradient(circle at 12% 8%, rgba(63, 154, 103, 0.08), transparent 34%),
+    radial-gradient(circle at 86% 92%, rgba(23, 133, 91, 0.07), transparent 38%);
+  background-size: 7px 7px, auto, auto;
+  background-attachment: fixed, fixed, fixed;
+  color: var(--color-text-primary);
+}
+
+.riso ::selection {
+  background-color: rgba(23, 133, 91, 0.22);
+  color: var(--color-text-primary);
+}
+
+.riso .bg-dot-grid {
+  background-image: radial-gradient(circle, rgba(23, 133, 91, 0.24) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+.riso header,
+.riso footer,
+.riso nav {
+  backdrop-filter: blur(6px);
+}
+
+.riso button,
+.riso a[class*='border'],
+.riso .article-tag,
+.riso .friends-card,
+.riso .photo-card,
+.riso .feed-card {
+  box-shadow: var(--riso-offset-shadow);
+}
+
+.riso main section,
+.riso .article-page,
+.riso .friends-card,
+.riso .photo-card,
+.riso .feed-card {
+  background-image: radial-gradient(rgba(18, 58, 41, 0.045) 1px, transparent 1.1px);
+  background-size: 7px 7px;
+}
+
+.riso button,
+.riso a[class*='border'] {
+  background-image: radial-gradient(rgba(18, 58, 41, 0.04) 1px, transparent 1.1px);
+  background-size: 6px 6px;
+}
+
+.riso button:hover,
+.riso a[class*='border']:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 6px 5px 0 var(--riso-plate-a), -3px 6px 0 var(--riso-plate-b);
+}
+
+.riso button:active,
+.riso a[class*='border']:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--riso-plate-a);
+}
+
+.riso header nav a,
+.riso footer a {
+  text-shadow: none;
+}
+
+.riso header nav a.text-text-primary {
+  text-shadow: 2px 2px 0 var(--riso-plate-a), -2px 2px 0 var(--riso-plate-b);
+}
+
+.riso .article-page,
+.riso .article-content-wrapper,
+.riso .article-content-html {
+  background-color: transparent;
+  background-image: none;
+}
+
+.riso .article-content-html code,
+.riso .article-content-html .callout,
+.riso .prose-basalt code,
+.riso .prose-basalt .callout {
+  color: #17402d;
+  background-color: rgba(255, 255, 255, 0.58);
+}
+
+.riso .article-content-html pre,
+.riso .article-content-html .shiki,
+.riso .article-content-html .code-block {
+  color: var(--color-text-primary);
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  background-image: radial-gradient(rgba(18, 58, 41, 0.035) 1px, transparent 1.1px);
+  background-size: 7px 7px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--riso-offset-shadow);
+}
+
+.riso .article-content-html .shiki span,
+.riso .prose-basalt pre {
+  color: var(--color-text-primary);
+  background-color: transparent;
+}
+
+/* RISO Notion content mapping */
+.riso .article-content-html {
+  color: #2b4b3b;
+}
+.riso .article-content-html h1,
+.riso .article-content-html h2,
+.riso .article-content-html h3 {
+  color: #173227;
+}
+.riso .article-content-html h1 {
+  font-weight: 800;
+  text-shadow: 2px 2px 0 rgba(63, 154, 103, 0.26), -2px 2px 0 rgba(24, 60, 44, 0.14);
+}
+.riso .article-content-html h2 {
+  font-weight: 800;
+  text-shadow: 2px 1px 0 rgba(63, 154, 103, 0.22);
+}
+.riso .article-content-html h3 {
+  text-shadow: 1px 1px 0 rgba(63, 154, 103, 0.2);
+}
+.riso .article-content-html blockquote {
+  position: relative;
+  padding: 0.9rem 0.95rem 0.9rem 2.2rem;
+  background: rgba(23, 133, 91, 0.1);
+  border: 1px dashed rgba(39, 133, 91, 0.42);
+  border-radius: 0.45rem;
+  box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.14);
+}
+.riso .article-content-html blockquote::before {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.7rem;
+  color: rgba(23, 133, 91, 0.48);
+  font-family: var(--font-ui);
+  font-size: 2rem;
+  line-height: 1;
+  content: "“";
+}
+.riso .article-content-html .callout {
+  background: rgba(63, 154, 103, 0.12);
+  border: 1px solid rgba(23, 133, 91, 0.28);
+  border-left: 4px solid rgba(23, 133, 91, 0.72);
+  border-radius: 0.42rem;
+}
+.riso .article-content-html .notion-toggle,
+.riso .article-content-html .notion-todo {
+  background: rgba(255, 255, 255, 0.36);
+  border: 1px solid rgba(39, 133, 91, 0.22);
+  border-radius: 0.38rem;
+}
+.riso .article-content-html .notion-todo-checked {
+  color: #5b7367;
+  text-decoration-color: rgba(23, 133, 91, 0.45);
+}
+.riso .article-content-html .code-block {
+  overflow: hidden;
+  background: #173227 !important;
+  background-image: none !important;
+  border-color: #0f251c;
+}
+.riso .article-content-html .code-block::before {
+  color: rgba(242, 248, 233, 0.72);
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.riso .article-content-html .code-block pre,
+.riso .article-content-html .code-block code {
+  color: #dff0d4;
+  background: transparent !important;
+}
+.riso .article-content-html .code-block ::selection {
+  color: rgba(23, 50, 39, 0.96);
+  background: rgba(242, 248, 233, 0.92);
+}
+.riso .article-content-html figure,
+.riso .article-content-html .video-embed,
+.riso .article-content-html .music-embed {
+  border: 1px solid rgba(39, 133, 91, 0.32);
+  border-radius: 0.48rem;
+  overflow: hidden;
+  box-shadow: var(--riso-offset-shadow);
+  background: rgba(255, 255, 255, 0.36);
+}
+.riso .article-content-html figcaption,
+.riso .article-content-html .video-caption {
+  color: #4c6a59;
+}
+.riso .article-content-html .notion-bookmark {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(39, 133, 91, 0.35);
+  border-radius: 0.42rem;
+  box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.18);
+}
+.riso .article-content-html .notion-bookmark-title {
+  color: #1d4630;
+}
+.riso .article-content-html .notion-bookmark-desc,
+.riso .article-content-html .notion-bookmark-url {
+  color: #52705f;
+}
+.riso .article-content-html .notion-columns {
+  gap: 0.55rem;
+}
+.riso .article-content-html .notion-column {
+  padding: 0.6rem;
+  background: rgba(63, 154, 103, 0.1);
+  border: 1px dashed rgba(39, 133, 91, 0.28);
+  border-radius: 0.35rem;
+}
+.riso .article-content-html table {
+  border-collapse: collapse;
+}
+.riso .article-content-html th {
+  color: #17472f;
+  border-color: rgba(39, 133, 91, 0.24);
+}
+.riso .article-content-html td {
+  border-color: rgba(39, 133, 91, 0.2);
+}
+.riso .article-content-html hr {
+  height: 1px;
+  border: 0;
+  background-image: linear-gradient(90deg, transparent, rgba(39, 133, 91, 0.45), transparent);
+}
+
+/* ===== Native Theme Toggle ===== */
+.theme-icon {
+  display: none;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.theme-icon-light { display: block; }
+.riso .theme-icon-light { display: none; }
+.riso .theme-icon-riso { display: block; }
+
 /* ===== Typography Utilities ===== */
 .font-ui {
   font-family: var(--font-sans);
@@ -1282,3 +1537,13 @@ html::view-transition-group(root) {
     width: 6.5rem;
   }
 }
+
+/* ===== Native Theme Toggle ===== */
+.theme-icon {
+  display: none;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.theme-icon-light { display: block; }
+.riso .theme-icon-light { display: none; }
+.riso .theme-icon-riso { display: block; }

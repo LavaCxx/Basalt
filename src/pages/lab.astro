@@ -1,23 +1,1076 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import OneBitLab from '../components/islands/OneBitLab';
+import RisoPortraitLab from '../components/islands/RisoPortraitLab';
 ---
 
-<Layout title="1-bit Lab" description="1-bit 二值化实验">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<Layout title="Lab" description="网页视觉实验：1-bit 抖动与 RISO 插画风格">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <header class="mb-8">
-      <h1 class="font-ui text-3xl font-bold text-text-primary mb-2">1-bit Lab</h1>
+      <h1 class="font-ui text-3xl font-bold text-text-primary mb-2">Lab</h1>
       <p class="text-text-secondary text-sm">
-        
-        二值化 / Dithering 实验室。在这里探索 1-bit 美术在 Web 上的可能性。
+        视觉语言实验。从 1-bit 抖动到 RISO 错版插画，探索 Web 上的可交互图像。
       </p>
     </header>
 
-    <OneBitLab client:load />
+    <section class="lab-section" aria-labelledby="riso-lab-title">
+      <h2 id="riso-lab-title" class="font-ui text-xl font-semibold text-text-primary mb-4">RISO 治愈小动物</h2>
+      <RisoPortraitLab client:load />
+    </section>
+
+    <section class="lab-section" aria-labelledby="riso-ui-title">
+      <h2 id="riso-ui-title" class="font-ui text-xl font-semibold text-text-primary mb-4">RISO UI 组件试验</h2>
+      <div class="riso-ui-paper">
+        <div class="riso-ui-grid">
+          <article class="riso-ui-card">
+            <div class="riso-ui-tags">
+              <span>Riso Print</span>
+              <span>Green Plate</span>
+            </div>
+            <h3>纸面与分色层</h3>
+            <p>浅绿纸色作为基底，两层半透明绿色错位叠印，形成印刷品的手工温度。</p>
+            <div class="riso-ui-actions">
+              <button class="riso-ui-primary">Primary</button>
+              <button>Secondary</button>
+            </div>
+          </article>
+
+          <article class="riso-ui-card riso-ui-media">
+            <div class="riso-ui-frame" aria-hidden="true"></div>
+            <div class="riso-ui-caption">
+              <strong>Halftone Frame</strong>
+              <span>网点 + 错版边框</span>
+            </div>
+          </article>
+
+          <blockquote class="riso-ui-quote">
+            <p>丝网版画的透明油墨重叠后，会生成第三种颜色；界面中的层也可以这样相遇。</p>
+          </blockquote>
+
+          <nav class="riso-ui-card riso-ui-nav-card" aria-label="RISO navigation demo">
+            <h3>Navigation</h3>
+            <div class="riso-ui-nav">
+              <a href="#riso-ui-title" aria-current="page">Home</a>
+              <a href="#riso-ui-title">Archive</a>
+              <a href="#riso-ui-title">Albums</a>
+              <a href="#riso-ui-title">Lab</a>
+            </div>
+          </nav>
+
+          <article class="riso-ui-card riso-ui-form-card">
+            <h3>Search &amp; Filters</h3>
+            <label class="riso-ui-field">
+              <span>Search</span>
+              <input type="search" placeholder="Search articles, albums, links..." />
+            </label>
+            <div class="riso-ui-checks">
+              <label><input type="checkbox" checked /><span>Illustration</span></label>
+              <label><input type="checkbox" /><span>Photography</span></label>
+              <label><input type="radio" name="riso-ui-demo" checked /><span>Green plate</span></label>
+              <label><input type="radio" name="riso-ui-demo" /><span>Blue plate</span></label>
+            </div>
+            <select aria-label="Sort demo">
+              <option>Newest first</option>
+              <option>Oldest first</option>
+            </select>
+          </article>
+
+          <article class="riso-ui-card riso-ui-post-card">
+            <div class="riso-ui-tags">
+              <span>Article</span>
+              <span>3 min</span>
+            </div>
+            <h3>Offset Printed Post</h3>
+            <p>标题、摘要、日期与阅读时长使用清晰的编辑层级；纸面质感保留在卡片上。</p>
+            <div class="riso-ui-meta">
+              <time datetime="2026-08-18">Aug 18, 2026</time>
+              <span>Reading demo</span>
+            </div>
+          </article>
+
+          <article class="riso-ui-card riso-ui-media">
+            <div class="riso-ui-frame riso-ui-frame-blue" aria-hidden="true"></div>
+            <div class="riso-ui-caption">
+              <strong>Album Cell</strong>
+              <span>Another plate</span>
+            </div>
+          </article>
+
+          <article class="riso-ui-card">
+            <h3>States</h3>
+            <div class="riso-ui-states">
+              <span class="riso-ui-success">Published</span>
+              <span class="riso-ui-warning">Draft</span>
+              <span class="riso-ui-danger">Sync failed</span>
+            </div>
+            <div class="riso-ui-progress" role="progressbar" aria-label="Demo progress" aria-valuenow="68">
+              <span class="riso-ui-progress-value"></span>
+            </div>
+            <p class="riso-ui-hint">状态色保持 RISO 油墨的透明感，而不是使用实心屏幕色。</p>
+          </article>
+
+          <article class="riso-ui-card">
+            <h3>Pagination</h3>
+            <div class="riso-ui-pagination">
+              <button aria-label="Previous page">←</button>
+              <button class="active">1</button>
+              <button>2</button>
+              <button>3</button>
+              <button aria-label="Next page">→</button>
+            </div>
+          </article>
+
+          <article class="riso-ui-card riso-ui-list-card">
+            <h3>Link List</h3>
+            <ul>
+              <li><a href="#riso-ui-title">Paper Press</a><span>Friend</span></li>
+              <li><a href="#riso-ui-title">Green Plate</a><span>RSS</span></li>
+              <li><a href="#riso-ui-title">Halftone Club</a><span>Archive</span></li>
+            </ul>
+          </article>
+
+          <article class="riso-ui-card">
+            <h3>Alert</h3>
+            <div class="riso-ui-alert">同步完成：3 篇文章、2 个相册已经进入纸面。</div>
+            <div class="riso-ui-alert riso-ui-alert-error">同步失败：RSS 源暂时不可用。</div>
+          </article>
+
+          <article class="riso-ui-card riso-ui-table-card">
+            <h3>Data Table</h3>
+            <div class="riso-ui-table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Source</th><th>Type</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Notion</td><td>Article</td><td><span class="riso-ui-success">Ready</span></td></tr>
+                  <tr><td>Telegram</td><td>Album</td><td><span class="riso-ui-warning">Partial</span></td></tr>
+                  <tr><td>RSS</td><td>Link</td><td><span class="riso-ui-success">Ready</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="riso-ui-card riso-ui-type-card">
+            <h3>Long-form Typography</h3>
+            <div class="riso-ui-longform">
+              <p>长文阅读区需要主动降噪：保留纸色和轻微边缘，但取消正文上的重网点与错版文字。这样 RISO 的性格仍在，读者眼睛不会被印刷过程干扰。</p>
+              <h4>Small heading</h4>
+              <p>标题、引用和图片可以承担更多印刷表现；正文负责稳定、均匀和可读。</p>
+            </div>
+          </article>
+
+          <article class="riso-ui-card riso-ui-avatar-card">
+            <h3>Avatar &amp; Identity</h3>
+            <div class="riso-ui-avatars">
+              <span aria-hidden="true">V</span>
+              <span aria-hidden="true">R</span>
+              <span aria-hidden="true">P</span>
+              <span aria-hidden="true">+</span>
+            </div>
+            <p>头像使用叠印底版、网点和深绿描边，适合站主、友链和评论区身份。</p>
+          </article>
+
+          <article class="riso-ui-card riso-ui-notion-card">
+            <h3>Notion Blocks</h3>
+            <div class="riso-ui-notion">
+              <h1>Heading 1</h1>
+              <h2>Heading 2</h2>
+              <h3>Heading 3</h3>
+              <p>正文使用低噪纸面，标题保留轻微错版。Inline <strong>bold</strong>、<em>italic</em>、<code>code</code> 和 <a href="#riso-ui-title">link</a> 都能落在同一层油墨上。</p>
+              <ul>
+                <li>Bulleted list</li>
+                <li>Second item</li>
+              </ul>
+              <ol>
+                <li>Numbered list</li>
+                <li>Second step</li>
+              </ol>
+              <hr />
+
+              <blockquote class="riso-ui-notion-quote">
+                <p>丝网版画的透明油墨重叠后，会生成第三种颜色；界面中的层也可以这样相遇。</p>
+              </blockquote>
+
+              <aside class="callout">
+                <span class="callout-icon">🌱</span>
+                <div class="callout-content"><strong>Callout block</strong> — 半透明绿色底版承担提示层级，不额外使用高饱和屏幕色。</div>
+              </aside>
+
+              <details class="notion-toggle" open>
+                <summary>Toggle block</summary>
+                <div class="riso-ui-toggle-body">展开后的正文保持稳定行高，只在边框和背景上保留叠印感。</div>
+              </details>
+
+              <label class="notion-todo">
+                <input type="checkbox" disabled checked />
+                <span class="notion-todo-checked">Checked todo</span>
+              </label>
+              <label class="notion-todo">
+                <input type="checkbox" disabled />
+                <span>Open todo</span>
+              </label>
+
+              <div class="code-block" data-lang="JavaScript">
+                <pre><code class="language-javascript"><span class="token keyword">const</span> <span class="token function">printRiso</span> <span class="token operator">=</span> <span class="token parameter">paper</span> <span class="token operator">=&gt;</span>
+  paper <span class="token operator">+</span> <span class="token string">' + halftone'</span><span class="token punctuation">;</span></code></pre>
+              </div>
+
+              <figure class="riso-ui-notion-figure">
+                <div class="riso-ui-frame" aria-hidden="true"></div>
+                <figcaption>Image block caption</figcaption>
+              </figure>
+
+              <a class="notion-bookmark" href="#riso-ui-title">
+                <span class="riso-ui-bookmark-cover" aria-hidden="true"></span>
+                <span class="notion-bookmark-text">
+                  <span class="notion-bookmark-icon-row">🔗</span>
+                  <span class="notion-bookmark-title">Bookmark block</span>
+                  <span class="notion-bookmark-desc">链接卡片保留纸面填充，缩略图使用网点分色层。</span>
+                  <span class="notion-bookmark-url">example.com</span>
+                </span>
+              </a>
+
+              <div class="notion-column-list">
+                <div class="notion-column"><p>Column 1</p></div>
+                <div class="notion-column"><p>Column 2</p></div>
+                <div class="notion-column"><p>Column 3</p></div>
+              </div>
+
+              <div class="riso-ui-embed">
+                <div class="riso-ui-embed-inner" aria-hidden="true">Video / Embed</div>
+                <p class="video-caption">Embed caption</p>
+              </div>
+
+              <table class="notion-table has-col-header">
+                <thead><tr><th>Name</th><th>Status</th><th>Tag</th></tr></thead>
+                <tbody>
+                  <tr><td>Page A</td><td>Done</td><td>Design</td></tr>
+                  <tr><td>Page B</td><td>Doing</td><td>Writing</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="lab-section" aria-labelledby="onebit-lab-title">
+      <h2 id="onebit-lab-title" class="font-ui text-xl font-semibold text-text-primary mb-4">1-bit Lab</h2>
+      <OneBitLab client:load />
+    </section>
   </div>
 </Layout>
 
 <style is:global>
+/* ===== Lab 布局 ===== */
+.lab-section {
+  margin-bottom: 4rem;
+}
+.riso-lab {
+  display: grid;
+  grid-template-columns: minmax(0, 38rem) minmax(18rem, 22rem);
+  gap: 1.25rem;
+  align-items: start;
+}
+.riso-stage {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: #eff7e6;
+}
+.riso-stage canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.riso-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--color-background-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+}
+.riso-field {
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+.riso-buttons,
+.riso-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.riso-buttons button,
+.riso-actions button {
+  padding: 0.42rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 0.3rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.riso-buttons button:hover,
+.riso-actions button:hover,
+.riso-buttons button.active,
+.riso-actions button.active {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-muted);
+}
+.riso-actions .primary {
+  color: var(--color-background);
+  background: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+}
+.riso-actions .primary:hover {
+  color: var(--color-background);
+  opacity: 0.82;
+}
+.riso-field input[type="range"] {
+  width: 100%;
+  accent-color: #24885a;
+}
+.riso-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.65;
+  color: var(--color-text-muted);
+}
+
+/* ===== RISO UI 组件试验 ===== */
+.riso-ui-paper {
+  padding: 1.25rem;
+  overflow: hidden;
+  color: #173227;
+  background:
+    radial-gradient(rgba(18, 58, 41, 0.075) 1px, transparent 1.1px),
+    linear-gradient(145deg, #f2f8e9, #e3f1d7);
+  background-size: 7px 7px, auto;
+  border: 1px solid #9dbca4;
+  border-radius: 0.65rem;
+  box-shadow: 5px 4px 0 rgba(63, 154, 103, 0.2), -3px 6px 0 rgba(24, 60, 44, 0.08);
+}
+.riso-ui-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.riso-ui-card,
+.riso-ui-quote {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.15rem;
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid #27855b;
+  border-radius: 0.55rem;
+  box-shadow: 4px 3px 0 rgba(63, 154, 103, 0.22), -2px 5px 0 rgba(24, 60, 44, 0.1);
+}
+.riso-ui-card h3 {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 0 rgba(63, 154, 103, 0.28), -2px 2px 0 rgba(24, 60, 44, 0.14);
+}
+.riso-ui-card p,
+.riso-ui-quote p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.75;
+  color: #2b4b3b;
+}
+.riso-ui-tags {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.riso-ui-tags span {
+  padding: 0.22rem 0.48rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #16472f;
+  background: rgba(63, 154, 103, 0.18);
+  border: 1px solid rgba(23, 133, 91, 0.45);
+  border-radius: 999px;
+}
+.riso-ui-actions {
+  display: flex;
+  gap: 0.55rem;
+  margin-top: auto;
+}
+.riso-ui-actions button {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: #173227;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid #27855b;
+  border-radius: 0.4rem;
+  box-shadow: 3px 2px 0 rgba(63, 154, 103, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.riso-ui-actions .riso-ui-primary {
+  color: #f2f8e9;
+  background: rgba(23, 133, 91, 0.9);
+}
+.riso-ui-actions button:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 4px 0 rgba(63, 154, 103, 0.28);
+}
+.riso-ui-actions button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 rgba(63, 154, 103, 0.22);
+}
+.riso-ui-media {
+  justify-content: space-between;
+}
+.riso-ui-frame {
+  min-height: 210px;
+  background:
+    radial-gradient(rgba(18, 58, 41, 0.16) 1.5px, transparent 2px),
+    radial-gradient(circle at 30% 25%, rgba(63, 154, 103, 0.5), transparent 58%),
+    radial-gradient(circle at 72% 70%, rgba(23, 133, 91, 0.5), transparent 55%);
+  background-size: 8px 8px, auto, auto;
+  border: 1px solid rgba(23, 60, 44, 0.55);
+  border-radius: 0.45rem;
+  mix-blend-mode: multiply;
+}
+.riso-ui-caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.riso-ui-caption strong {
+  font-size: 0.84rem;
+}
+.riso-ui-caption span {
+  font-size: 0.7rem;
+  color: #42604f;
+}
+.riso-ui-quote {
+  grid-column: 1 / -1;
+  background: rgba(23, 133, 91, 0.1);
+  border-style: dashed;
+}
+.riso-ui-quote::before {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.75rem;
+  font-size: 2rem;
+  line-height: 1;
+  color: rgba(23, 133, 91, 0.45);
+  content: "“";
+}
+.riso-ui-quote p {
+  max-width: 46rem;
+  margin-left: 1.5rem;
+}
+
+.riso-ui-nav-card,
+.riso-ui-list-card {
+  grid-column: 1 / -1;
+}
+.riso-ui-nav {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+.riso-ui-nav a {
+  padding: 0.45rem 0.72rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: #244b39;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.34);
+  border: 1px solid rgba(39, 133, 91, 0.45);
+  border-radius: 0.38rem;
+  transition: all 0.15s ease;
+}
+.riso-ui-nav a:hover,
+.riso-ui-nav a[aria-current='page'] {
+  color: #f2f8e9;
+  background: rgba(23, 133, 91, 0.82);
+  border-color: #27855b;
+  box-shadow: 3px 2px 0 rgba(63, 154, 103, 0.24);
+}
+.riso-ui-form-card {
+  gap: 0.75rem;
+}
+.riso-ui-field {
+  display: grid;
+  gap: 0.35rem;
+}
+.riso-ui-field span,
+.riso-ui-checks label,
+.riso-ui-hint {
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: #42604f;
+}
+.riso-ui-field input,
+.riso-ui-form-card select {
+  width: 100%;
+  padding: 0.55rem 0.68rem;
+  color: #1d3b2d;
+  font-size: 0.8rem;
+  background: rgba(248, 255, 242, 0.72);
+  border: 1px solid rgba(39, 133, 91, 0.5);
+  border-radius: 0.38rem;
+  box-shadow: inset 2px 2px 0 rgba(63, 154, 103, 0.1);
+  outline: none;
+}
+.riso-ui-field input::placeholder {
+  color: rgba(66, 96, 79, 0.68);
+}
+.riso-ui-field input:focus,
+.riso-ui-form-card select:focus {
+  border-color: #27855b;
+  box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.22);
+}
+.riso-ui-checks {
+  display: flex;
+  gap: 0.75rem 1rem;
+  flex-wrap: wrap;
+}
+.riso-ui-checks label,
+.riso-ui-list-card li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.riso-ui-checks input {
+  width: 0.95rem;
+  height: 0.95rem;
+  accent-color: #17855b;
+}
+.riso-ui-post-card p {
+  flex-grow: 1;
+}
+.riso-ui-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.45rem;
+  font-size: 0.7rem;
+  color: #4c6a59;
+  border-top: 1px dashed rgba(39, 133, 91, 0.28);
+}
+.riso-ui-frame-blue {
+  background:
+    radial-gradient(rgba(18, 58, 41, 0.15) 1.5px, transparent 2px),
+    radial-gradient(circle at 25% 75%, rgba(52, 126, 177, 0.45), transparent 58%),
+    radial-gradient(circle at 76% 24%, rgba(23, 133, 91, 0.45), transparent 54%);
+  background-size: 8px 8px, auto, auto;
+}
+.riso-ui-states,
+.riso-ui-avatars,
+.riso-ui-pagination {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.riso-ui-success,
+.riso-ui-warning,
+.riso-ui-danger {
+  padding: 0.22rem 0.5rem;
+  font-size: 0.67rem;
+  font-weight: 750;
+  border: 1px solid;
+  border-radius: 999px;
+}
+.riso-ui-success {
+  color: #17472f;
+  background: rgba(63, 154, 103, 0.18);
+  border-color: rgba(23, 133, 91, 0.45);
+}
+.riso-ui-warning {
+  color: #5e4a10;
+  background: rgba(228, 189, 83, 0.2);
+  border-color: rgba(177, 135, 24, 0.46);
+}
+.riso-ui-danger {
+  color: #662726;
+  background: rgba(203, 91, 82, 0.16);
+  border-color: rgba(166, 56, 48, 0.44);
+}
+.riso-ui-progress {
+  width: 100%;
+  height: 0.65rem;
+  overflow: hidden;
+  background: rgba(23, 133, 91, 0.12);
+  border: 1px solid rgba(39, 133, 91, 0.3);
+  border-radius: 999px;
+}
+.riso-ui-progress-value {
+  display: block;
+  width: 68%;
+  height: 100%;
+  background: repeating-linear-gradient(90deg, rgba(23, 133, 91, 0.88) 0 7px, rgba(63, 154, 103, 0.76) 7px 14px);
+}
+.riso-ui-hint {
+  margin: 0;
+}
+.riso-ui-pagination {
+  margin-top: auto;
+}
+.riso-ui-pagination button {
+  min-width: 2.15rem;
+  padding: 0.4rem 0.58rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #244b39;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(39, 133, 91, 0.46);
+  border-radius: 0.38rem;
+  box-shadow: 2px 2px 0 rgba(63, 154, 103, 0.2);
+}
+.riso-ui-pagination button:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 3px 0 rgba(63, 154, 103, 0.25);
+}
+.riso-ui-pagination button.active {
+  color: #f2f8e9;
+  background: rgba(23, 133, 91, 0.9);
+}
+.riso-ui-list-card ul {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.riso-ui-list-card li {
+  justify-content: space-between;
+  padding: 0.55rem 0.65rem;
+  background: rgba(255, 255, 255, 0.34);
+  border: 1px solid rgba(39, 133, 91, 0.28);
+  border-radius: 0.38rem;
+}
+.riso-ui-list-card a {
+  color: #1d3b2d;
+  font-size: 0.82rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+.riso-ui-list-card li span {
+  font-size: 0.66rem;
+  color: #52705f;
+}
+.riso-ui-alert {
+  padding: 0.65rem 0.75rem;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #1d4630;
+  background: rgba(63, 154, 103, 0.12);
+  border: 1px dashed rgba(23, 133, 91, 0.45);
+  border-radius: 0.42rem;
+}
+.riso-ui-alert-error {
+  color: #662726;
+  background: rgba(203, 91, 82, 0.12);
+  border-color: rgba(166, 56, 48, 0.42);
+}
+.riso-ui-alert + .riso-ui-alert {
+  margin-top: 0.55rem;
+}
+.riso-ui-table-wrap {
+  overflow-x: auto;
+}
+.riso-ui-table-card table {
+  width: 100%;
+  min-width: 25rem;
+  border-collapse: collapse;
+}
+.riso-ui-table-card th,
+.riso-ui-table-card td {
+  padding: 0.55rem 0.6rem;
+  font-size: 0.76rem;
+  text-align: left;
+  border-bottom: 1px dashed rgba(39, 133, 91, 0.24);
+}
+.riso-ui-table-card th {
+  color: #17472f;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.riso-ui-table-card tr:last-child td {
+  border-bottom: 0;
+}
+.riso-ui-longform {
+  padding: 0.85rem;
+  background: rgba(248, 255, 242, 0.64);
+  border: 1px solid rgba(39, 133, 91, 0.2);
+  border-radius: 0.42rem;
+}
+.riso-ui-longform h4 {
+  margin: 0.85rem 0 0.35rem;
+  font-size: 0.84rem;
+  text-shadow: 1px 1px 0 rgba(63, 154, 103, 0.24);
+}
+.riso-ui-longform p {
+  margin: 0;
+}
+.riso-ui-avatars {
+  margin-top: auto;
+}
+.riso-ui-avatars span {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #17472f;
+  background:
+    radial-gradient(rgba(18, 58, 41, 0.13) 1px, transparent 1.2px),
+    radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.68), transparent 58%),
+    rgba(63, 154, 103, 0.22);
+  background-size: 5px 5px, auto, auto;
+  border: 1px solid #27855b;
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 rgba(63, 154, 103, 0.2);
+}
+
+.riso-ui-notion-card {
+  grid-column: 1 / -1;
+}
+.riso-ui-notion {
+  display: grid;
+  gap: 1rem;
+  padding: 0.9rem;
+  color: #2b4b3b;
+  background: rgba(248, 255, 242, 0.58);
+  border: 1px solid rgba(39, 133, 91, 0.2);
+  border-radius: 0.48rem;
+}
+.riso-ui-notion h1,
+.riso-ui-notion h2,
+.riso-ui-notion h3 {
+  margin: 0;
+  font-family: var(--font-ui);
+  color: #173227;
+  line-height: 1.3;
+}
+.riso-ui-notion h1 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  text-shadow: 2px 2px 0 rgba(63, 154, 103, 0.26), -2px 2px 0 rgba(24, 60, 44, 0.14);
+}
+.riso-ui-notion h2 {
+  font-size: 1.12rem;
+  font-weight: 800;
+  text-shadow: 2px 1px 0 rgba(63, 154, 103, 0.22);
+}
+.riso-ui-notion h3 {
+  font-size: 0.98rem;
+  font-weight: 750;
+  text-shadow: 1px 1px 0 rgba(63, 154, 103, 0.2);
+}
+.riso-ui-notion p,
+.riso-ui-notion li,
+.riso-ui-notion figcaption,
+.riso-ui-notion td {
+  font-size: 0.82rem;
+  line-height: 1.75;
+}
+.riso-ui-notion ul,
+.riso-ui-notion ol {
+  margin: 0;
+  padding-left: 1.35rem;
+  list-style-position: outside;
+}
+.riso-ui-notion ul {
+  list-style-type: disc;
+}
+.riso-ui-notion ol {
+  list-style-type: decimal;
+}
+.riso-ui-notion li + li {
+  margin-top: 0.25rem;
+}
+.riso-ui-notion li::marker {
+  color: rgba(23, 133, 91, 0.8);
+}
+.riso-ui-notion a {
+  color: #146645;
+  text-decoration: underline;
+  text-decoration-color: rgba(23, 133, 91, 0.42);
+  text-underline-offset: 0.2em;
+}
+.riso-ui-notion code {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.78em;
+  color: #16472f;
+  background: rgba(63, 154, 103, 0.12);
+  border-radius: 0.22rem;
+}
+.riso-ui-notion hr {
+  height: 1px;
+  border: 0;
+  background-image: linear-gradient(90deg, transparent, rgba(39, 133, 91, 0.45), transparent);
+}
+.riso-ui-notion-quote {
+  position: relative;
+  margin: 0;
+  padding: 0.9rem 0.95rem 0.9rem 2.2rem;
+  background: rgba(23, 133, 91, 0.1);
+  border: 1px dashed rgba(39, 133, 91, 0.42);
+  border-radius: 0.45rem;
+  box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.14);
+}
+.riso-ui-notion-quote::before {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.7rem;
+  color: rgba(23, 133, 91, 0.48);
+  font-family: var(--font-ui);
+  font-size: 2rem;
+  line-height: 1;
+  content: "“";
+}
+.riso-ui-notion-quote p {
+  max-width: 46rem;
+}
+.riso-ui-notion .callout {
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.8rem;
+  background: rgba(63, 154, 103, 0.12);
+  border: 1px solid rgba(23, 133, 91, 0.28);
+  border-left: 4px solid rgba(23, 133, 91, 0.72);
+  border-radius: 0.42rem;
+}
+.riso-ui-notion .callout-icon {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.riso-ui-notion .callout-content {
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+.riso-ui-notion .notion-toggle,
+.riso-ui-notion .notion-todo {
+  padding: 0.65rem 0.72rem;
+  background: rgba(255, 255, 255, 0.36);
+  border: 1px solid rgba(39, 133, 91, 0.22);
+  border-radius: 0.38rem;
+}
+.riso-ui-notion .notion-toggle summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1d4630;
+}
+.riso-ui-toggle-body {
+  padding-top: 0.55rem;
+  font-size: 0.79rem;
+  line-height: 1.7;
+  color: #3d5c4c;
+}
+.riso-ui-notion .notion-todo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.riso-ui-notion .notion-todo input {
+  width: 0.95rem;
+  height: 0.95rem;
+  accent-color: #17855b;
+}
+.riso-ui-notion .notion-todo span {
+  font-size: 0.81rem;
+}
+.riso-ui-notion .notion-todo-checked {
+  color: #5b7367;
+  text-decoration: line-through;
+  text-decoration-color: rgba(23, 133, 91, 0.45);
+}
+.riso-ui-notion .code-block {
+  overflow: hidden;
+  background: #173227;
+  border: 1px solid #0f251c;
+  border-radius: 0.45rem;
+  box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.2);
+}
+.riso-ui-notion .code-block::before {
+  display: block;
+  padding: 0.42rem 0.72rem;
+  font-size: 0.65rem;
+  font-weight: 750;
+  color: rgba(242, 248, 233, 0.72);
+  content: attr(data-lang);
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.riso-ui-notion .code-block pre {
+  margin: 0;
+  padding: 0.75rem;
+  overflow-x: auto;
+}
+.riso-ui-notion .code-block code {
+  padding: 0;
+  color: #dff0d4;
+  background: none;
+  font-size: 0.76rem;
+  line-height: 1.65;
+}
+.riso-ui-notion .code-block .token.keyword {
+  color: #86d99b;
+}
+.riso-ui-notion .code-block .token.string {
+  color: #e6c98a;
+}
+.riso-ui-notion .code-block .token.function {
+  color: #b9dc8e;
+}
+.riso-ui-notion .code-block .token.parameter,
+.riso-ui-notion .code-block .token.operator {
+  color: #a9c8e2;
+}
+.riso-ui-notion .code-block .token.punctuation {
+  color: rgba(223, 240, 212, 0.65);
+}
+.riso-ui-notion .code-block ::selection {
+  color: rgba(23, 50, 39, 0.96);
+  background: rgba(242, 248, 233, 0.92);
+}
+.riso-ui-notion-figure {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+}
+.riso-ui-notion-figure .riso-ui-frame {
+  min-height: 150px;
+}
+.riso-ui-notion-figure figcaption,
+.riso-ui-notion .video-caption {
+  color: #4c6a59;
+}
+.riso-ui-notion .notion-bookmark {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5.5rem;
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(39, 133, 91, 0.35);
+  border-radius: 0.42rem;
+  box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.18);
+}
+.riso-ui-notion .notion-bookmark-text {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.68rem;
+}
+.riso-ui-notion .notion-bookmark-title {
+  font-size: 0.8rem;
+  font-weight: 750;
+  color: #1d4630;
+}
+.riso-ui-notion .notion-bookmark-desc,
+.riso-ui-notion .notion-bookmark-url {
+  overflow: hidden;
+  font-size: 0.69rem;
+  color: #52705f;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.riso-ui-bookmark-cover {
+  min-height: 100%;
+  background:
+    radial-gradient(rgba(18, 58, 41, 0.16) 1.2px, transparent 1.6px),
+    radial-gradient(circle at 65% 35%, rgba(63, 154, 103, 0.55), transparent 62%);
+  background-size: 6px 6px, auto;
+  border-left: 1px solid rgba(39, 133, 91, 0.28);
+}
+.riso-ui-notion .notion-column-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+.riso-ui-notion .notion-column {
+  padding: 0.6rem;
+  font-size: 0.76rem;
+  text-align: center;
+  background: rgba(63, 154, 103, 0.1);
+  border: 1px dashed rgba(39, 133, 91, 0.28);
+  border-radius: 0.35rem;
+}
+.riso-ui-embed {
+  display: grid;
+  gap: 0.4rem;
+}
+.riso-ui-embed-inner {
+  display: grid;
+  min-height: 145px;
+  place-items: center;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: rgba(23, 60, 44, 0.7);
+  background:
+    radial-gradient(rgba(18, 58, 41, 0.12) 1px, transparent 1.3px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.42), rgba(63, 154, 103, 0.16));
+  background-size: 6px 6px, auto;
+  border: 1px solid rgba(39, 133, 91, 0.38);
+  border-radius: 0.42rem;
+}
+.riso-ui-notion table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.riso-ui-notion th {
+  padding: 0.48rem 0.55rem;
+  color: #17472f;
+  font-size: 0.67rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+}
+.riso-ui-notion td {
+  padding: 0.5rem 0.55rem;
+  border-top: 1px dashed rgba(39, 133, 91, 0.22);
+}
+@media (max-width: 820px) {
+  .riso-lab {
+    grid-template-columns: 1fr;
+  }
+  .riso-ui-grid {
+    grid-template-columns: 1fr;
+  }
+  .riso-ui-paper {
+    padding: 0.8rem;
+  }
+  .riso-ui-notion .notion-bookmark {
+    grid-template-columns: 1fr;
+  }
+  .riso-ui-bookmark-cover {
+    min-height: 4rem;
+    border-top: 1px solid rgba(39, 133, 91, 0.28);
+    border-left: 0;
+  }
+  .riso-ui-notion .notion-column-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ===== 1-Bit Lab 实验室专用样式 ===== */
 .onebit-lab {
   font-family: var(--font-sans);

@@ -34,7 +34,7 @@ export default function Comments(props: CommentsProps) {
 
   onMount(() => {
     // Initial theme detection
-    setIsDark(document.documentElement.classList.contains('dark'));
+    setIsDark(false);
 
     // Giscus configuration
     const giscusConfig: Record<string, string | undefined> = {
@@ -76,7 +76,7 @@ export default function Comments(props: CommentsProps) {
 
     // Listen for theme changes
     const observer = new MutationObserver(() => {
-      const newIsDark = document.documentElement.classList.contains('dark');
+      const newIsDark = false;
       setIsDark(newIsDark);
     });
 

@@ -19,9 +19,17 @@ Configure local bindings from `wrangler.toml` and secrets through Wrangler; use 
 
 TypeScript uses the repository's strict Astro configuration. Keep imports explicit and preserve Solid's JSX import source. Use two-space indentation, PascalCase for component filenames and exports, camelCase for functions and variables, and descriptive route-level filenames. Astro files should contain markup-first page/component logic; move reusable behavior into `src/lib` or focused island components. Follow Tailwind conventions in existing components and keep the Linear-style thin borders, restrained surfaces, and editorial typography.
 
+## RISO Theme Direction
+
+- The public theme switch is intentionally **Light ↔ RISO**; do not reintroduce Dark/System through the visible toggle without explicit user approval. Legacy dark CSS may remain for future restoration.
+- RISO is a full-site style system, not only a background color swap: preserve the **paper green base, CSS halftone dots, translucent overprint surfaces, and misregistered plate shadows**.
+- Keep halftone texture visible globally at a restrained opacity, but reduce noise inside long-form article content and code blocks for readability.
+- Prefer semantic CSS variables and `html.riso` overrides over restructuring components. `/drive` remains a standalone visual experience and should not be force-restyled.
+- Interactive controls should use subtle offset-print hover/active states: hover increases misregistration slightly; active presses the element toward the paper.
+
 ## Testing Guidelines
 
-There is no automated test suite or coverage requirement. At minimum, run `pnpm build` before submitting. Exercise changed routes and sync behavior locally, including the mock-data fallback when appropriate. For UI changes, check both light and dark themes as well as responsive layouts.
+There is no automated test suite or coverage requirement. At minimum, run `pnpm build` before submitting. Exercise changed routes and sync behavior locally, including the mock-data fallback when appropriate. For UI changes, check both Light and RISO themes as well as responsive layouts.
 
 ## Commit & Pull Request Guidelines
 
@@ -34,3 +42,11 @@ Never commit credentials, private Notion tokens, or database contents. Secrets m
 ## Agent Workflow
 
 For style-related features, pause before committing so the user can inspect the local result first. For other changes, test and build, then push directly to the repository to trigger the Cloudflare Pages deployment; afterward, the user will verify the result online.
+- The `/lab` RISO UI section is the reference implementation. Its component recipe is:
+  - **Paper:** gradient `#f2f8e9 → #e3f1d7`, fine dot overlay `rgba(18,58,41,0.075)` at `7px`, soft green edge, and dual offset plate shadows.
+  - **Cards:** translucent white fill (`rgba(255,255,255,0.48)`), `#27855b` border, dual misregistration shadows (`rgba(63,154,103,0.22)` and `rgba(24,60,44,0.1)`), generous padding, and rounded paper corners.
+  - **Titles:** green dual text-shadow offsets to echo misregistered plates; body text stays solid and readable.
+  - **Tags:** uppercase green capsules using translucent overprint fill (`rgba(63,154,103,0.18)`) and soft green borders.
+  - **Buttons:** secondary controls use translucent paper fill; primary uses `rgba(23,133,91,0.9)` overprint green. Hover moves slightly away from the paper and increases shadow; active moves into the paper and reduces shadow.
+  - **Media frames:** layered radial halftone and green plate gradients, `multiply` blending, deep-green frame, and a caption baseline.
+  - **Quotes:** translucent green overprint surface, dashed green border, oversized decorative quotation mark, and restrained width.
