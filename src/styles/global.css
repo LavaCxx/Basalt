@@ -171,6 +171,13 @@ body {
   box-shadow: 6px 5px 0 var(--riso-plate-a), -3px 6px 0 var(--riso-plate-b);
 }
 
+.riso .toc-container button,
+.riso .toc-container button:hover,
+.riso .toc-container button:active {
+  transform: none;
+  box-shadow: none;
+}
+
 .riso button:active,
 .riso a[class*='border']:active {
   transform: translate(2px, 2px);
@@ -265,11 +272,20 @@ body {
   border: 0;
   border-radius: 0;
 }
+.riso .article-content-html .notion-toggle {
+  padding: 0.65rem 0.7rem;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 0.38rem;
+}
 .riso .article-content-html .notion-toggle summary {
   padding: 0.35rem 0.55rem;
   margin-left: -0.55rem;
-  background: rgba(255, 255, 255, 0.36);
-  border-radius: 0.3rem;
+  background: transparent;
+  border-radius: 0;
+}
+.riso .article-content-html .notion-toggle > *:not(summary) {
+  margin-top: 0.45rem;
+  padding-left: 1.35rem;
 }
 .riso .article-content-html .notion-todo {
   align-items: center;
@@ -278,15 +294,13 @@ body {
   margin: 0;
 }
 .riso .article-content-html .notion-todo > span {
-  padding: 0.25rem 0.45rem;
-  margin-left: -0.45rem;
-  background: rgba(255, 255, 255, 0.36);
-  border-radius: 0.3rem;
-  line-height: 1.5;
+  padding: 0;
+  margin-left: 0;
+  background: transparent;
+  border-radius: 0;
 }
 .riso .article-content-html .notion-toggle > *:not(summary),
 .riso .article-content-html .notion-todo-children {
-  background: transparent;
   border: 0;
   box-shadow: none;
 }
@@ -314,6 +328,41 @@ body {
 .riso .article-content-html .code-block pre.shiki span {
   background-color: transparent !important;
   background-image: none !important;
+}
+.riso .article-content-html .code-block pre.shiki span {
+  color: inherit;
+}
+.riso .article-content-html .code-block pre.shiki {
+  color: #dff0d4 !important;
+}
+.riso .article-content-html .code-block code {
+  color: #dff0d4;
+}
+.riso .article-content-html .code-block pre.shiki span[style*='#24292e'],
+.riso .article-content-html .code-block pre.shiki span[style*='#005cc5'],
+.riso .article-content-html .code-block pre.shiki span[style*='#032f62'],
+.riso .article-content-html .code-block pre.shiki span[style*='#6a737d'],
+.riso .article-content-html .code-block pre.shiki span[style*='#22863a'],
+.riso .article-content-html .code-block pre.shiki span[style*='#735c0f'] {
+  color: inherit !important;
+}
+.riso .article-content-html .code-block pre.shiki span[style*='#24292e'] {
+  color: #dff0d4 !important;
+}
+.riso .article-content-html .code-block pre.shiki span[style*='#005cc5'] {
+  color: #a5d8ff !important;
+}
+.riso .article-content-html .code-block pre.shiki span[style*='#032f62'] {
+  color: #b8daff !important;
+}
+.riso .article-content-html .code-block pre.shiki span[style*='#6a737d'] {
+  color: rgba(223, 240, 212, 0.7) !important;
+}
+.riso .article-content-html .code-block pre.shiki span[style*='#22863a'] {
+  color: #9ddfaa !important;
+}
+.riso .article-content-html .code-block pre.shiki span[style*='#735c0f'] {
+  color: #e8ce8f !important;
 }
 .riso .article-content-html .code-copy-btn {
   color: #dff0d4;
@@ -361,6 +410,23 @@ body {
 .riso .article-content-html .notion-bookmark-desc,
 .riso .article-content-html .notion-bookmark-url {
   color: #52705f;
+}
+.riso .toc-container {
+  box-shadow: none;
+}
+.riso .toc-progress,
+.riso .toc-progress-bar,
+.riso .toc-header,
+.riso .toc-link,
+.riso .toc-dot {
+  border: 0;
+  box-shadow: none;
+}
+.riso .toc-link:hover {
+  background: transparent;
+}
+.riso .toc-item-active .toc-dot {
+  box-shadow: none;
 }
 .riso .article-content-html .notion-columns {
   gap: 0.55rem;
