@@ -194,28 +194,26 @@ body {
 }
 
 .riso .article-content-html code,
-.riso .article-content-html .callout,
 .riso .prose-basalt code,
 .riso .prose-basalt .callout {
   color: #17402d;
   background-color: rgba(255, 255, 255, 0.58);
 }
 
-.riso .article-content-html pre,
-.riso .article-content-html .shiki,
 .riso .article-content-html .code-block {
-  color: var(--color-text-primary);
-  background-color: rgba(255, 255, 255, 0.72) !important;
-  background-image: radial-gradient(rgba(18, 58, 41, 0.035) 1px, transparent 1.1px);
-  background-size: 7px 7px;
-  border: 1px solid var(--color-border);
+  position: relative;
+  overflow: hidden;
+  color: #dff0d4;
+  background-color: #173227 !important;
+  background-image: none !important;
+  border: 1px solid #0f251c;
   box-shadow: var(--riso-offset-shadow);
 }
-
-.riso .article-content-html .shiki span,
-.riso .prose-basalt pre {
-  color: var(--color-text-primary);
+.riso .article-content-html .code-block pre,
+.riso .article-content-html .code-block code {
+  color: inherit;
   background-color: transparent;
+  background-image: none;
 }
 
 /* RISO Notion content mapping */
@@ -257,25 +255,46 @@ body {
   content: "“";
 }
 .riso .article-content-html .callout {
-  background: rgba(63, 154, 103, 0.12);
-  border: 1px solid rgba(23, 133, 91, 0.28);
+  background: rgba(63, 154, 103, 0.1);
+  border: 0;
   border-left: 4px solid rgba(23, 133, 91, 0.72);
-  border-radius: 0.42rem;
+  border-radius: 0 0.3rem 0.3rem 0;
+  box-shadow: none;
 }
 .riso .article-content-html .notion-toggle,
 .riso .article-content-html .notion-todo {
+  border: 0;
+  border-radius: 0;
+}
+.riso .article-content-html .notion-toggle summary {
+  padding: 0.35rem 0.55rem;
+  margin-left: -0.55rem;
   background: rgba(255, 255, 255, 0.36);
-  border: 1px solid rgba(39, 133, 91, 0.22);
-  border-radius: 0.38rem;
+  border-radius: 0.3rem;
+}
+.riso .article-content-html .notion-todo {
+  align-items: flex-start;
+}
+.riso .article-content-html .notion-todo > input[type='checkbox'] {
+  margin-top: 0.28rem;
+}
+.riso .article-content-html .notion-todo > span {
+  padding: 0.25rem 0.45rem;
+  margin-left: -0.45rem;
+  background: rgba(255, 255, 255, 0.36);
+  border-radius: 0.3rem;
+}
+.riso .article-content-html .notion-toggle > *:not(summary),
+.riso .article-content-html .notion-todo-children {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 .riso .article-content-html .notion-todo-checked {
   color: #5b7367;
   text-decoration-color: rgba(23, 133, 91, 0.45);
 }
 .riso .article-content-html .code-block {
-  overflow: hidden;
-  background: #173227 !important;
-  background-image: none !important;
   border-color: #0f251c;
 }
 .riso .article-content-html .code-block::before {
@@ -285,14 +304,38 @@ body {
 }
 .riso .article-content-html .code-block pre,
 .riso .article-content-html .code-block code {
+  color: inherit;
+  background: transparent;
+}
+.riso .article-content-html .code-block pre {
+  position: relative;
+  z-index: 1;
+}
+.riso .article-content-html .code-block pre.shiki,
+.riso .article-content-html .code-block pre.shiki span {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+.riso .article-content-html .code-copy-btn {
   color: #dff0d4;
-  background: transparent !important;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(242, 248, 233, 0.24);
+}
+.riso .article-content-html .code-copy-btn:hover {
+  color: #f2f8e9;
+  background: rgba(255, 255, 255, 0.18);
 }
 .riso .article-content-html .code-block ::selection {
   color: rgba(23, 50, 39, 0.96);
   background: rgba(242, 248, 233, 0.92);
 }
-.riso .article-content-html figure,
+.riso .article-content-html figure {
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.riso .article-content-html figure > img,
 .riso .article-content-html .video-embed,
 .riso .article-content-html .music-embed {
   border: 1px solid rgba(39, 133, 91, 0.32);
@@ -304,6 +347,8 @@ body {
 .riso .article-content-html figcaption,
 .riso .article-content-html .video-caption {
   color: #4c6a59;
+  margin-top: 0.55rem;
+  text-align: center;
 }
 .riso .article-content-html .notion-bookmark {
   background: rgba(255, 255, 255, 0.4);

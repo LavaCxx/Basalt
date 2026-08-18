@@ -53,7 +53,7 @@ const fullTitle = title === 'LavaC' ? title : `${title} | LavaC`;
 
     <!-- View Transitions for smooth page navigation -->
     <ClientRouter />
-    <script is:inline data-astro-rerun>
+    <script is:inline>
       (() => {
         const theme = localStorage.getItem('theme') === 'riso' ? 'riso' : 'light';
         document.documentElement.classList.toggle('riso', theme === 'riso');
@@ -95,8 +95,10 @@ const fullTitle = title === 'LavaC' ? title : `${title} | LavaC`;
     <!-- Footer -->
     <Footer />
 
-    <script is:inline data-astro-rerun>
+    <script is:inline>
       (() => {
+        if (window.__basaltThemeReady) return;
+        window.__basaltThemeReady = true;
         const root = document.documentElement;
         const syncThemeToggle = () => {
           const themeToggle = document.getElementById('theme-toggle');
