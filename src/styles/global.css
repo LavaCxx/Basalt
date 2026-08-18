@@ -201,7 +201,6 @@ body {
 }
 
 .riso .article-content-html .code-block {
-  position: relative;
   overflow: hidden;
   color: #dff0d4;
   background-color: #173227 !important;
@@ -273,16 +272,17 @@ body {
   border-radius: 0.3rem;
 }
 .riso .article-content-html .notion-todo {
-  align-items: flex-start;
+  align-items: center;
 }
 .riso .article-content-html .notion-todo > input[type='checkbox'] {
-  margin-top: 0.28rem;
+  margin: 0;
 }
 .riso .article-content-html .notion-todo > span {
   padding: 0.25rem 0.45rem;
   margin-left: -0.45rem;
   background: rgba(255, 255, 255, 0.36);
   border-radius: 0.3rem;
+  line-height: 1.5;
 }
 .riso .article-content-html .notion-toggle > *:not(summary),
 .riso .article-content-html .notion-todo-children {
@@ -299,8 +299,8 @@ body {
 }
 .riso .article-content-html .code-block::before {
   color: rgba(242, 248, 233, 0.72);
-  background: rgba(255, 255, 255, 0.06);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  border-bottom: 0;
 }
 .riso .article-content-html .code-block pre,
 .riso .article-content-html .code-block code {
@@ -308,8 +308,7 @@ body {
   background: transparent;
 }
 .riso .article-content-html .code-block pre {
-  position: relative;
-  z-index: 1;
+  z-index: auto;
 }
 .riso .article-content-html .code-block pre.shiki,
 .riso .article-content-html .code-block pre.shiki span {
