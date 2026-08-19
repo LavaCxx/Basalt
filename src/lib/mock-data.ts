@@ -49,10 +49,10 @@ export const mockFeedItems: FeedItem[] = [
 <p>好的系统应该让你在需要时找到需要的信息。标签和搜索是关键。</p>
 <h2>实践方法</h2>
 <p>从简单的开始，逐步构建你的系统。不要一开始就追求完美。</p>
-<pre><code class="language-javascript">const notion = new Client({ auth: process.env.NOTION_API_KEY });
-const response = await notion.databases.query({
-  database_id: process.env.NOTION_DATABASE_ID,
-});</code></pre>
+<div class="code-block" data-lang="JavaScript"><pre class="shiki github-light" style="background-color:#fff;color:#24292e"><code><span class="line"><span style="color:#D73A49">const</span><span style="color:#005CC5"> notion</span><span style="color:#D73A49"> =</span><span style="color:#D73A49"> new</span><span style="color:#6F42C1"> Client</span><span style="color:#24292E">({ auth: process.env.</span><span style="color:#005CC5">NOTION_API_KEY</span><span style="color:#24292E"> });</span></span>
+<span class="line"><span style="color:#D73A49">const</span><span style="color:#005CC5"> response</span><span style="color:#D73A49"> =</span><span style="color:#D73A49"> await</span><span style="color:#24292E"> notion.databases.</span><span style="color:#6F42C1">query</span><span style="color:#24292E">({</span></span>
+<span class="line"><span style="color:#24292E">  database_id: process.env.</span><span style="color:#005CC5">NOTION_DATABASE_ID</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#24292E">});</span></span></code></pre></div>
 <h2>总结</h2>
 <p>搭建第二大脑是一个持续的过程。工具只是手段，重要的是建立自己的知识体系。</p>`,
     date: new Date('2025-02-15'),

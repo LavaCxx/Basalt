@@ -309,12 +309,24 @@ body {
   text-decoration-color: rgba(23, 133, 91, 0.45);
 }
 .riso .article-content-html .code-block {
-  border-color: #0f251c;
+  overflow: hidden;
+  background: #173227;
+  border: 1px solid #0f251c;
+  border-radius: 0.45rem;
+  box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.2);
 }
 .riso .article-content-html .code-block::before {
+  display: flex;
+  align-items: center;
+  padding: 0.42rem 4.05rem 0.42rem 0.72rem;
+  font-size: 0.65rem;
+  font-weight: 750;
   color: rgba(242, 248, 233, 0.72);
-  background: transparent;
-  border-bottom: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: static;
+  width: auto;
+  pointer-events: none;
 }
 .riso .article-content-html .code-block pre,
 .riso .article-content-html .code-block code {
@@ -323,6 +335,14 @@ body {
 }
 .riso .article-content-html .code-block pre {
   z-index: auto;
+  margin: 0;
+  padding: 0.75rem !important;
+  overflow-x: auto;
+}
+.riso .article-content-html .code-block code {
+  padding: 0;
+  font-size: 0.76rem;
+  line-height: 1.65;
 }
 .riso .article-content-html .code-block pre.shiki,
 .riso .article-content-html .code-block pre.shiki span {
@@ -338,40 +358,57 @@ body {
 .riso .article-content-html .code-block code {
   color: #dff0d4;
 }
-.riso .article-content-html .code-block pre.shiki span[style*='#24292e'],
-.riso .article-content-html .code-block pre.shiki span[style*='#005cc5'],
-.riso .article-content-html .code-block pre.shiki span[style*='#032f62'],
-.riso .article-content-html .code-block pre.shiki span[style*='#6a737d'],
-.riso .article-content-html .code-block pre.shiki span[style*='#22863a'],
-.riso .article-content-html .code-block pre.shiki span[style*='#735c0f'] {
+.riso .article-content-html .code-block pre.shiki span[style*='#24292e'i],
+.riso .article-content-html .code-block pre.shiki span[style*='#d73a49'i],
+.riso .article-content-html .code-block pre.shiki span[style*='#005cc5'i],
+.riso .article-content-html .code-block pre.shiki span[style*='#032f62'i],
+.riso .article-content-html .code-block pre.shiki span[style*='#6a737d'i],
+.riso .article-content-html .code-block pre.shiki span[style*='#22863a'i],
+.riso .article-content-html .code-block pre.shiki span[style*='#735c0f'i] {
   color: inherit !important;
 }
-.riso .article-content-html .code-block pre.shiki span[style*='#24292e'] {
+.riso .article-content-html .code-block pre.shiki span[style*='#24292e'i] {
   color: #dff0d4 !important;
 }
-.riso .article-content-html .code-block pre.shiki span[style*='#005cc5'] {
-  color: #a5d8ff !important;
+.riso .article-content-html .code-block pre.shiki span[style*='#d73a49'i] {
+  color: #86d99b !important;
 }
-.riso .article-content-html .code-block pre.shiki span[style*='#032f62'] {
-  color: #b8daff !important;
+.riso .article-content-html .code-block pre.shiki span[style*='#005cc5'i] {
+  color: #b9dc8e !important;
 }
-.riso .article-content-html .code-block pre.shiki span[style*='#6a737d'] {
-  color: rgba(223, 240, 212, 0.7) !important;
+.riso .article-content-html .code-block pre.shiki span[style*='#032f62'i] {
+  color: #e6c98a !important;
 }
-.riso .article-content-html .code-block pre.shiki span[style*='#22863a'] {
-  color: #9ddfaa !important;
+.riso .article-content-html .code-block pre.shiki span[style*='#6a737d'i] {
+  color: rgba(223, 240, 212, 0.76) !important;
 }
-.riso .article-content-html .code-block pre.shiki span[style*='#735c0f'] {
+.riso .article-content-html .code-block pre.shiki span[style*='#22863a'i] {
+  color: #e6c98a !important;
+}
+.riso .article-content-html .code-block pre.shiki span[style*='#735c0f'i] {
   color: #e8ce8f !important;
 }
+.riso .article-content-html .code-block pre.shiki span[style*='#6f42c1'i] {
+  color: #b9dc8e !important;
+}
 .riso .article-content-html .code-copy-btn {
-  color: #dff0d4;
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(242, 248, 233, 0.24);
+  top: 0.26rem;
+  right: 0.28rem;
+  padding: 0.16rem 0.42rem;
+  font-size: 0.62rem;
+  color: rgba(242, 248, 233, 0.72);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(242, 248, 233, 0.18);
+  opacity: 1;
 }
 .riso .article-content-html .code-copy-btn:hover {
   color: #f2f8e9;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(242, 248, 233, 0.3);
+}
+.riso .article-content-html .code-copy-btn.copied {
+  color: #9ddfaa;
+  opacity: 1;
 }
 .riso .article-content-html .code-block ::selection {
   color: rgba(23, 50, 39, 0.96);
