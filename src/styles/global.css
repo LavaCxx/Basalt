@@ -395,6 +395,7 @@ body {
   top: 0.26rem;
   right: 0.28rem;
   padding: 0.16rem 0.42rem;
+  min-width: calc(3em + 0.84rem);
   font-size: 0.62rem;
   color: rgba(242, 248, 233, 0.72);
   background: rgba(255, 255, 255, 0.06);
