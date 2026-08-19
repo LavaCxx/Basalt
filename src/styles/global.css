@@ -100,18 +100,60 @@ body {
 
 /* ===== RISO Paper Theme ===== */
 .riso {
-  --color-background: #f2f8e9;
-  --color-background-alt: #e3f1d7;
-  --color-border: #9dbca4;
-  --color-border-subtle: #bcd6bf;
-  --color-text-primary: #173227;
-  --color-text-secondary: #2b4b3b;
-  --color-text-muted: #42604f;
-  --color-accent: #17855b;
-  --color-accent-hover: #116746;
+  /* Paper and ink */
+  --riso-paper: #f2f8e9;
+  --riso-paper-alt: #e3f1d7;
+  --riso-ink: #173227;
+  --riso-body-ink: #2b4b3b;
+  --riso-muted-ink: #42604f;
+  --riso-caption-ink: #4c6a59;
+
+  /* Plates and borders */
   --riso-plate-a: rgba(63, 154, 103, 0.18);
   --riso-plate-b: rgba(24, 60, 44, 0.09);
+  --riso-border-ink: rgba(39, 133, 91, 0.35);
+  --riso-border-subtle-ink: rgba(39, 133, 91, 0.32);
+
+  /* Visual levels */
+  --riso-quiet-surface: rgba(255, 255, 255, 0.58);
+  --riso-standard-surface: rgba(255, 255, 255, 0.4);
+  --riso-standard-surface-soft: rgba(255, 255, 255, 0.36);
+  --riso-standard-surface-quiet: rgba(255, 255, 255, 0.3);
+  --riso-expressive-surface: rgba(63, 154, 103, 0.1);
+  --riso-expressive-shadow: 3px 3px 0 rgba(63, 154, 103, 0.18);
+
+  /* Offset printing */
   --riso-offset-shadow: 4px 3px 0 var(--riso-plate-a), -2px 5px 0 var(--riso-plate-b);
+  --riso-offset-shadow-hover: 6px 5px 0 var(--riso-plate-a), -3px 6px 0 var(--riso-plate-b);
+  --riso-offset-shadow-active: 1px 1px 0 var(--riso-plate-a);
+  --riso-title-shadow-h1: 2px 2px 0 rgba(63, 154, 103, 0.26), -2px 2px 0 rgba(24, 60, 44, 0.14);
+  --riso-title-shadow-h2: 2px 1px 0 rgba(63, 154, 103, 0.22);
+  --riso-title-shadow-h3: 1px 1px 0 rgba(63, 154, 103, 0.2);
+
+  /* Code paper */
+  --riso-code-surface: #173227;
+  --riso-code-border: #0f251c;
+  --riso-code-ink: #dff0d4;
+  --riso-code-ink-muted: rgba(223, 240, 212, 0.76);
+  --riso-code-keyword-ink: #86d99b;
+  --riso-code-variable-ink: #b9dc8e;
+  --riso-code-string-ink: #e6c98a;
+  --riso-code-constant-ink: #e8ce8f;
+  --riso-code-success-ink: #9ddfaa;
+  --riso-code-header-surface: rgba(255, 255, 255, 0.06);
+  --riso-code-header-border: rgba(255, 255, 255, 0.08);
+  --riso-code-header-ink: rgba(242, 248, 233, 0.72);
+  --riso-code-hover-surface: rgba(255, 255, 255, 0.14);
+
+  --color-background: var(--riso-paper);
+  --color-background-alt: var(--riso-paper-alt);
+  --color-border: #9dbca4;
+  --color-border-subtle: #bcd6bf;
+  --color-text-primary: var(--riso-ink);
+  --color-text-secondary: var(--riso-body-ink);
+  --color-text-muted: var(--riso-muted-ink);
+  --color-accent: #17855b;
+  --color-accent-hover: #116746;
 }
 
 .riso body {
@@ -168,7 +210,7 @@ body {
 .riso button:hover,
 .riso a[class*='border']:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 6px 5px 0 var(--riso-plate-a), -3px 6px 0 var(--riso-plate-b);
+  box-shadow: var(--riso-offset-shadow-hover);
 }
 
 .riso .toc-container button,
@@ -181,7 +223,7 @@ body {
 .riso button:active,
 .riso a[class*='border']:active {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--riso-plate-a);
+  box-shadow: var(--riso-offset-shadow-active);
 }
 
 .riso header nav a,
@@ -190,7 +232,7 @@ body {
 }
 
 .riso header nav a.text-text-primary {
-  text-shadow: 2px 2px 0 var(--riso-plate-a), -2px 2px 0 var(--riso-plate-b);
+  text-shadow: var(--riso-offset-shadow-hover);
 }
 
 .riso .article-page,
@@ -204,15 +246,15 @@ body {
 .riso .prose-basalt code,
 .riso .prose-basalt .callout {
   color: #17402d;
-  background-color: rgba(255, 255, 255, 0.58);
+  background-color: var(--riso-quiet-surface);
 }
 
 .riso .article-content-html .code-block {
   overflow: hidden;
-  color: #dff0d4;
-  background-color: #173227 !important;
+  color: var(--riso-code-ink);
+  background-color: var(--riso-code-surface) !important;
   background-image: none !important;
-  border: 1px solid #0f251c;
+  border: 1px solid var(--riso-code-border);
   box-shadow: var(--riso-offset-shadow);
 }
 .riso .article-content-html .code-block pre,
@@ -224,28 +266,28 @@ body {
 
 /* RISO Notion content mapping */
 .riso .article-content-html {
-  color: #2b4b3b;
+  color: var(--riso-body-ink);
 }
 .riso .article-content-html h1,
 .riso .article-content-html h2,
 .riso .article-content-html h3 {
-  color: #173227;
+  color: var(--riso-ink);
 }
 .riso .article-content-html h1 {
   font-weight: 800;
-  text-shadow: 2px 2px 0 rgba(63, 154, 103, 0.26), -2px 2px 0 rgba(24, 60, 44, 0.14);
+  text-shadow: var(--riso-title-shadow-h1);
 }
 .riso .article-content-html h2 {
   font-weight: 800;
-  text-shadow: 2px 1px 0 rgba(63, 154, 103, 0.22);
+  text-shadow: var(--riso-title-shadow-h2);
 }
 .riso .article-content-html h3 {
-  text-shadow: 1px 1px 0 rgba(63, 154, 103, 0.2);
+  text-shadow: var(--riso-title-shadow-h3);
 }
 .riso .article-content-html blockquote {
   position: relative;
   padding: 0.9rem 0.95rem 0.9rem 2.2rem;
-  background: rgba(23, 133, 91, 0.1);
+  background: var(--riso-expressive-surface);
   border: 1px dashed rgba(39, 133, 91, 0.42);
   border-radius: 0.45rem;
   box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.14);
@@ -261,7 +303,7 @@ body {
   content: "“";
 }
 .riso .article-content-html .callout {
-  background: rgba(63, 154, 103, 0.1);
+  background: var(--riso-expressive-surface);
   border: 0;
   border-left: 4px solid rgba(23, 133, 91, 0.72);
   border-radius: 0 0.3rem 0.3rem 0;
@@ -274,7 +316,7 @@ body {
 }
 .riso .article-content-html .notion-toggle {
   padding: 0.65rem 0.7rem;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--riso-standard-surface-quiet);
   border-radius: 0.38rem;
 }
 .riso .article-content-html .notion-toggle summary {
@@ -310,10 +352,10 @@ body {
 }
 .riso .article-content-html .code-block {
   overflow: hidden;
-  background: #173227;
-  border: 1px solid #0f251c;
+  background: var(--riso-code-surface);
+  border: 1px solid var(--riso-code-border);
   border-radius: 0.45rem;
-  box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.2);
+  box-shadow: var(--riso-expressive-shadow);
 }
 .riso .article-content-html .code-block::before {
   display: flex;
@@ -321,9 +363,9 @@ body {
   padding: 0.42rem 4.05rem 0.42rem 0.72rem;
   font-size: 0.65rem;
   font-weight: 750;
-  color: rgba(242, 248, 233, 0.72);
-  background: rgba(255, 255, 255, 0.06);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--riso-code-header-ink);
+  background: var(--riso-code-header-surface);
+  border-bottom: 1px solid var(--riso-code-header-border);
   position: static;
   width: auto;
   pointer-events: none;
@@ -353,10 +395,10 @@ body {
   color: inherit;
 }
 .riso .article-content-html .code-block pre.shiki {
-  color: #dff0d4 !important;
+  color: var(--riso-code-ink) !important;
 }
 .riso .article-content-html .code-block code {
-  color: #dff0d4;
+  color: var(--riso-code-ink);
 }
 .riso .article-content-html .code-block pre.shiki span[style*='#24292e'i],
 .riso .article-content-html .code-block pre.shiki span[style*='#d73a49'i],
@@ -368,28 +410,28 @@ body {
   color: inherit !important;
 }
 .riso .article-content-html .code-block pre.shiki span[style*='#24292e'i] {
-  color: #dff0d4 !important;
+  color: var(--riso-code-ink) !important;
 }
 .riso .article-content-html .code-block pre.shiki span[style*='#d73a49'i] {
-  color: #86d99b !important;
+  color: var(--riso-code-keyword-ink) !important;
 }
 .riso .article-content-html .code-block pre.shiki span[style*='#005cc5'i] {
-  color: #b9dc8e !important;
+  color: var(--riso-code-variable-ink) !important;
 }
 .riso .article-content-html .code-block pre.shiki span[style*='#032f62'i] {
-  color: #e6c98a !important;
+  color: var(--riso-code-string-ink) !important;
 }
 .riso .article-content-html .code-block pre.shiki span[style*='#6a737d'i] {
-  color: rgba(223, 240, 212, 0.76) !important;
+  color: var(--riso-code-ink-muted) !important;
 }
 .riso .article-content-html .code-block pre.shiki span[style*='#22863a'i] {
-  color: #e6c98a !important;
+  color: var(--riso-code-string-ink) !important;
 }
 .riso .article-content-html .code-block pre.shiki span[style*='#735c0f'i] {
-  color: #e8ce8f !important;
+  color: var(--riso-code-constant-ink) !important;
 }
 .riso .article-content-html .code-block pre.shiki span[style*='#6f42c1'i] {
-  color: #b9dc8e !important;
+  color: var(--riso-code-variable-ink) !important;
 }
 .riso .article-content-html .code-copy-btn {
   top: 0.26rem;
@@ -397,18 +439,18 @@ body {
   padding: 0.16rem 0.42rem;
   min-width: calc(3em + 0.84rem);
   font-size: 0.62rem;
-  color: rgba(242, 248, 233, 0.72);
-  background: rgba(255, 255, 255, 0.06);
+  color: var(--riso-code-header-ink);
+  background: var(--riso-code-header-surface);
   border-color: rgba(242, 248, 233, 0.18);
   opacity: 1;
 }
 .riso .article-content-html .code-copy-btn:hover {
   color: #f2f8e9;
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--riso-code-hover-surface);
   border-color: rgba(242, 248, 233, 0.3);
 }
 .riso .article-content-html .code-copy-btn.copied {
-  color: #9ddfaa;
+  color: var(--riso-code-success-ink);
   opacity: 1;
 }
 .riso .article-content-html .code-block ::selection {
@@ -424,11 +466,11 @@ body {
 .riso .article-content-html figure > img,
 .riso .article-content-html .video-embed,
 .riso .article-content-html .music-embed {
-  border: 1px solid rgba(39, 133, 91, 0.32);
+  border: 1px solid var(--riso-border-subtle-ink);
   border-radius: 0.48rem;
   overflow: hidden;
   box-shadow: var(--riso-offset-shadow);
-  background: rgba(255, 255, 255, 0.36);
+  background: var(--riso-standard-surface-soft);
 }
 .riso .article-content-html figcaption,
 .riso .article-content-html .video-caption {
@@ -437,10 +479,10 @@ body {
   text-align: center;
 }
 .riso .article-content-html .notion-bookmark {
-  background: rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(39, 133, 91, 0.35);
+  background: var(--riso-standard-surface);
+  border: 1px solid var(--riso-border-ink);
   border-radius: 0.42rem;
-  box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.18);
+  box-shadow: var(--riso-expressive-shadow);
 }
 .riso .article-content-html .notion-bookmark-title {
   color: #1d4630;
@@ -471,7 +513,7 @@ body {
 }
 .riso .article-content-html .notion-column {
   padding: 0.6rem;
-  background: rgba(63, 154, 103, 0.1);
+  background: var(--riso-expressive-surface);
   border: 1px dashed rgba(39, 133, 91, 0.28);
   border-radius: 0.35rem;
 }
