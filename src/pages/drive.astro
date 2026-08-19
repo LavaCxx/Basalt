@@ -8,10 +8,61 @@ import VoxelDrive from '../components/islands/VoxelDrive';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Voxel Drive</title>
+<title>{Astro.props.text ? `${Astro.props.text} · Voxel Drive` : "Voxel Drive"}</title>
+    <script is:inline>
+      (() => {
+        const baseTitle = document.title;
+        const width = 18;
+        const carIndex = 8;
+        const roadside = ["🌲", "🪨", "🚏"];
+        let roadsideObjects = [];
+        let nextObjectIn = 2;
+        let titleTimer;
+
+        const updateTitle = () => {
+          roadsideObjects = roadsideObjects
+            .map((object) => ({ ...object, position: object.position + 1 }))
+            .filter((object) => object.position < width);
+
+          nextObjectIn -= 1;
+          if (nextObjectIn <= 0) {
+            roadsideObjects.push({
+              symbol: roadside[Math.floor(Math.random() * roadside.length)],
+              position: 0,
+            });
+            nextObjectIn = 12 + Math.floor(Math.random() * 6);
+          }
+
+          const cells = Array.from({ length: width }, () => "_");
+          roadsideObjects.forEach((object) => {
+            cells[object.position] = object.symbol;
+          });
+          cells[carIndex] = "🚗";
+          document.title = cells.join("");
+        };
+
+        const startTitle = () => {
+          if (titleTimer !== undefined) return;
+          titleTimer = window.setInterval(updateTitle, 350);
+        };
+
+        const stopTitle = () => {
+          if (titleTimer === undefined) return;
+          window.clearInterval(titleTimer);
+          titleTimer = undefined;
+          document.title = baseTitle;
+        };
+
+        document.addEventListener("visibilitychange", () => {
+          document.hidden ? stopTitle() : startTitle();
+        });
+
+        startTitle();
+      })();
+    </script>
   </head>
   <body>
-    <VoxelDrive client:only="solid-js" />
+    <VoxelDrive client:only="solid-js" text={Astro.props.text} />
   </body>
 </html>
 
@@ -108,7 +159,7 @@ import VoxelDrive from '../components/islands/VoxelDrive';
   /* Panel toggle */
   .voxel-panel-toggle {
     position: fixed;
-    top: 74px;
+    bottom: 44px;
     left: 44px;
     z-index: 12;
     padding: 8px 16px;
@@ -126,7 +177,7 @@ import VoxelDrive from '../components/islands/VoxelDrive';
   /* Param panel */
   .voxel-panel {
     position: fixed;
-    top: 118px;
+    bottom: 92px;
     left: 44px;
     z-index: 12;
     width: 248px;
@@ -217,7 +268,7 @@ import VoxelDrive from '../components/islands/VoxelDrive';
   /* Back link */
   .voxel-back {
     position: fixed;
-    bottom: 44px;
+    top: 44px;
     left: 44px;
     z-index: 12;
     color: rgba(210,214,228,0.5);
@@ -234,8 +285,8 @@ import VoxelDrive from '../components/islands/VoxelDrive';
   @media (max-width: 640px) {
     .voxel-hud { top: 20px; right: 20px; }
     .voxel-toggle-btn { bottom: 20px; right: 20px; padding: 10px 16px; }
-    .voxel-panel-toggle { top: 20px; left: 20px; }
-    .voxel-panel { left: 20px; width: calc(100vw - 40px); max-width: 280px; }
-    .voxel-back { bottom: 20px; left: 20px; }
+    .voxel-panel-toggle { bottom: 20px; left: 20px; }
+    .voxel-panel { bottom: 68px; left: 20px; width: calc(100vw - 40px); max-width: 280px; }
+    .voxel-back { top: 20px; left: 20px; }
   }
 </style>

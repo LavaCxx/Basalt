@@ -4,7 +4,7 @@ import { VoxelDriveEngine } from "../../lib/voxel/engine";
 
 const isDev = import.meta.env.DEV;
 
-export default function VoxelDrive() {
+export default function VoxelDrive(props: { text?: string }) {
   let canvasRef: HTMLCanvasElement | undefined;
   let engine: VoxelDriveEngine | null = null;
 
@@ -39,7 +39,7 @@ export default function VoxelDrive() {
 
   onMount(() => {
     if (!canvasRef) return;
-    engine = new VoxelDriveEngine(canvasRef, { onFps: setFps, onSpeed: setSpd });
+    engine = new VoxelDriveEngine(canvasRef, { onFps: setFps, onSpeed: setSpd }, { text: props.text });
     engine.init();
     engine.start();
 

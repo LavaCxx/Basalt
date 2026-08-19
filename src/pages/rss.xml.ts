@@ -40,9 +40,9 @@ export const GET: APIRoute = async (context) => {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>LavaC</title>
+    <title>LavaC's Stash</title>
     <link>${escapeXml(site)}</link>
-    <description>个人博客与内容聚合</description>
+    <description>LavaC 的文章、动态、照片与阅读记录</description>
     <language>zh-CN</language>
     <atom:link href="${escapeXml(site)}/rss.xml" rel="self" type="application/rss+xml" />
 ${feedItems

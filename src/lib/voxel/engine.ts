@@ -3,6 +3,9 @@
  * 组件传入 canvas，调 init()/start()/dispose()。 */
 import * as THREE from "three";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import helvetikerFont from "three/examples/fonts/helvetiker_regular.typeface.json";
 
 /* ── 共享常量 ─────────────────────────────────────────── */
 const GROUND_Y = -1.2;
@@ -90,9 +93,14 @@ export interface VoxelDriveCallbacks {
   onSpeed?: (speed: number) => void;
 }
 
+export interface VoxelDriveOptions {
+  text?: string;
+}
+
 export class VoxelDriveEngine {
   private canvas: HTMLCanvasElement;
   private cb: VoxelDriveCallbacks;
+  private options: VoxelDriveOptions;
 
   private renderer!: THREE.WebGLRenderer;
   private camera!: THREE.PerspectiveCamera;
@@ -147,6 +155,10 @@ export class VoxelDriveEngine {
   private disposed = false;
 
   private fpsAcc = 0; private fpsFrames = 0; private fpsSmooth = 0;
+  private textGroupCache = new Map<string, THREE.Group>();
+  private textPosition = { x: 0.8, y: 3.6, z: 0 };
+  private static font = new FontLoader().parse(helvetikerFont);
+  private cameraOrbit = { azimuth: 230, elevation: 20, distance: 13.4 };
 
   private resizeHandler!: () => void;
   private mouseHandler!: (e: MouseEvent) => void;
@@ -155,9 +167,10 @@ export class VoxelDriveEngine {
   private readonly _v2 = new THREE.Vector3();
   private readonly _v3 = new THREE.Vector3();
 
-  constructor(canvas: HTMLCanvasElement, cb: VoxelDriveCallbacks = {}) {
+  constructor(canvas: HTMLCanvasElement, cb: VoxelDriveCallbacks = {}, options: VoxelDriveOptions = {}) {
     this.canvas = canvas;
     this.cb = cb;
+    this.options = options;
   }
 
   /* ── Grid ── */
@@ -288,7 +301,51 @@ export class VoxelDriveEngine {
         }
       }
     }
+    this.addWorldText(world, carZ);
     return world;
+  }
+
+  private addWorldText(world: THREE.Group, carZ: number) {
+    const text = this.options.text?.trim();
+    if (!text) return;
+
+    const textGroup = this.buildTextGroup(text);
+    textGroup.position.set(this.textPosition.x, GROUND_Y + this.textPosition.y, this.textPosition.z);
+    world.add(textGroup);
+  }
+
+  private buildTextGroup(text: string): THREE.Group {
+    const cached = this.textGroupCache.get(text);
+    if (cached) return cached;
+
+    const size = text.length > 5 ? 0.75 : 1.5;
+    const geometry = new TextGeometry(text, {
+      font: VoxelDriveEngine.font,
+      size,
+      height: 0.18,
+      curveSegments: 5,
+      bevelEnabled: true,
+      bevelThickness: 0.015,
+      bevelSize: 0.012,
+      bevelSegments: 2,
+    });
+    geometry.computeBoundingBox();
+    geometry.center();
+
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xe89a30,
+      emissive: 0x8a4b08,
+      emissiveIntensity: 0.55,
+      roughness: 0.5,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.userData.solid = true;
+    mesh.rotation.y = THREE.MathUtils.degToRad(270);
+
+    const group = new THREE.Group();
+    group.add(mesh);
+    this.textGroupCache.set(text, group);
+    return group;
   }
 
   /* ── Triangle extraction ── */
@@ -729,6 +786,16 @@ export class VoxelDriveEngine {
   setJitter(v: number) { this.mat.uniforms.uJit.value = v; }
   setFlicker(v: number) { this.flickerAmt = v; this.mat.uniforms.uFlicker.value = v; }
   setShape(v: number) { this.mat.uniforms.uShape.value = v; }
+  private cameraTargetPosition(): THREE.Vector3 {
+    const azimuth = THREE.MathUtils.degToRad(this.cameraOrbit.azimuth);
+    const elevation = THREE.MathUtils.degToRad(this.cameraOrbit.elevation);
+    const horizontal = Math.cos(elevation) * this.cameraOrbit.distance;
+    return new THREE.Vector3(
+      this.lookTarget.x + Math.sin(azimuth) * horizontal,
+      this.lookTarget.y + Math.sin(elevation) * this.cameraOrbit.distance,
+      this.lookTarget.z + Math.cos(azimuth) * horizontal
+    );
+  }
 
   /* ── Animation loop ── */
   start() {
@@ -769,8 +836,10 @@ export class VoxelDriveEngine {
       this.mys += (this.my - this.mys) * 0.04;
       const bob = Math.sin(t * 8.6) * 0.02 + Math.sin(t * 5.3) * 0.014;
       const roll = Math.sin(t * 6.1) * 0.012;
-      this.camTarget.set(-7.4 + this.mxs * 0.6 + roll, 5.0 + bob + this.mys * 0.3, -9.4);
       this.lookTarget.set(this.mxs * 0.3, -0.3 + bob * 0.4, 1.6);
+      this.camTarget.copy(this.cameraTargetPosition());
+      this.camTarget.x += this.mxs * 0.6 + roll;
+      this.camTarget.y += bob + this.mys * 0.3;
       this.camPos.lerp(this.camTarget, 0.1);
       this.lookAt.lerp(this.lookTarget, 0.1);
       this.camera.position.copy(this.camPos);

@@ -15,9 +15,9 @@ import type {
  * Site configuration
  */
 export const siteConfig: SiteConfig = {
-  title: '玄武',
+  title: "LavaC's Stash",
   description: '数字花园与内容聚合站',
-  author: '玄武',
+  author: 'LavaC',
   url: 'https://example.com',
   social: {
     twitter: 'https://twitter.com/username',
