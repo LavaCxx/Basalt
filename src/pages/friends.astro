@@ -1,37 +1,38 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { mockFriendLinks } from '../lib/mock-data';
 import Comments from '../components/islands/Comments';
 import SmartImage from '../components/islands/SmartImage';
 
-const friends = mockFriendLinks;
-
-// Extended friend data for this page
-const extendedFriends = [
-  ...friends,
+const friends = [
   {
-    name: 'Eva',
-    url: 'https://eva.example.com',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Eva',
-    description: '用户体验研究员',
+    name: '5had0w',
+    url: 'https://www.5had0w.com/',
+    avatar: 'https://www.5had0w.com/assets/logo.png',
+    description: '一个游走在互联网边缘的影子，希望在这个世界留下一点痕迹。',
   },
   {
-    name: 'Frank',
-    url: 'https://frank.example.com',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Frank',
-    description: '数据科学家',
+    name: 'enpitsulin',
+    url: 'https://enpitsulin.xyz/',
+    avatar: 'https://avatars.githubusercontent.com/u/29378026?v=4',
+    description: 'enpitsulin 的个人博客',
   },
   {
-    name: 'Grace',
-    url: 'https://grace.example.com',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Grace',
-    description: '插画师',
+    name: 'iBatis',
+    url: 'https://yanxizhu.com/',
   },
   {
-    name: 'Henry',
-    url: 'https://henry.example.com',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Henry',
-    description: '后端工程师',
+    name: 'mephisto',
+    url: 'http://mephisto.cc/',
+  },
+  {
+    name: 'Niracler的博物志',
+    url: 'https://niracler.com/',
+    avatar: 'https://niracler.com/favicon.ico',
+    description: '长门大明神会梦到外星羊么？',
+  },
+  {
+    name: 'tedding',
+    url: 'https://tedding.dev/',
   },
 ];
 ---
@@ -50,7 +51,7 @@ const extendedFriends = [
 
     <!-- Friends List -->
     <div>
-      {extendedFriends.map((friend) => (
+      {friends.map((friend) => (
         <a
          href={friend.url}
          target="_blank"
