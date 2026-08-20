@@ -197,7 +197,7 @@ function formatDaysInProgress(date?: Date): string {
           <div class="min-w-0 flex-1">
             <p class="text-sm text-text-primary line-clamp-1 group-hover:underline">{game.title}</p>
             <p class="text-xs text-text-muted truncate">
-              {['手动记录', formatDaysInProgress(game.date)].filter(Boolean).join(' · ')}
+              {formatDaysInProgress(game.date)}
             </p>
           </div>
         </a>

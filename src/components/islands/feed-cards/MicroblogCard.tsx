@@ -1,4 +1,4 @@
-import { createSignal, Show, For, type JSX } from 'solid-js';
+import { createSignal, onMount, Show, For, type JSX } from 'solid-js';
 import type { MicroblogFeedItem } from '../../../lib/types';
 import SourceBadge from '../SourceBadge';
 import SmartImage from '../SmartImage';
@@ -90,6 +90,7 @@ function getPhotoItems(item: MicroblogFeedItem): PhotoItem[] {
 export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
   const item = () => props.item;
   const [expanded, setExpanded] = createSignal(false);
+  const [contentElement, setContentElement] = createSignal<HTMLDivElement>();
   const photos = () => getPhotoItems(item());
   const content = () =>
     item().source === 'telegram' ? linkifyTelegramText(item().content) : item().content;
@@ -101,13 +102,15 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
       return undefined;
     }
   };
-  const estimatedHeight = () => {
-    const contentLength = item().content.length;
-    const photoCount = Math.min(photos().length, 3);
-    const previewHeight = linkPreview() ? 110 : 0;
-    return contentLength * 1.15 + photoCount * 96 + previewHeight;
-  };
-  const isOversized = () => estimatedHeight() > 240;
+  const [naturalHeight, setNaturalHeight] = createSignal(0);
+  const collapsedHeight = () => 350;
+  const isOversized = () => naturalHeight() > 350;
+
+  onMount(() => {
+    const element = contentElement();
+    if (!element) return;
+    setNaturalHeight(element.scrollHeight);
+  });
 
   return (
     <div class="py-4 border-b border-border-subtle">
@@ -115,7 +118,11 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
         <SourceBadge source={item().source} channel={item().metadata?.channel} />
         <time class="ml-auto">{formatDate(item().date)}</time>
       </div>
-      <div classList={{ 'microblog-collapsible': isOversized() && !expanded() }}>
+      <div
+        ref={setContentElement}
+        classList={{ 'microblog-collapsible': isOversized() && !expanded() }}
+        style={isOversized() && !expanded() ? { 'max-height': `${collapsedHeight()}px` } : undefined}
+      >
         <p class="text-text-primary leading-relaxed whitespace-pre-line">{content()}</p>
         <Show when={linkPreview()}>
           <a

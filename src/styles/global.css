@@ -1848,7 +1848,6 @@ html::view-transition-group(root) {
 
 .microblog-collapsible {
   position: relative;
-  max-height: 13rem;
   overflow: hidden;
   mask-image: linear-gradient(to bottom, black 82%, transparent);
   -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent);
