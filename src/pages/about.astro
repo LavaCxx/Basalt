@@ -1,21 +1,22 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Comments from '../components/islands/Comments';
+import TableOfContents from '../components/islands/TableOfContents';
 ---
 
 <Layout title="关于" description="LavaC 的自述">
-  <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Page Header -->
-    <header class="mb-12">
-      <h1 class="font-ui text-4xl font-bold text-text-primary mb-2">
-        关于
-      </h1>
-    </header>
+  <div class="about-layout">
+    <article class="about-page">
+      <header class="mb-12">
+        <h1 class="font-ui text-4xl font-bold text-text-primary mb-2">
+          关于
+        </h1>
+      </header>
 
-  <!-- Content -->
+      <!-- Content -->
     <div class="article-content prose-basalt">
       <div class="article-content-html">
-        <h3 class="!mt-8 !mb-4">关于LavaC</h3>
+        <h3 id="about-lavac" class="!mt-8 !mb-4">关于LavaC</h3>
         <p>
           <strong>LavaC</strong>这个怪兮兮的ID来源于2017年入坑
           <a href="https://www.ingress.com" target="_blank" rel="noopener noreferrer">Ingress</a>
@@ -29,7 +30,7 @@ import Comments from '../components/islands/Comments';
           性格以当今流行的MBTI<del>赛博占星</del>测试看属于INFP-T。
         </p>
 
-        <h3 class="!mt-8 !mb-4">爱好</h3>
+        <h3 id="hobbies" class="!mt-8 !mb-4">爱好</h3>
         <ul class="list-disc pl-6 space-y-2 text-text-secondary">
           <li><strong>游戏</strong>：除了PVP的都能接受，csgo有一半时间在荒漠迷城进行3v10bot对战;</li>
           <li>
@@ -44,7 +45,7 @@ import Comments from '../components/islands/Comments';
           <li><strong>音乐</strong>：杂食系，但近年来更偏爱City Pop和Synthwave</li>
         </ul>
 
-        <h3 class="!mt-8 !mb-4">关于博客</h3>
+        <h3 id="about-blog" class="!mt-8 !mb-4">关于博客</h3>
         <p>
           有一说一，配色上我更喜欢
           <a href="https://lavace.vercel.app/home" target="_blank" rel="noopener noreferrer">2022版</a>
@@ -52,7 +53,42 @@ import Comments from '../components/islands/Comments';
       </div>
     </div>
 
-    <!-- Comments -->
-    <Comments client:load mapping="specific" term="about" />
+      <Comments client:load mapping="specific" term="about" />
+    </article>
+
+    <aside class="about-sidebar">
+      <TableOfContents client:load />
+    </aside>
   </div>
 </Layout>
+
+<style>
+  .about-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+  }
+
+  .about-page {
+    max-width: 42rem;
+  }
+
+  .about-sidebar {
+    display: none;
+  }
+
+  @media (min-width: 1280px) {
+    .about-layout {
+      grid-template-columns: 1fr 220px;
+      padding: 4rem 2rem 6rem;
+    }
+
+    .about-sidebar {
+      display: block;
+      padding-top: 6rem;
+    }
+  }
+</style>
