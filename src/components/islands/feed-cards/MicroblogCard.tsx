@@ -1,4 +1,4 @@
-import { Show, For, type JSX } from 'solid-js';
+import { createSignal, Show, For, type JSX } from 'solid-js';
 import type { MicroblogFeedItem } from '../../../lib/types';
 import SourceBadge from '../SourceBadge';
 import SmartImage from '../SmartImage';
@@ -89,6 +89,7 @@ function getPhotoItems(item: MicroblogFeedItem): PhotoItem[] {
 
 export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
   const item = () => props.item;
+  const [expanded, setExpanded] = createSignal(false);
   const photos = () => getPhotoItems(item());
   const content = () =>
     item().source === 'telegram' ? linkifyTelegramText(item().content) : item().content;
@@ -100,6 +101,13 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
       return undefined;
     }
   };
+  const estimatedHeight = () => {
+    const contentLength = item().content.length;
+    const photoCount = Math.min(photos().length, 3);
+    const previewHeight = linkPreview() ? 110 : 0;
+    return contentLength * 1.15 + photoCount * 96 + previewHeight;
+  };
+  const isOversized = () => estimatedHeight() > 240;
 
   return (
     <div class="py-4 border-b border-border-subtle">
@@ -107,55 +115,66 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
         <SourceBadge source={item().source} channel={item().metadata?.channel} />
         <time class="ml-auto">{formatDate(item().date)}</time>
       </div>
-      <p class="text-text-primary leading-relaxed whitespace-pre-line">{content()}</p>
-      <Show when={linkPreview()}>
-        <a
-          href={linkPreview()!.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="telegram-link-preview mt-3 group/preview"
-        >
-          <div class="telegram-link-preview-content">
-            <Show when={linkPreview()!.siteName}>
-              <span class="telegram-link-preview-site">{linkPreview()!.siteName}</span>
+      <div classList={{ 'microblog-collapsible': isOversized() && !expanded() }}>
+        <p class="text-text-primary leading-relaxed whitespace-pre-line">{content()}</p>
+        <Show when={linkPreview()}>
+          <a
+            href={linkPreview()!.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="telegram-link-preview mt-3 group/preview"
+          >
+            <div class="telegram-link-preview-content">
+              <Show when={linkPreview()!.siteName}>
+                <span class="telegram-link-preview-site">{linkPreview()!.siteName}</span>
+              </Show>
+              <Show when={linkPreview()!.title}>
+                <span class="telegram-link-preview-title">{linkPreview()!.title}</span>
+              </Show>
+              <Show when={linkPreview()!.description}>
+                <span class="telegram-link-preview-description">{linkPreview()!.description}</span>
+              </Show>
+              <Show when={previewHost()}>
+                <span class="telegram-link-preview-url">{previewHost()}</span>
+              </Show>
+            </div>
+            <Show when={linkPreview()!.image}>
+              <span class="telegram-link-preview-cover">
+                <SmartImage
+                  src={linkPreview()!.image}
+                  alt={linkPreview()!.title || linkPreview()!.url}
+                  class="w-full h-full"
+                />
+              </span>
             </Show>
-            <Show when={linkPreview()!.title}>
-              <span class="telegram-link-preview-title">{linkPreview()!.title}</span>
-            </Show>
-            <Show when={linkPreview()!.description}>
-              <span class="telegram-link-preview-description">{linkPreview()!.description}</span>
-            </Show>
-            <Show when={previewHost()}>
-              <span class="telegram-link-preview-url">{previewHost()}</span>
-            </Show>
+          </a>
+        </Show>
+        <Show when={photos().length >= 1}>
+          <div class="mt-3 flex gap-1">
+            <For each={photos().slice(0, 3)}>
+              {(photo) => (
+                <SmartImage
+                  src={photo.thumbnail}
+                  alt={photo.alt}
+                  class="rounded"
+                  naturalSizing={photos().length === 1}
+                  width={photo.width}
+                  height={photo.height}
+                  classList={{ 'max-w-xs': photos().length === 1, 'w-24 h-24': photos().length > 1 }}
+                />
+              )}
+            </For>
           </div>
-          <Show when={linkPreview()!.image}>
-            <span class="telegram-link-preview-cover">
-              <SmartImage
-                src={linkPreview()!.image}
-                alt={linkPreview()!.title || linkPreview()!.url}
-                class="w-full h-full"
-              />
-            </span>
-          </Show>
-        </a>
-      </Show>
-      <Show when={photos().length >= 1}>
-        <div class="mt-3 flex gap-1">
-          <For each={photos().slice(0, 3)}>
-            {(photo) => (
-              <SmartImage
-                src={photo.thumbnail}
-                alt={photo.alt}
-                class="rounded"
-                naturalSizing={photos().length === 1}
-                width={photo.width}
-                height={photo.height}
-                classList={{ 'max-w-xs': photos().length === 1, 'w-24 h-24': photos().length > 1 }}
-              />
-            )}
-          </For>
-        </div>
+        </Show>
+      </div>
+      <Show when={isOversized()}>
+        <button
+          type="button"
+          class="mt-2 text-xs text-text-muted hover:text-text-primary transition-colors"
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {expanded() ? '收起' : '展开全文'}
+        </button>
       </Show>
       <div class="mt-2 flex items-center gap-4 text-xs text-text-muted">
         <Show when={item().metadata?.likes !== undefined}>

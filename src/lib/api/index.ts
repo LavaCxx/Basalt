@@ -6,9 +6,9 @@
  */
 
 import type { FeedItem, ArchiveGroup, CurrentItem } from '../types';
-import { mockFeedItems, mockArchiveGroups, mockCurrentItems } from '../mock-data';
+import { mockFeedItems, mockArchiveGroups, mockCurrentItems, mockCurrentGames } from '../mock-data';
 import { getDemoSteamSnapshot } from '../steam';
-import type { SteamSnapshot } from '../types';
+import type { ManualGame, SteamSnapshot } from '../types';
 
 import {
   setRuntimeDB,
@@ -18,6 +18,7 @@ import {
   queryAllArticleSlugs,
   queryArchiveGroups,
   queryPhotosByYear,
+  queryCurrentGames,
   queryCurrentItems,
   querySteamSnapshot,
 } from '../db';
@@ -180,6 +181,20 @@ export async function getSteamSnapshot(): Promise<SteamSnapshot> {
   }
 }
 
+export async function getCurrentGames(): Promise<ManualGame[]> {
+  if (!isDBAvailable()) {
+    return import.meta.env.DEV ? mockCurrentGames : [];
+  }
+
+  try {
+    const games = await queryCurrentGames();
+    return import.meta.env.DEV && games.length === 0 ? mockCurrentGames : games;
+  } catch (error) {
+    console.error('Error fetching current games:', error);
+    return import.meta.env.DEV ? mockCurrentGames : [];
+  }
+}
+
 /**
  * Get featured articles.
  */
@@ -199,4 +214,4 @@ export async function getRecentFeedItems(count: number = 10): Promise<FeedItem[]
 }
 
 // Re-export types
-export type { FeedItem, ArchiveGroup, CurrentItem } from '../types';
+export type { FeedItem, ArchiveGroup, CurrentItem, ManualGame } from '../types';

@@ -1,6 +1,6 @@
 ---
-import type { CurrentItem, SteamStatus, SteamGame } from '../../lib/types';
-import { getCurrentItems, getSteamSnapshot, initRuntime } from '../../lib/api';
+import type { CurrentItem, ManualGame, SteamStatus, SteamGame } from '../../lib/types';
+import { getCurrentGames, getCurrentItems, getSteamSnapshot, initRuntime } from '../../lib/api';
 import { mockCurrentItems } from '../../lib/mock-data';
 import { mediaTypeLabels } from '../../lib/media-config';
 import SmartImage from '../islands/SmartImage';
@@ -10,6 +10,7 @@ interface Props {
   stats?: { articles?: number; photos?: number; microblogs?: number; media?: number };
   steamGames?: SteamGame[];
   steamSnapshot?: SteamSnapshot;
+  currentGames?: ManualGame[];
 }
 
 // Inject Cloudflare runtime env if available
@@ -43,6 +44,9 @@ if (Astro.props.steamSnapshot) {
 const orderedSteamGames = [...steamGames].sort((game, otherGame) =>
   isCurrentSteamGame(game, steamStatus) ? -1 : isCurrentSteamGame(otherGame, steamStatus) ? 1 : 0
 );
+const currentGames = Astro.props.currentGames || await getCurrentGames();
+const steamGameNames = new Set(steamGames.map((game) => game.name.trim().toLowerCase()));
+const manualGames = currentGames.filter((game) => !steamGameNames.has(game.title.trim().toLowerCase()));
 const stats = Astro.props.stats || {};
 
 const typeLabels: Record<string, string> = {
@@ -68,11 +72,16 @@ function isCurrentSteamGame(game: SteamGame, status: SteamStatus): boolean {
   );
 }
 
+function formatDaysInProgress(date?: Date): string {
+  if (!date) return '';
+  const days = Math.max(1, Math.ceil((Date.now() - date.getTime()) / 86400000));
+  return `已进行 ${days} 天`;
+}
+
 ---
 
 <aside class="space-y-6">
- <!-- Currently -->
- <!-- Currently -->
+ <!-- Recent non-game media -->
 {currentItems.length > 0 && (
    <section class="border-t border-border pt-5 mt-5">
       <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
@@ -132,10 +141,10 @@ function isCurrentSteamGame(game: SteamGame, status: SteamStatus): boolean {
       </div>
     </section>
   )}
-{steamGames.length > 0 && (
+{(steamGames.length > 0 || manualGames.length > 0) && (
   <section class="border-t border-border pt-5 mt-5">
     <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
-      在玩
+      游戏
     </h3>
     <div class="space-y-3">
       {orderedSteamGames.map((game) => (
@@ -162,6 +171,33 @@ function isCurrentSteamGame(game: SteamGame, status: SteamStatus): boolean {
             </div>
             <p class="text-xs text-text-muted truncate">
               两周 {formatHours(game.playtimeTwoWeeksMinutes)} · 总计 {formatHours(game.playtimeForeverMinutes)}
+            </p>
+          </div>
+        </a>
+      ))}
+      {manualGames.map((game) => (
+        <a
+          href={game.url || '#'}
+          target={game.url ? '_blank' : undefined}
+          rel="noopener noreferrer"
+          class="group flex items-center gap-3"
+        >
+          {game.cover ? (
+            <SmartImage
+              src={game.cover}
+              alt={game.title}
+              class="rounded-sm flex-shrink-0 w-16 h-9 object-cover"
+              client:visible
+            />
+          ) : (
+            <div class="w-16 h-9 rounded-sm bg-surface-secondary flex items-center justify-center flex-shrink-0">
+              <span class="text-xs text-text-muted">游</span>
+            </div>
+          )}
+          <div class="min-w-0 flex-1">
+            <p class="text-sm text-text-primary line-clamp-1 group-hover:underline">{game.title}</p>
+            <p class="text-xs text-text-muted truncate">
+              {['手动记录', formatDaysInProgress(game.date)].filter(Boolean).join(' · ')}
             </p>
           </div>
         </a>

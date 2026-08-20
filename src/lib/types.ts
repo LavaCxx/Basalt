@@ -249,6 +249,14 @@ export interface SteamSnapshot {
   status: SteamStatus;
 }
 
+export interface ManualGame {
+  id: string;
+  title: string;
+  cover?: string;
+  url?: string;
+  date?: Date;
+}
+
 /**
  * Archive item for the archives page
  */

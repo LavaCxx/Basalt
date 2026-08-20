@@ -1845,3 +1845,11 @@ html::view-transition-group(root) {
 .theme-icon-light { display: block; }
 .riso .theme-icon-light { display: none; }
 .riso .theme-icon-riso { display: block; }
+
+.microblog-collapsible {
+  position: relative;
+  max-height: 13rem;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, black 82%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent);
+}

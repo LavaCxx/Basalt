@@ -7,6 +7,7 @@ import type {
   FeedItem,
   FriendLink,
   CurrentItem,
+  ManualGame,
   ArchiveGroup,
   SiteConfig,
 } from './types';
@@ -112,6 +113,45 @@ export const mockFeedItems: FeedItem[] = [
   },
 
   // Microblog posts
+  {
+    id: 'micro-0',
+    type: 'microblog',
+    title: '',
+    content: `这是一条用于测试长动态折叠的示例。真实信息流里，Telegram 长文、多图和链接预览会让单条内容占据整个首屏，甚至把后续内容推到很远的位置。
+
+现在这条内容超过阈值后会被限制在一个可扫读的高度内，底部使用轻微渐隐提示还有未展示的部分。点击“展开全文”后，会完整显示文字、链接预览和图片；再次点击“收起”则回到紧凑状态。
+
+这里额外补充几段内容，确保它在大多数桌面和移动视口下都会稳定触发折叠逻辑，而不是刚好卡在边界附近。折叠的目标不是隐藏信息，而是让首页信息流保持节奏：短内容快速扫过，长内容可以展开细读，用户始终掌握展开与收起的主动权。`,
+    date: new Date('2025-02-19'),
+    source: 'telegram',
+    image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80',
+    metadata: {
+      platform: 'telegram',
+      likes: 31,
+      replies: 5,
+      attachments: [
+        {
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&q=80',
+          width: 600,
+          height: 400,
+        },
+        {
+          type: 'image',
+          url: 'https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=600&q=80',
+          width: 600,
+          height: 400,
+        },
+      ],
+      linkPreview: {
+        url: 'https://example.com/long-post',
+        siteName: 'Example',
+        title: '长动态链接预览',
+        description: '链接预览也会被纳入同一条动态的折叠范围。',
+        image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=600&q=80',
+      },
+    },
+  },
   {
     id: 'micro-1',
     type: 'microblog',
@@ -330,6 +370,22 @@ export const mockCurrentItems: CurrentItem[] = [
     title: '机核 GADIO 游戏电台',
     cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&q=80',
     date: new Date('2025-02-10'),
+  },
+];
+
+export const mockCurrentGames: ManualGame[] = [
+  {
+    id: 'manual-game-1',
+    title: 'RimWorld',
+    cover: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/632360/header.jpg',
+    date: new Date(Date.now() - 12 * 86400000),
+  },
+  {
+    id: 'manual-game-2',
+    title: 'The Legend of Zelda: Breath of the Wild',
+    cover: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/632360/header.jpg',
+    url: 'https://www.nintendo.com/us/store/products/the-legend-of-zelda-breath-of-the-wild-switch/',
+    date: new Date(Date.now() - 34 * 86400000),
   },
 ];
 

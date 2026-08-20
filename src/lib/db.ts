@@ -5,7 +5,7 @@
  * instead of making real-time API calls to third-party sources.
  */
 
-import type { FeedItem, FeedItemType, ContentSource, ArchiveGroup, ArchiveItem, CurrentItem, SteamSnapshot, SteamStatus } from './types';
+import type { FeedItem, FeedItemType, ContentSource, ArchiveGroup, ArchiveItem, CurrentItem, ManualGame, SteamSnapshot, SteamStatus } from './types';
 
 // ============================================================
 // D1 binding access
@@ -267,6 +267,7 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
     .prepare(
       `SELECT * FROM items
        WHERE type = 'media' AND source = 'notion'
+       AND json_extract(metadata_json, '$.mediaType') != 'game'
        ORDER BY date DESC
        LIMIT 50`
     )
@@ -323,6 +324,28 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
   }
 
   return currentItems;
+}
+
+export async function queryCurrentGames(): Promise<ManualGame[]> {
+  const db = getDB();
+  const result = await db
+    .prepare(
+      `SELECT id, title, image, url, date FROM items
+       WHERE type = 'media' AND source = 'notion'
+       AND json_extract(metadata_json, '$.mediaType') = 'game'
+       AND json_extract(metadata_json, '$.status') = 'in_progress'
+       ORDER BY date DESC
+       LIMIT 4`
+    )
+    .all();
+
+  return result.results.map((row: any) => ({
+    id: row.id,
+    title: row.title || '',
+    cover: row.image || undefined,
+    url: row.url || undefined,
+    date: row.date ? new Date(row.date) : undefined,
+  }));
 }
 
 export async function querySteamSnapshot(): Promise<SteamSnapshot> {
