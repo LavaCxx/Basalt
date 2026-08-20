@@ -110,7 +110,12 @@ export async function queryItems(options?: {
   const params: any[] = [];
   const conditions: string[] = [];
 
-  if (options?.types && options.types.length > 0) {
+  const types = options?.types;
+  if (!types || types.includes('media')) {
+    conditions.push(`NOT (type = 'media' AND source = 'notion')`);
+  }
+
+  if (types && types.length > 0) {
     const placeholders = options.types.map(() => '?').join(',');
     conditions.push(`type IN (${placeholders})`);
     params.push(...options.types);
