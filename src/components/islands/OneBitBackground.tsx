@@ -20,7 +20,7 @@ export default function OneBitBackground() {
   let canvasRef: HTMLCanvasElement | undefined;
   let timerId: ReturnType<typeof setTimeout> | 0 = 0;
   let lastFrame = 0;
-  const FRAME_INTERVAL = 500; // 极低帧率（2fps），配合慢速图案足够
+  const FRAME_INTERVAL = 125; // 8fps，保留低负载的动态节奏
 
   const opacity = useStore(opacityStore);
   const threshold = useStore(thresholdStore);
