@@ -72,10 +72,10 @@ function isCurrentSteamGame(game: SteamGame, status: SteamStatus): boolean {
   );
 }
 
-function formatDaysInProgress(date?: Date): string {
+function formatWastedDays(date?: Date): string {
   if (!date) return '';
   const days = Math.max(1, Math.ceil((Date.now() - date.getTime()) / 86400000));
-  return `已进行 ${days} 天`;
+  return `已浪费 ${days} 天`;
 }
 
 ---
@@ -85,7 +85,7 @@ function formatDaysInProgress(date?: Date): string {
 {currentItems.length > 0 && (
    <section class="border-t border-border pt-5 mt-5">
       <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
-        最近
+        在看
       </h3>
       <div class="space-y-3">
         {currentItems.map((item) => {
@@ -144,7 +144,7 @@ function formatDaysInProgress(date?: Date): string {
 {(steamGames.length > 0 || manualGames.length > 0) && (
   <section class="border-t border-border pt-5 mt-5">
     <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
-      游戏
+      在玩
     </h3>
     <div class="space-y-3">
       {orderedSteamGames.map((game) => (
@@ -197,7 +197,7 @@ function formatDaysInProgress(date?: Date): string {
           <div class="min-w-0 flex-1">
             <p class="text-sm text-text-primary line-clamp-1 group-hover:underline">{game.title}</p>
             <p class="text-xs text-text-muted truncate">
-              {formatDaysInProgress(game.date)}
+              {formatWastedDays(game.date)}
             </p>
           </div>
         </a>
