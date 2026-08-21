@@ -114,7 +114,6 @@ export default function SmartImage(props: SmartImageProps) {
         }}
         ref={(node) => {
           imageRef = node;
-          syncImageState();
         }}
       />
       {props.children}

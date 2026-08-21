@@ -2,7 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 import Sidebar from '../components/ui/Sidebar.astro';
 import FeedList from '../components/islands/FeedList';
-import { getFeedItems, initRuntime } from '../lib/api';
+import { getFeedPage, getFeedStats, initRuntime } from '../lib/api';
+import type { FeedPage, FeedStats } from '../lib/types';
 
 // Initialize D1 binding from Cloudflare runtime env
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
@@ -11,30 +12,26 @@ if (runtimeEnv) {
 }
 
 // Fetch feed items server-side (reads from D1)
-let feedItems: any[] = [];
+let feedPage: FeedPage = { items: [], nextCursor: null };
+let stats: FeedStats = { articles: 0, photos: 0, microblogs: 0, media: 0 };
 try {
-  feedItems = await getFeedItems();
+  [feedPage, stats] = await Promise.all([
+    getFeedPage({ limit: 30 }),
+    getFeedStats(),
+  ]);
 } catch (e) {
   console.error('Failed to fetch feed items:', e);
 }
 
-// Compute stats from feed items already fetched (no extra requests)
-const stats: { articles?: number; photos?: number; microblogs?: number; media?: number } = {
-  articles: feedItems.filter((i: any) => i.type === 'article').length,
-  photos: feedItems.filter((i: any) => i.type === 'photo').length,
-  microblogs: feedItems.filter((i: any) => i.type === 'microblog').length,
-  media: feedItems.filter((i: any) => i.type === 'media').length,
-};
-
 // Serialize dates for client-side hydration
-const serializedItems = feedItems.map((item) => ({
+const serializedItems = feedPage.items.map((item) => ({
   ...item,
   date: item.date instanceof Date ? item.date.toISOString() : item.date,
 }));
 ---
 
 <Layout title="首页" description="数字花园与内容聚合站" withSidebar>
-  <FeedList client:load items={serializedItems} />
+  <FeedList client:load items={serializedItems} nextCursor={feedPage.nextCursor} />
 
   <!-- Sidebar Slot -->
   <Sidebar slot="sidebar" stats={stats} />

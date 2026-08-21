@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --test-scheduled",
+    "dev": "wrangler dev --test-scheduled --persist-to=../.wrangler/state",
     "deploy": "wrangler deploy",
     "migrate": "wrangler d1 migrations apply basalt",
-    "migrate-local": "wrangler d1 migrations apply basalt --local"
+    "migrate-local": "wrangler d1 migrations apply basalt --local --persist-to=../.wrangler/state"
   },
   "dependencies": {
     "@notionhq/client": "^2.3.0",

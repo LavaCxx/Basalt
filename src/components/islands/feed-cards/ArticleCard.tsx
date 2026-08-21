@@ -16,14 +16,28 @@ export default function ArticleCard(props: { item: ArticleFeedItem }) {
       </div>
       <div class="flex gap-4">
         <Show when={item().image}>
-          <a href={item().url || '#'} class="block flex-shrink-0">
-            <SmartImage src={item().image} alt={item().title || ''} class="rounded-lg w-32 h-24" />
-          </a>
+          <Show
+            when={item().url}
+            fallback={<SmartImage src={item().image} alt={item().title || ''} class="rounded-lg w-32 h-24 flex-shrink-0" />}
+          >
+            {(url) => (
+              <a href={url()} class="block flex-shrink-0">
+                <SmartImage src={item().image} alt={item().title || ''} class="rounded-lg w-32 h-24" />
+              </a>
+            )}
+          </Show>
         </Show>
         <div class="flex-1 min-w-0">
-          <a href={item().url || '#'} class="group/link">
-            <h3 class="font-ui text-lg text-text-primary group-hover/link:underline transition-colors">{item().title}</h3>
-          </a>
+          <Show
+            when={item().url}
+            fallback={<h3 class="font-ui text-lg text-text-primary">{item().title}</h3>}
+          >
+            {(url) => (
+              <a href={url()} class="group/link">
+                <h3 class="font-ui text-lg text-text-primary group-hover/link:underline transition-colors">{item().title}</h3>
+              </a>
+            )}
+          </Show>
           <Show when={meta()?.excerpt}>
             <p class="mt-1 text-sm text-text-secondary line-clamp-2">{meta()!.excerpt}</p>
           </Show>

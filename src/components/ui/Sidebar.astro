@@ -177,7 +177,7 @@ function formatWastedDays(date?: Date): string {
       ))}
       {manualGames.map((game) => (
         <a
-          href={game.url || '#'}
+          href={game.url || undefined}
           target={game.url ? '_blank' : undefined}
           rel="noopener noreferrer"
           class="group flex items-start gap-3"

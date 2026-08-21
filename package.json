@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
+    "db:pull": "./scripts/pull-local-d1.sh",
     "build": "astro build",
     "check": "astro check",
     "test": "vitest run",
@@ -31,6 +32,6 @@
     "dotenv": "^17.3.1",
     "typescript": "^5.9.3",
     "vitest": "^4.1.11",
-    "wrangler": "^4.67.0"
+    "wrangler": "^4.125.0"
   }
 }

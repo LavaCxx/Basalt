@@ -54,6 +54,23 @@ export interface PhotoFeedItem extends FeedItemBase {
 
 export type FeedItem = ArticleFeedItem | MicroblogFeedItem | MediaFeedItem | PhotoFeedItem;
 
+export interface FeedCursor {
+  date: string;
+  id: string;
+}
+
+export interface FeedPage {
+  items: FeedItem[];
+  nextCursor: string | null;
+}
+
+export interface FeedStats {
+  articles: number;
+  photos: number;
+  microblogs: number;
+  media: number;
+}
+
 /**
  * Article-specific metadata
  */

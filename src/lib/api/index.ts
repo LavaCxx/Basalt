@@ -5,7 +5,7 @@
  * In development mode, if D1 is not available, we fall back to mock data.
  */
 
-import type { FeedItem, ArchiveGroup, CurrentItem } from '../types';
+import type { FeedItem, ArchiveGroup, CurrentItem, FeedPage, FeedStats } from '../types';
 import { mockFeedItems, mockArchiveGroups, mockCurrentItems, mockCurrentGames } from '../mock-data';
 import { getDemoSteamSnapshot } from '../steam';
 import type { ManualGame, SteamSnapshot } from '../types';
@@ -14,6 +14,9 @@ import {
   setRuntimeDB,
   isDBAvailable,
   queryItems,
+  queryFeedPage,
+  queryFeedStats,
+  decodeFeedCursor,
   queryArticleBySlug,
   queryAllArticleSlugs,
   queryArchiveGroups,
@@ -49,6 +52,43 @@ export async function getFeedItems(): Promise<FeedItem[]> {
     console.error('Error fetching feed items from D1:', error);
     return import.meta.env.DEV ? mockFeedItems : [];
   }
+}
+
+export async function getFeedPage(options: { limit: number; cursor?: string }): Promise<FeedPage> {
+  const cursor = options.cursor ? decodeFeedCursor(options.cursor) : undefined;
+  if (options.cursor && !cursor) throw new Error('Invalid feed cursor');
+
+  if (!isDBAvailable()) {
+    const items = import.meta.env.DEV ? mockFeedItems.slice(0, options.limit) : [];
+    return { items, nextCursor: null };
+  }
+
+  try {
+    return await queryFeedPage({ limit: options.limit, cursor: cursor ?? undefined });
+  } catch (error) {
+    console.error('Error fetching feed page from D1:', error);
+    const items = import.meta.env.DEV ? mockFeedItems.slice(0, options.limit) : [];
+    return { items, nextCursor: null };
+  }
+}
+
+export async function getFeedStats(): Promise<FeedStats> {
+  if (!isDBAvailable()) return countFeedItems(import.meta.env.DEV ? mockFeedItems : []);
+  try {
+    return await queryFeedStats();
+  } catch (error) {
+    console.error('Error fetching feed stats from D1:', error);
+    return countFeedItems(import.meta.env.DEV ? mockFeedItems : []);
+  }
+}
+
+function countFeedItems(items: FeedItem[]): FeedStats {
+  return {
+    articles: items.filter((item) => item.type === 'article').length,
+    photos: items.filter((item) => item.type === 'photo').length,
+    microblogs: items.filter((item) => item.type === 'microblog').length,
+    media: items.filter((item) => item.type === 'media').length,
+  };
 }
 
 /**

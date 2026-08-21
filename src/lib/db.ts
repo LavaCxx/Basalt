@@ -5,7 +5,7 @@
  * instead of making real-time API calls to third-party sources.
  */
 
-import type { FeedItem, FeedItemType, ContentSource, ArchiveGroup, ArchiveItem, CurrentItem, ManualGame, SteamSnapshot, SteamStatus } from './types';
+import type { FeedItem, FeedItemType, ContentSource, ArchiveGroup, ArchiveItem, CurrentItem, ManualGame, SteamSnapshot, SteamStatus, FeedCursor, FeedPage, FeedStats } from './types';
 
 // ============================================================
 // D1 binding access
@@ -103,6 +103,7 @@ function isExpiringNotionFileUrl(value: string): boolean {
 export async function queryItems(options?: {
   types?: FeedItemType[];
   limit?: number;
+  cursor?: FeedCursor;
 }): Promise<FeedItem[]> {
   const db = getDB();
 
@@ -121,11 +122,16 @@ export async function queryItems(options?: {
     params.push(...types);
   }
 
+  if (options?.cursor) {
+    conditions.push('(date < ? OR (date = ? AND id < ?))');
+    params.push(options.cursor.date, options.cursor.date, options.cursor.id);
+  }
+
   if (conditions.length > 0) {
     sql += ' WHERE ' + conditions.join(' AND ');
   }
 
-  sql += ' ORDER BY date DESC';
+  sql += ' ORDER BY date DESC, id DESC';
 
   if (options?.limit) {
     sql += ' LIMIT ?';
@@ -137,6 +143,67 @@ export async function queryItems(options?: {
   const result = await bound.all();
 
   return result.results.map(rowToFeedItem);
+}
+
+export async function queryFeedPage(options: {
+  limit: number;
+  cursor?: FeedCursor;
+}): Promise<FeedPage> {
+  const rows = await queryItems({ limit: options.limit + 1, cursor: options.cursor });
+  const hasMore = rows.length > options.limit;
+  const items = hasMore ? rows.slice(0, options.limit) : rows;
+  const lastItem = items.at(-1);
+
+  return {
+    items,
+    nextCursor: hasMore && lastItem
+      ? encodeFeedCursor({ date: lastItem.date.toISOString(), id: lastItem.id })
+      : null,
+  };
+}
+
+export async function queryFeedStats(): Promise<FeedStats> {
+  const result = await getDB()
+    .prepare(
+      `SELECT type, COUNT(*) AS count
+       FROM items
+       WHERE NOT (type = 'media' AND source = 'notion')
+       GROUP BY type`
+    )
+    .all();
+  const stats: FeedStats = { articles: 0, photos: 0, microblogs: 0, media: 0 };
+
+  for (const row of result.results) {
+    const count = Number(row.count || 0);
+    if (row.type === 'article') stats.articles = count;
+    if (row.type === 'photo') stats.photos = count;
+    if (row.type === 'microblog') stats.microblogs = count;
+    if (row.type === 'media') stats.media = count;
+  }
+
+  return stats;
+}
+
+export function encodeFeedCursor(cursor: FeedCursor): string {
+  const bytes = new TextEncoder().encode(JSON.stringify(cursor));
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+}
+
+export function decodeFeedCursor(value: string): FeedCursor | null {
+  try {
+    const base64 = value.replaceAll('-', '+').replaceAll('_', '/');
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+    const binary = atob(padded);
+    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+    const parsed = JSON.parse(new TextDecoder().decode(bytes));
+    if (!parsed || typeof parsed.date !== 'string' || typeof parsed.id !== 'string') return null;
+    if (Number.isNaN(Date.parse(parsed.date)) || parsed.id.length === 0) return null;
+    return { date: parsed.date, id: parsed.id };
+  } catch {
+    return null;
+  }
 }
 
 /**

@@ -34,13 +34,16 @@ export default function MediaCard(props: { item: MediaFeedItem }) {
       </div>
       <div class="flex gap-4 items-start">
         <Show when={item().image}>
-          <a href={item().url || '#'} class="block flex-shrink-0" target="_blank" rel="noopener">
-            <SmartImage
-              src={item().image!}
-              alt={item().title || ''}
-              class="w-16 h-24 rounded flex-shrink-0"
-            />
-          </a>
+          <Show
+            when={item().url}
+            fallback={<SmartImage src={item().image!} alt={item().title || ''} class="w-16 h-24 rounded flex-shrink-0" />}
+          >
+            {(url) => (
+              <a href={url()} class="block flex-shrink-0" target="_blank" rel="noopener noreferrer">
+                <SmartImage src={item().image!} alt={item().title || ''} class="w-16 h-24 rounded flex-shrink-0" />
+              </a>
+            )}
+          </Show>
         </Show>
         <div class="flex-1 min-w-0 -mt-1">
           <Show when={meta()?.status}>
@@ -48,9 +51,16 @@ export default function MediaCard(props: { item: MediaFeedItem }) {
               {getStatusLabel(meta()!.status!, meta()!.mediaType)}
             </span>
           </Show>
-          <a href={item().url || '#'} class="group/title" target="_blank" rel="noopener">
-            <h3 class="font-ui text-base text-text-primary group-hover/title:underline transition-colors mt-1.5">{item().title}</h3>
-          </a>
+          <Show
+            when={item().url}
+            fallback={<h3 class="font-ui text-base text-text-primary mt-1.5">{item().title}</h3>}
+          >
+            {(url) => (
+              <a href={url()} class="group/title" target="_blank" rel="noopener noreferrer">
+                <h3 class="font-ui text-base text-text-primary group-hover/title:underline transition-colors mt-1.5">{item().title}</h3>
+              </a>
+            )}
+          </Show>
           <Show when={meta()?.creator}>
             <p class="text-xs text-text-muted mt-0.5">{meta()!.creator}</p>
           </Show>

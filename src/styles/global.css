@@ -965,6 +965,32 @@ body {
   font-weight: 500;
 }
 
+/* Compact marker for links embedded in prose or shown as a URL. */
+.prose-basalt a:not(.notion-bookmark):not(:has(img))::after,
+.article-content-html a:not(.notion-bookmark):not(:has(img))::after,
+.telegram-inline-link::after {
+  content: "";
+  display: inline-block;
+  width: 0.78em;
+  height: 0.78em;
+  margin-left: 0.14em;
+  vertical-align: -0.15em;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M1 15 15 1M6 1h9v9' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M1 15 15 1M6 1h9v9' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  opacity: 0.55;
+  text-decoration: none;
+  transform: translateY(-0.08em);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.prose-basalt a:not(.notion-bookmark):not(:has(img)):hover::after,
+.article-content-html a:not(.notion-bookmark):not(:has(img)):hover::after,
+.telegram-inline-link:hover::after {
+  opacity: 0.9;
+  transform: translate(0.1em, -0.18em);
+}
+
 .prose-basalt blockquote {
   font-style: italic;
   padding-left: 1.5rem;

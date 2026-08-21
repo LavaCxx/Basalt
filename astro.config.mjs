@@ -11,7 +11,8 @@ export default defineConfig({
   output: 'server',
   adapter: cloudflare({
     platformProxy: {
-      enabled: true
+      enabled: true,
+      persist: { path: '.wrangler/state/v3' }
     }
   }),
   vite: {

@@ -17,6 +17,8 @@ interface NotionCurrentProperties {
   类型?: { select: { name: string } | null };
   状态?: { status: { name: string } | null };
   封面?: { files: { type: string; file?: { url: string }; external?: { url: string } }[] };
+  链接?: { url: string | null };
+  Link?: { url: string | null };
   开始时间?: { date: { start: string } | null };
   结束时间?: { date: { start: string } | null };
 }
@@ -87,6 +89,7 @@ export async function fetchCurrentItems(options?: {
     const typeStr = props.类型?.select?.name ?? null;
     const statusStr = props.状态?.status?.name ?? null;
     const cover = getCoverImage(props.封面?.files);
+    const url = props.链接?.url || props.Link?.url || undefined;
     const startStr = props.开始时间?.date?.start;
     const endStr = props.结束时间?.date?.start;
 
@@ -112,6 +115,7 @@ export async function fetchCurrentItems(options?: {
       content: '',
       date,
       source: 'notion' as const,
+      url,
       image: cover,
       metadata,
     };

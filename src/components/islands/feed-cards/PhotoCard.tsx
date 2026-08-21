@@ -14,9 +14,16 @@ export default function PhotoCard(props: { item: PhotoFeedItem }) {
         <time class="ml-auto">{formatDate(item().date)}</time>
       </div>
       <div class="flex gap-4">
-        <a href={item().url || '#'} class="block flex-shrink-0">
-          <SmartImage src={item().image} alt={item().title || ''} class="rounded-lg w-32 h-32" />
-        </a>
+        <Show
+          when={item().url}
+          fallback={<SmartImage src={item().image} alt={item().title || ''} class="rounded-lg w-32 h-32 flex-shrink-0" />}
+        >
+          {(url) => (
+            <a href={url()} class="block flex-shrink-0">
+              <SmartImage src={item().image} alt={item().title || ''} class="rounded-lg w-32 h-32" />
+            </a>
+          )}
+        </Show>
         <div class="flex-1 min-w-0 py-1">
           <Show when={item().title}>
             <h3 class="font-ui text-lg text-text-primary">{item().title}</h3>
