@@ -149,3 +149,24 @@ export function findStaleItemIds(existingIds: string[], currentIds: string[]): s
   const currentIdSet = new Set(currentIds);
   return existingIds.filter((id) => !currentIdSet.has(id));
 }
+
+/**
+ * Acquire a global sync lease. A stale lease can be replaced after 15 minutes
+ * so an interrupted Worker invocation cannot block future cron runs forever.
+ */
+export async function tryAcquireSyncLock(db: D1Database): Promise<boolean> {
+  const result = await db
+    .prepare(
+      `INSERT INTO sync_locks (name, acquired_at)
+       VALUES ('global', datetime('now'))
+       ON CONFLICT(name) DO UPDATE SET acquired_at = excluded.acquired_at
+       WHERE sync_locks.acquired_at < datetime('now', '-15 minutes')`
+    )
+    .run();
+
+  return Number(result?.meta?.changes || 0) > 0;
+}
+
+export async function releaseSyncLock(db: D1Database): Promise<void> {
+  await db.prepare(`DELETE FROM sync_locks WHERE name = 'global'`).run();
+}

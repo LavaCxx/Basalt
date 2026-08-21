@@ -11,7 +11,7 @@
 import { setRuntimeEnv } from '../../src/lib/api/env';
 import { verifyBearerToken } from '../../src/lib/auth';
 import { syncNotionArticles, syncNotionPhotos, syncTelegram, syncDouban, syncNotionCurrent, syncSteam } from './sync';
-import type { D1Database } from './db';
+import { releaseSyncLock, tryAcquireSyncLock, type D1Database } from './db';
 
 export interface Env {
   DB: D1Database;
@@ -91,8 +91,17 @@ export default {
    * Scheduled handler — triggered by Cron Trigger.
    */
   async scheduled(_controller: unknown, env: Env): Promise<void> {
-    const results = await runSync(env);
-    console.log('[sync] Summary:', JSON.stringify(results));
+    if (!(await tryAcquireSyncLock(env.DB))) {
+      console.log(JSON.stringify({ event: 'sync.skipped', reason: 'already_running', trigger: 'cron' }));
+      return;
+    }
+
+    try {
+      const results = await runSync(env);
+      console.log('[sync] Summary:', JSON.stringify(results));
+    } finally {
+      await releaseSyncLock(env.DB);
+    }
   },
 
   /**
@@ -122,9 +131,24 @@ export default {
       });
     }
 
-    const results = await runSync(env);
-    return new Response(JSON.stringify({ sync: results, time: new Date().toISOString() }, null, 2), {
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-    });
+    if (!(await tryAcquireSyncLock(env.DB))) {
+      return new Response(JSON.stringify({ error: 'Sync already in progress' }), {
+        status: 409,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+          'Retry-After': '30',
+        },
+      });
+    }
+
+    try {
+      const results = await runSync(env);
+      return new Response(JSON.stringify({ sync: results, time: new Date().toISOString() }, null, 2), {
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+      });
+    } finally {
+      await releaseSyncLock(env.DB);
+    }
   },
 };
