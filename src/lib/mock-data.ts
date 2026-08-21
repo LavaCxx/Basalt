@@ -377,13 +377,13 @@ export const mockCurrentGames: ManualGame[] = [
   {
     id: 'manual-game-1',
     title: 'RimWorld',
-    cover: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/632360/header.jpg',
+    cover: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=120&q=80',
     date: new Date(Date.now() - 12 * 86400000),
   },
   {
     id: 'manual-game-2',
     title: 'The Legend of Zelda: Breath of the Wild',
-    cover: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/632360/header.jpg',
+    cover: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=120&q=80',
     url: 'https://www.nintendo.com/us/store/products/the-legend-of-zelda-breath-of-the-wild-switch/',
     date: new Date(Date.now() - 34 * 86400000),
   },

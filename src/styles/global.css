@@ -818,6 +818,10 @@ body {
   object-fit: cover;
 }
 
+.smart-image[data-fit='contain'] .smart-image-img {
+  object-fit: contain;
+}
+
 .smart-image-img.smart-image-loading,
 .smart-image-img.smart-image-error {
   opacity: 0;

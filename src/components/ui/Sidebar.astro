@@ -96,11 +96,11 @@ function formatWastedDays(date?: Date): string {
               <SmartImage
                 src={item.cover}
                 alt={item.title}
-                class="rounded flex-shrink-0 w-10 h-14"
+                class="rounded flex-shrink-0 w-12 h-18 object-cover"
                 client:visible
               />
             ) : (
-              <div class="w-10 h-14 rounded bg-surface-secondary flex items-center justify-center flex-shrink-0">
+              <div class="w-12 h-18 rounded bg-surface-secondary flex items-center justify-center flex-shrink-0">
                 <span class="text-xs text-text-muted">
                   {mediaType === 'book' ? '书' : mediaType === 'movie' ? '影' : mediaType === 'tv' ? '剧' : mediaType === 'music' ? '音' : mediaType === 'game' ? '游' : mediaType === 'manga' ? '漫' : mediaType === 'anime' ? '番' : '看'}
                 </span>
@@ -157,7 +157,7 @@ function formatWastedDays(date?: Date): string {
           <SmartImage
             src={game.cover}
             alt={game.name}
-            class="rounded-sm flex-shrink-0 w-16 h-9"
+            class="rounded flex-shrink-0 w-16 h-9 object-cover"
             client:visible
           />
           <div class="min-w-0 flex-1">
@@ -180,17 +180,18 @@ function formatWastedDays(date?: Date): string {
           href={game.url || '#'}
           target={game.url ? '_blank' : undefined}
           rel="noopener noreferrer"
-          class="group flex items-center gap-3"
+          class="group flex items-start gap-3"
         >
           {game.cover ? (
             <SmartImage
               src={game.cover}
               alt={game.title}
-              class="rounded-sm flex-shrink-0 w-16 h-9 object-cover"
+              class="rounded flex-shrink-0 w-16 h-16 object-contain bg-surface-secondary"
+              fit="contain"
               client:visible
             />
           ) : (
-            <div class="w-16 h-9 rounded-sm bg-surface-secondary flex items-center justify-center flex-shrink-0">
+            <div class="w-16 h-16 rounded bg-surface-secondary flex items-center justify-center flex-shrink-0">
               <span class="text-xs text-text-muted">游</span>
             </div>
           )}
