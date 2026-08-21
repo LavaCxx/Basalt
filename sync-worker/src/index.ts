@@ -9,7 +9,9 @@
  */
 
 import { setRuntimeEnv } from '../../src/lib/api/env';
+import { verifyBearerToken } from '../../src/lib/auth';
 import { syncNotionArticles, syncNotionPhotos, syncTelegram, syncDouban, syncNotionCurrent, syncSteam } from './sync';
+import type { D1Database } from './db';
 
 export interface Env {
   DB: D1Database;
@@ -25,6 +27,7 @@ export interface Env {
   DOUBAN_USER_RSS?: string;
   STEAM_ID?: string;
   STEAM_API_KEY?: string;
+  SYNC_WORKER_TOKEN?: string;
 }
 
 /**
@@ -40,104 +43,88 @@ function envToStringRecord(env: Env): Record<string, string> {
   return record;
 }
 
+async function runSync(env: Env): Promise<Record<string, 'ok' | 'error'>> {
+  const envRecord = envToStringRecord(env);
+  setRuntimeEnv(envRecord);
+
+  const results: Record<string, 'ok' | 'error'> = {};
+  const sources: { name: string; fn: () => Promise<void> }[] = [
+    { name: 'notion:articles', fn: () => syncNotionArticles(env.DB, envRecord) },
+    { name: 'notion:photos', fn: () => syncNotionPhotos(env.DB, envRecord) },
+  ];
+
+  if (env.NOTION_CURRENT_DATABASE_ID) {
+    sources.push({ name: 'notion:current', fn: () => syncNotionCurrent(env.DB, envRecord) });
+  }
+  if (env.TELEGRAM_CHANNEL_USERNAME) {
+    sources.push({ name: 'telegram', fn: () => syncTelegram(env.DB, envRecord) });
+  }
+  if (env.DOUBAN_USER_RSS) {
+    sources.push({ name: 'douban', fn: () => syncDouban(env.DB, envRecord) });
+  }
+  if (env.STEAM_ID && env.STEAM_API_KEY) {
+    sources.push({ name: 'steam', fn: () => syncSteam(env.DB, envRecord) });
+  }
+
+  await Promise.allSettled(
+    sources.map(async (source) => {
+      try {
+        await source.fn();
+        results[source.name] = 'ok';
+        console.log(JSON.stringify({ event: 'sync.complete', source: source.name }));
+      } catch (error) {
+        results[source.name] = 'error';
+        console.error(JSON.stringify({
+          event: 'sync.failed',
+          source: source.name,
+          error: error instanceof Error ? error.message : String(error),
+        }));
+      }
+    })
+  );
+
+  return results;
+}
+
 export default {
   /**
    * Scheduled handler — triggered by Cron Trigger.
    */
-  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    const envRecord = envToStringRecord(env);
-    setRuntimeEnv(envRecord);
-
-    const results: Record<string, string> = {};
-
-    // Sync each source independently — one failure doesn't block the others
-    const sources: { name: string; fn: () => Promise<void> }[] = [
-      { name: 'notion:articles', fn: () => syncNotionArticles(env.DB, envRecord) },
-     { name: 'notion:photos', fn: () => syncNotionPhotos(env.DB, envRecord) },
-   ];
-
-    if (env.NOTION_CURRENT_DATABASE_ID) {
-      sources.push({ name: 'notion:current', fn: () => syncNotionCurrent(env.DB, envRecord) });
-    }
-    if (env.TELEGRAM_CHANNEL_USERNAME) {
-      sources.push({ name: 'telegram', fn: () => syncTelegram(env.DB, envRecord) });
-    }
-    if (env.DOUBAN_USER_RSS) {
-      sources.push({ name: 'douban', fn: () => syncDouban(env.DB, envRecord) });
-    }
-    if (env.STEAM_ID && env.STEAM_API_KEY) {
-      sources.push({ name: 'steam', fn: () => syncSteam(env.DB, envRecord) });
-    }
-
-    // Run all syncs in parallel (they write to different item types)
-    await Promise.allSettled(
-      sources.map(async (source) => {
-        try {
-          await source.fn();
-          results[source.name] = 'ok';
-          console.log(`[sync] ${source.name}: success`);
-        } catch (error) {
-          results[source.name] = `error: ${String(error)}`;
-          console.error(`[sync] ${source.name} failed:`, error);
-        }
-      })
-    );
-
+  async scheduled(_controller: unknown, env: Env): Promise<void> {
+    const results = await runSync(env);
     console.log('[sync] Summary:', JSON.stringify(results));
   },
 
   /**
    * Fetch handler — allows manual sync trigger via HTTP for testing.
-   * GET / → triggers a full sync and returns the summary.
-   * Protect this in production with a secret header if needed.
+   * POST /sync → triggers a full sync and returns the summary.
    */
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
     // Health check
-    if (url.pathname === '/health') {
+    if (url.pathname === '/health' && request.method === 'GET') {
       return new Response(JSON.stringify({ status: 'ok', time: new Date().toISOString() }), {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
       });
     }
 
-    // Manual sync trigger
-    const envRecord = envToStringRecord(env);
-    setRuntimeEnv(envRecord);
-
-    const results: Record<string, string> = {};
-    const sources: { name: string; fn: () => Promise<void> }[] = [
-      { name: 'notion:articles', fn: () => syncNotionArticles(env.DB, envRecord) },
-      { name: 'notion:photos', fn: () => syncNotionPhotos(env.DB, envRecord) },
-    ];
-
-    if (env.NOTION_CURRENT_DATABASE_ID) {
-      sources.push({ name: 'notion:current', fn: () => syncNotionCurrent(env.DB, envRecord) });
+    if (url.pathname !== '/sync') {
+      return new Response('Not found', { status: 404 });
     }
-    if (env.TELEGRAM_CHANNEL_USERNAME) {
-      sources.push({ name: 'telegram', fn: () => syncTelegram(env.DB, envRecord) });
+    if (request.method !== 'POST') {
+      return new Response('Method not allowed', { status: 405, headers: { Allow: 'POST' } });
     }
-    if (env.DOUBAN_USER_RSS) {
-      sources.push({ name: 'douban', fn: () => syncDouban(env.DB, envRecord) });
-    }
-    if (env.STEAM_ID && env.STEAM_API_KEY) {
-      sources.push({ name: 'steam', fn: () => syncSteam(env.DB, envRecord) });
+    if (!(await verifyBearerToken(request, env.SYNC_WORKER_TOKEN))) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+      });
     }
 
-    await Promise.allSettled(
-      sources.map(async (source) => {
-        try {
-          await source.fn();
-          results[source.name] = 'ok';
-        } catch (error) {
-          results[source.name] = `error: ${String(error)}`;
-          console.error(`[sync] ${source.name} failed:`, error);
-        }
-      })
-    );
-
+    const results = await runSync(env);
     return new Response(JSON.stringify({ sync: results, time: new Date().toISOString() }, null, 2), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
   },
 };

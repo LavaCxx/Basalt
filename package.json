@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "check": "astro check",
+    "test": "vitest run",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -24,8 +26,11 @@
     "three": "^0.169.0"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
     "@types/three": "^0.169.0",
     "dotenv": "^17.3.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11",
     "wrangler": "^4.67.0"
   }
 }

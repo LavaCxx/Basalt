@@ -99,7 +99,7 @@ export default function Lightbox(props: LightboxProps) {
     zoomAtPoint(zoom() * factor, { x: event.clientX, y: event.clientY });
   };
 
-  const updatePinch = (event: PointerEvent) => {
+  const updatePinch = () => {
     if (activePointers.size < 2) return;
     const [first, second] = [...activePointers.values()];
     const distance = Math.hypot(second.x - first.x, second.y - first.y);
@@ -113,7 +113,7 @@ export default function Lightbox(props: LightboxProps) {
   const handlePointerDown = (event: PointerEvent) => {
     if (imageState() !== 'loaded') return;
     event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
+    (event.currentTarget as HTMLElement | null)?.setPointerCapture(event.pointerId);
     activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
     if (activePointers.size === 2) {
@@ -134,7 +134,7 @@ export default function Lightbox(props: LightboxProps) {
     activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
     if (activePointers.size >= 2) {
-      updatePinch(event);
+      updatePinch();
       return;
     }
     if (zoom() <= MIN_ZOOM) return;

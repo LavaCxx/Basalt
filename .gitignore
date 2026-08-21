@@ -19,6 +19,8 @@ pnpm-debug.log*
 .env.local
 .env.production.local
 !.env.example
+.secrets/
+.pnpm-store/
 
 # Cloudflare
 .wrangler/

@@ -22,6 +22,7 @@ migrations_dir = "../migrations"
 
 # Secrets (set via `wrangler secret put` or Dashboard):
 #   NOTION_API_KEY
+#   SYNC_WORKER_TOKEN
 #   TELEGRAM_CHANNEL_USERNAME
 #   RSSHUB_INSTANCE (optional)
 #   DOUBAN_USER_RSS (optional)

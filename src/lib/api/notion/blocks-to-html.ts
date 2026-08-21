@@ -57,7 +57,7 @@ function getLangLabel(lang: string): string {
 }
 
 /** Shiki highlighter singleton — uses pure JS regex engine (no WASM) for Cloudflare compatibility */
-let _highlighterPromise: Promise<ReturnType<typeof createHighlighter>> | null = null;
+let _highlighterPromise: ReturnType<typeof createHighlighter> | null = null;
 
 async function getHighlighter() {
   if (!_highlighterPromise) {

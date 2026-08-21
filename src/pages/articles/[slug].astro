@@ -28,7 +28,8 @@ if (!article) {
   return Astro.rewrite('/404');
 }
 
-const { title, content, date, image, metadata } = article;
+const { content, date, image, metadata } = article;
+const title = article.title || 'Untitled';
 const tags = (metadata as any)?.tags || [];
 const readingTime = (metadata as any)?.readingTime || 5;
 const canonicalUrl = `https://blog.lavac.cc/articles/${slug}`;

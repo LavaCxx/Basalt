@@ -58,6 +58,8 @@ export type FeedItem = ArticleFeedItem | MicroblogFeedItem | MediaFeedItem | Pho
  * Article-specific metadata
  */
 export interface ArticleMetadata {
+  /** Display name for articles imported from an RSS feed */
+  feedName?: string;
   /** Reading time in minutes */
   readingTime?: number;
   /** Article tags/categories */

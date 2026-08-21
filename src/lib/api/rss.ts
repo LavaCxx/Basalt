@@ -186,8 +186,8 @@ export async function fetchDoubanFeed(): Promise<FeedItem[]> {
 
   const feed = await fetchAndParseRSS(rssUrl);
 
-  const items: FeedItem[] = feed.items
-    .map((item) => {
+  const items = feed.items
+    .map<FeedItem | null>((item) => {
       const parsed = parseDoubanItem(item);
       if (!parsed) return null;
 

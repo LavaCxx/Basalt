@@ -107,19 +107,45 @@ export async function updateSyncState(db: D1Database, source: string, cursor: st
  * We pass in the set of IDs we just synced; anything else for that source gets deleted.
  */
 export async function deleteStaleItems(db: D1Database, source: string, currentIds: string[]): Promise<void> {
-  if (currentIds.length === 0) return;
+  await deleteStaleItemsScoped(db, source, undefined, currentIds);
+}
 
-  // Delete items that belong to this source but aren't in currentIds
-  // Do it in batches to avoid SQL parameter limits
+/**
+ * Delete records missing from the latest complete source snapshot.
+ *
+ * Fetch stale IDs first, then delete those IDs in batches. Splitting a NOT IN
+ * list into batches is unsafe because each batch would delete IDs retained by
+ * the other batches.
+ */
+export async function deleteStaleItemsScoped(
+  db: D1Database,
+  source: string,
+  type: string | undefined,
+  currentIds: string[]
+): Promise<void> {
+  const selectSql = type
+    ? 'SELECT id FROM items WHERE source = ? AND type = ?'
+    : 'SELECT id FROM items WHERE source = ?';
+  const existing = type
+    ? await db.prepare(selectSql).bind(source, type).all()
+    : await db.prepare(selectSql).bind(source).all();
+  const staleIds = findStaleItemIds(
+    existing.results.map((row) => String(row.id)),
+    currentIds
+  );
+
   const BATCH = 100;
-  for (let i = 0; i < currentIds.length; i += BATCH) {
-    const batch = currentIds.slice(i, i + BATCH);
+  for (let i = 0; i < staleIds.length; i += BATCH) {
+    const batch = staleIds.slice(i, i + BATCH);
     const placeholders = batch.map(() => '?').join(',');
     await db
-      .prepare(
-        `DELETE FROM items WHERE source = ? AND id NOT IN (${placeholders})`
-      )
-      .bind(source, ...batch)
+      .prepare(`DELETE FROM items WHERE id IN (${placeholders})`)
+      .bind(...batch)
       .run();
   }
+}
+
+export function findStaleItemIds(existingIds: string[], currentIds: string[]): string[] {
+  const currentIdSet = new Set(currentIds);
+  return existingIds.filter((id) => !currentIdSet.has(id));
 }

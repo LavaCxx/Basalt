@@ -12,7 +12,7 @@ import { getSteamGames, getSteamStatus } from '../../src/lib/steam';
 import { calculateReadingTime } from '../../src/lib/api/notion/blocks-to-html';
 import type { FeedItem } from '../../src/lib/types';
 
-import { upsertItem, upsertArticleBody, getSyncState, updateSyncState, deleteStaleItems } from './db';
+import { upsertItem, upsertArticleBody, getSyncState, updateSyncState, deleteStaleItems, deleteStaleItemsScoped } from './db';
 import { ensureBookmarksEnriched, createBookmarkResolver } from './link-enricher';
 import type { D1Database } from './db';
 
@@ -137,29 +137,12 @@ export async function syncNotionCurrent(db: D1Database, env: Record<string, stri
 
   const { getAllCurrentItems } = await import('../../src/lib/api/notion/current');
   const allItems: FeedItem[] = await getAllCurrentItems();
-  if (allItems.length === 0) return;
 
   for (const item of allItems) {
     await upsertItem(db, item);
   }
 
-  // Remove items that disappeared from the database.
-  // Notion media items share source='notion' with articles/photos, so we scope
-  // the stale deletion to source='notion' AND type='media' only.
-  const currentIds = allItems.map((i) => i.id);
-  if (currentIds.length > 0) {
-    const BATCH = 100;
-    for (let i = 0; i < currentIds.length; i += BATCH) {
-      const batch = currentIds.slice(i, i + BATCH);
-      const placeholders = batch.map(() => '?').join(',');
-      await db
-        .prepare(
-          `DELETE FROM items WHERE source = 'notion' AND type = 'media' AND id NOT IN (${placeholders})`
-        )
-        .bind(...batch)
-        .run();
-    }
-  }
+  await deleteStaleItemsScoped(db, 'notion', 'media', allItems.map((item) => item.id));
   await updateSyncState(db, 'notion:current', null);
 }
 

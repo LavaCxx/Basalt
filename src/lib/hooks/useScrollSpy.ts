@@ -56,7 +56,7 @@ export function useScrollSpy(options?: ScrollSpyOptions) {
   let ticking = false;
 
   function updateProgress() {
-    const article = document.querySelector(contentSelector);
+    const article = document.querySelector<HTMLElement>(contentSelector);
     if (!article) return;
 
     const scrollTop = window.scrollY;
@@ -108,7 +108,7 @@ export function useScrollSpy(options?: ScrollSpyOptions) {
       }
     }
 
-    setActiveIds(activeId ? new Set([activeId]) : new Set());
+    setActiveIds(activeId ? new Set<string>([activeId]) : new Set<string>());
   }
 
   function handleScroll() {

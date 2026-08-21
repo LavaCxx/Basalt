@@ -47,7 +47,9 @@ const COL = {
 };
 
 const hexToLin: Record<number, [number, number, number]> = {};
-for (const k of Object.keys(COL)) hexToLin[COL[k].hex] = COL[k].lin as [number, number, number];
+for (const color of Object.values(COL)) {
+  hexToLin[color.hex] = color.lin as [number, number, number];
+}
 
 const FBX_CAR_COLORS: Record<number, [number, number, number]> = {
   0x5982cc: [0.50, 0.62, 0.85],

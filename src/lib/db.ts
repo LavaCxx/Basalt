@@ -116,9 +116,9 @@ export async function queryItems(options?: {
   }
 
   if (types && types.length > 0) {
-    const placeholders = options.types.map(() => '?').join(',');
+    const placeholders = types.map(() => '?').join(',');
     conditions.push(`type IN (${placeholders})`);
-    params.push(...options.types);
+    params.push(...types);
   }
 
   if (conditions.length > 0) {

@@ -10,39 +10,47 @@
  */
 
 import type { APIRoute } from 'astro';
+import { verifyBearerToken } from '../../lib/auth';
 
 export const prerender = false;
 
-export const GET: APIRoute = async (context) => {
+export const POST: APIRoute = async (context) => {
   const runtimeEnv = (context as any).runtime?.env || (context.locals as any)?.runtime?.env;
   const syncWorkerUrl = runtimeEnv?.SYNC_WORKER_URL;
   const syncWorkerToken = runtimeEnv?.SYNC_WORKER_TOKEN;
+  const adminSyncToken = runtimeEnv?.ADMIN_SYNC_TOKEN;
 
-  if (!syncWorkerUrl) {
-    return new Response(
-      JSON.stringify({ error: 'SYNC_WORKER_URL is not configured. Set it to your sync worker URL.' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
+  if (!(await verifyBearerToken(context.request, adminSyncToken))) {
+    return jsonResponse({ error: 'Unauthorized' }, 401);
+  }
+
+  if (!syncWorkerUrl || !syncWorkerToken) {
+    return jsonResponse({ error: 'Manual sync is not configured' }, 503);
   }
 
   try {
-    const headers: Record<string, string> = {};
-    if (syncWorkerToken) {
-      headers['Authorization'] = `Bearer ${syncWorkerToken}`;
-    }
-
-    const response = await fetch(syncWorkerUrl, { headers });
+    const target = new URL('/sync', syncWorkerUrl);
+    const response = await fetch(target, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${syncWorkerToken}` },
+    });
     const result = await response.text();
 
     return new Response(result, {
       status: response.status,
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders,
     });
   } catch (error) {
     console.error('Sync trigger error:', error);
-    return new Response(
-      JSON.stringify({ error: `Failed to trigger sync: ${String(error)}` }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return jsonResponse({ error: 'Failed to trigger sync' }, 502);
   }
 };
+
+const jsonHeaders = {
+  'Content-Type': 'application/json',
+  'Cache-Control': 'no-store',
+};
+
+function jsonResponse(body: unknown, status: number): Response {
+  return new Response(JSON.stringify(body), { status, headers: jsonHeaders });
+}
