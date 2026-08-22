@@ -2,47 +2,51 @@ import { Show } from 'solid-js';
 import type { ArticleFeedItem } from '../../../lib/types';
 import SourceBadge from '../SourceBadge';
 import SmartImage from '../SmartImage';
-import { formatDate } from './formatDate';
+import { formatTime } from './formatDate';
 
 export default function ArticleCard(props: { item: ArticleFeedItem }) {
   const item = () => props.item;
   const meta = () => item().metadata;
+  const hasImage = () => Boolean(item().image);
 
   return (
-    <div class="py-4 border-b border-border-subtle">
-      <div class="flex items-center gap-1.5 mb-2 text-xs text-text-muted">
+    <div class="article-feed-card" classList={{ 'article-feed-card--no-image': !hasImage() }}>
+      <div class="article-feed-meta">
         <SourceBadge source={item().source} feedName={meta()?.feedName} />
-        <time class="ml-auto">{formatDate(item().date)}</time>
+        <time class="feed-card-time">{formatTime(item().date)}</time>
+        <Show when={meta()?.readingTime}>
+          <span class="article-feed-reading">约 {meta()!.readingTime} 分钟</span>
+        </Show>
       </div>
-      <div class="flex gap-4">
+      <div class="article-feed-layout">
         <Show when={item().image}>
           <Show
             when={item().url}
-            fallback={<SmartImage src={item().image} alt={item().title || ''} class="rounded-lg w-32 h-24 flex-shrink-0" />}
+            fallback={<SmartImage src={item().image} alt={item().title || ''} class="article-feed-image" width={256} height={192} />}
           >
             {(url) => (
-              <a href={url()} class="block flex-shrink-0">
-                <SmartImage src={item().image} alt={item().title || ''} class="rounded-lg w-32 h-24" />
+              <a href={url()} class="article-feed-image-link" aria-label={`阅读文章：${item().title || ''}`}>
+                <SmartImage src={item().image} alt="" class="article-feed-image" width={256} height={192} />
               </a>
             )}
           </Show>
         </Show>
-        <div class="flex-1 min-w-0">
+        <div class="article-feed-copy">
           <Show
             when={item().url}
-            fallback={<h3 class="font-ui text-lg text-text-primary">{item().title}</h3>}
+            fallback={<h3 class="article-feed-title">{item().title}</h3>}
           >
             {(url) => (
               <a href={url()} class="group/link">
-                <h3 class="font-ui text-lg text-text-primary group-hover/link:underline transition-colors">{item().title}</h3>
+                <h3 class="article-feed-title">{item().title}</h3>
               </a>
             )}
           </Show>
           <Show when={meta()?.excerpt}>
-            <p class="mt-1 text-sm text-text-secondary line-clamp-2">{meta()!.excerpt}</p>
+            <p class="article-feed-excerpt line-clamp-2">{meta()!.excerpt}</p>
           </Show>
-          <Show when={meta()?.readingTime}>
-            <p class="mt-2 text-xs text-text-muted">阅读需要约 {meta()!.readingTime} 分钟</p>
+          <Show when={item().url}>
+            <span class="article-feed-read" aria-hidden="true">阅读全文<span class="article-feed-arrow link-arrow-icon">↗</span></span>
           </Show>
         </div>
       </div>

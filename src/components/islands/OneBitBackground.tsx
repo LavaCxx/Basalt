@@ -13,7 +13,7 @@ const numStore = (key: string, def: number) =>
 
 const opacityStore = numStore("bg-opacity", 0.03);
 const thresholdStore = numStore("bg-threshold", 140);
-const speedStore = numStore("bg-speed", 0.10);
+const speedStore = numStore("bg-speed", 0.15);
 const resStore = numStore("bg-resolution", 1200);
 
 export default function OneBitBackground() {
@@ -185,7 +185,7 @@ export default function OneBitBackground() {
             </label>
             <button class="onebit-reset" onClick={() => {
               opacityStore.set(0.03); thresholdStore.set(140);
-              speedStore.set(0.10); resStore.set(1200);
+              speedStore.set(0.15); resStore.set(1200);
             }}>重置默认</button>
             <div class="onebit-fps">{fps()} FPS</div>
           </div>

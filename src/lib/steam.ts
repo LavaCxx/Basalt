@@ -7,39 +7,6 @@ interface SteamApiGame {
   playtime_2weeks?: number;
 }
 
-const demoGames: SteamGame[] = [
-  {
-    id: 632360,
-    name: 'RimWorld',
-    cover: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/632360/header.jpg',
-    url: 'https://store.steampowered.com/app/632360',
-    playtimeForeverMinutes: 18320,
-    playtimeTwoWeeksMinutes: 435,
-  },
-  {
-    id: 427520,
-    name: 'Factorio',
-    cover: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/427520/header.jpg',
-    url: 'https://store.steampowered.com/app/427520',
-    playtimeForeverMinutes: 9160,
-    playtimeTwoWeeksMinutes: 90,
-  },
-];
-
-const demoStatus: SteamStatus = {
-  online: true,
-  currentGameId: 632360,
-  currentGameName: 'RimWorld',
-};
-
-export function getDemoSteamGames(): SteamGame[] {
-  return demoGames;
-}
-
-export function getDemoSteamSnapshot(): { games: SteamGame[]; status: SteamStatus } {
-  return { games: demoGames, status: demoStatus };
-}
-
 interface SteamApiPlayer {
   personastate?: number;
   gameid?: string;
@@ -54,7 +21,7 @@ export async function getSteamGames(
   apiKey?: string
 ): Promise<SteamGame[]> {
   if (!steamId) {
-    return import.meta.env.DEV ? demoGames : [];
+    return [];
   }
 
   const params = new URLSearchParams({
@@ -89,7 +56,7 @@ export async function getSteamStatus(
   apiKey?: string
 ): Promise<SteamStatus> {
   if (!steamId || !apiKey) {
-    return import.meta.env.DEV ? demoStatus : { online: false };
+    return { online: false };
   }
   if (steamStatusCache && steamStatusCache.expiresAt > Date.now()) {
     return steamStatusCache.data;

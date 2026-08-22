@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import OneBitLab from '../components/islands/OneBitLab';
 import RisoPortraitLab from '../components/islands/RisoPortraitLab';
+import EastwardMenuLab from '../components/islands/EastwardMenuLab';
 ---
 
 <Layout title="Lab" description="网页视觉实验：1-bit 抖动与 RISO 插画风格">
@@ -12,6 +13,300 @@ import RisoPortraitLab from '../components/islands/RisoPortraitLab';
         视觉语言实验。从 1-bit 抖动到 RISO 错版插画，探索 Web 上的可交互图像。
       </p>
     </header>
+
+    <section class="lab-section floating-header-lab" aria-labelledby="floating-header-title">
+      <div class="blog-diff-heading">
+        <div>
+          <p class="blog-diff-kicker">Navigation shell · floating paper bar</p>
+          <h2 id="floating-header-title">居中浮动 Header</h2>
+        </div>
+        <p>不照搬完整胶囊：保留编辑式边框和纸面感，让导航从全宽横线变成独立、居中的页面对象。</p>
+      </div>
+
+      <div class="floating-header-grid">
+        <article class="floating-header-demo">
+          <div class="blog-preview-label"><span>LIGHT</span><small>克制的浮动编辑栏</small></div>
+          <div class="floating-header-stage">
+            <div class="floating-header-shell">
+              <a class="floating-header-brand" href="#floating-header-title" aria-label="返回首页"><span aria-hidden="true">L</span><b>LavaC's Stash</b></a>
+              <nav aria-label="Light 浮动导航示例"><a class="is-current" href="#floating-header-title">首页</a><a href="#floating-header-title">归档</a><a href="#floating-header-title">相册</a><a href="#floating-header-title">友链</a><a href="#floating-header-title">关于</a></nav>
+              <button type="button" aria-label="切换主题"><span aria-hidden="true">◐</span></button>
+              <span class="floating-header-menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+            </div>
+            <div class="floating-header-content"><small>数字花园 · 内容聚合 · 生活证据</small><h3>你好，我是 LavaC。</h3><p>文章、随手记、照片，以及最近在看在玩的东西。</p><div aria-hidden="true"><i></i><i></i></div></div>
+            <footer class="floating-header-footer"><p>© 2026 LavaC</p><p>由 <span>Astro</span> 与 <span>SolidJS</span> 驱动</p></footer>
+          </div>
+        </article>
+
+        <article class="floating-header-demo floating-header-demo-riso">
+          <div class="blog-preview-label"><span>RISO</span><small>纸面与轻微套色</small></div>
+          <div class="floating-header-stage">
+            <div class="floating-header-shell">
+              <a class="floating-header-brand" href="#floating-header-title" aria-label="返回首页"><span aria-hidden="true">L</span><b>LavaC's Stash</b></a>
+              <nav aria-label="RISO 浮动导航示例"><a class="is-current" href="#floating-header-title">首页</a><a href="#floating-header-title">归档</a><a href="#floating-header-title">相册</a><a href="#floating-header-title">友链</a><a href="#floating-header-title">关于</a></nav>
+              <button type="button" aria-label="切换主题"><span aria-hidden="true">◐</span></button>
+              <span class="floating-header-menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+            </div>
+            <div class="floating-header-content"><small>数字花园 · 内容聚合 · 生活证据</small><h3>你好，我是 LavaC。</h3><p>网点留在纸面边缘，导航文字本身保持清楚稳定。</p><div aria-hidden="true"><i></i><i></i></div></div>
+            <footer class="floating-header-footer"><p>© 2026 LavaC</p><p>由 <span>Astro</span> 与 <span>SolidJS</span> 驱动</p></footer>
+          </div>
+        </article>
+      </div>
+
+      <div class="blog-diff-notes"><span><b>宽度</b> 桌面端最大 820px</span><span><b>位置</b> 顶部保留 14px 呼吸区</span><span><b>形状</b> 14px 圆角，不做完整胶囊</span><span><b>Footer</b> 去掉铺满背景与顶边框，只保留居中文字</span></div>
+    </section>
+
+    <section class="lab-section blog-diff" aria-labelledby="blog-diff-title">
+      <div class="blog-diff-heading">
+        <div>
+          <p class="blog-diff-kicker">Homepage review · before / after</p>
+          <h2 id="blog-diff-title">博客首页优化 Diff</h2>
+        </div>
+        <p>同一组内容，比较信息层级、阅读节奏、点击反馈与 RISO 纸面表现。</p>
+      </div>
+
+      <p class="blog-diff-mode">LIGHT · 原版主题内的首页优化</p>
+      <div class="blog-diff-grid">
+        <article class="blog-preview blog-preview-before">
+          <div class="blog-preview-label"><span>BEFORE</span><small>当前首页方向</small></div>
+          <div class="blog-preview-header">
+            <span class="blog-mini-logo">L</span>
+            <span>LavaC's Stash</span>
+            <button aria-label="菜单示意">☰</button>
+          </div>
+          <div class="blog-preview-body">
+            <p class="preview-eyebrow">你好，我是 LavaC。</p>
+            <p class="preview-copy">一个 95 后前端工作者；这里收集文章、生活里的随手记、照片，以及最近在看在玩。</p>
+            <div class="preview-links"><span>GitHub</span><span>Steam</span><span>RSS</span><span>Email</span></div>
+            <div class="preview-rule"></div>
+            <p class="preview-eyebrow">最新文章</p>
+            <div class="preview-article">
+              <div class="preview-thumb"></div>
+              <div><small>2026 年 8 月 22 日</small><h3>把生活整理成一座数字花园</h3><p>一些关于写作、收集和持续维护个人网站的记录。</p></div>
+            </div>
+            <div class="preview-feed-line"><span>近期轨迹</span><span>时间线内容</span></div>
+          </div>
+        </article>
+
+        <article class="blog-preview blog-preview-after">
+          <div class="blog-preview-label"><span>AFTER</span><small>Light 优化版</small></div>
+          <div class="blog-preview-header">
+            <span class="blog-mini-logo">L</span>
+            <span>LavaC's Stash</span>
+            <button aria-label="打开菜单示意">☰</button>
+          </div>
+          <div class="blog-preview-body">
+            <p class="preview-eyebrow">数字花园 · 内容聚合 · 生活证据</p>
+            <h3 class="preview-hero-title">你好，我是 LavaC。</h3>
+            <p class="preview-copy">文章、随手记、照片，以及最近在看在玩的东西，都被收进同一段持续生长的生活记录里。</p>
+            <div class="preview-links preview-links-pills"><span>GitHub ↗</span><span>RSS ↗</span><span>Drive ↗</span></div>
+            <div class="preview-rule"></div>
+            <div class="preview-section-title"><span>01 / FEATURED</span><span>最新文章</span></div>
+            <div class="preview-article preview-article-featured">
+              <div class="preview-thumb"></div>
+              <div><small>2026.08.22 · 约 6 分钟</small><h3>把生活整理成一座数字花园</h3><p>从内容来源到纸面界面，记录一个个人网站如何慢慢长出来。</p><a href="#blog-diff-title">阅读全文<span class="link-arrow-icon" aria-hidden="true">↗</span></a></div>
+            </div>
+            <div class="preview-section-title preview-section-after"><span>02 / TIMELINE</span><span>近期轨迹</span></div>
+            <div class="preview-feed-line"><span class="preview-dot"></span><span>文章、照片与动态按日期聚合</span></div>
+          </div>
+        </article>
+      </div>
+
+      <p class="blog-diff-mode blog-diff-mode-riso">RISO · RISO 主题内的首页优化</p>
+      <div class="blog-diff-grid blog-diff-grid-riso">
+        <article class="blog-preview blog-preview-riso blog-preview-riso-before">
+          <div class="blog-preview-label"><span>BEFORE</span><small>RISO 原版方向</small></div>
+          <div class="blog-preview-header"><span class="blog-mini-logo">L</span><span>LavaC's Stash</span><button aria-label="RISO 菜单示意">☰</button></div>
+          <div class="blog-preview-body">
+            <p class="preview-eyebrow">你好，我是 LavaC。</p>
+            <p class="preview-copy">文章、随手记、照片，以及最近在看在玩。内容以简单列表向下展开。</p>
+            <div class="preview-links"><span>GitHub</span><span>Steam</span><span>RSS</span><span>Email</span></div>
+            <div class="preview-rule"></div>
+            <p class="preview-eyebrow">最新文章</p>
+            <div class="preview-article"><div class="preview-thumb"></div><div><small>2026 年 8 月 22 日</small><h3>把生活整理成一座数字花园</h3><p>一些关于写作、收集和持续维护个人网站的记录。</p></div></div>
+          </div>
+        </article>
+
+        <article class="blog-preview blog-preview-riso blog-preview-riso-after">
+          <div class="blog-preview-label"><span>AFTER</span><small>RISO 优化版</small></div>
+          <div class="blog-preview-header"><span class="blog-mini-logo">L</span><span>LavaC's Stash</span><button aria-label="打开 RISO 菜单示意">☰</button></div>
+          <div class="blog-preview-body">
+            <p class="preview-eyebrow">01 / FEATURED</p>
+            <h3 class="preview-hero-title">你好，我是 LavaC。</h3>
+            <p class="preview-copy">保留纸面、网点和错版性格，把绿色油墨集中在首屏主标题、精选文章和操作反馈上。</p>
+            <div class="preview-links preview-links-pills"><span>GitHub ↗</span><span>RSS ↗</span><span>Drive ↗</span></div>
+            <div class="preview-rule"></div>
+            <div class="preview-section-title"><span>FEATURED POST</span><span>最新文章</span></div>
+            <div class="preview-article preview-article-featured"><div class="preview-thumb"></div><div><small>2026.08.22 · 约 6 分钟</small><h3>把生活整理成一座数字花园</h3><p>错版阴影强调重点，正文区域降低纹理噪声。</p><a href="#blog-diff-title">阅读全文<span class="link-arrow-icon" aria-hidden="true">↗</span></a></div></div>
+            <div class="preview-section-title preview-section-after"><span>TIMELINE</span><span>近期轨迹</span></div>
+            <div class="preview-feed-line"><span class="preview-dot"></span><span>文章、照片与动态按日期聚合</span></div>
+          </div>
+        </article>
+      </div>
+
+      <p class="blog-diff-mode">NO IMAGE · 无图文章状态</p>
+      <div class="blog-diff-no-image-grid">
+        <article class="blog-no-image-card blog-no-image-light">
+          <div class="blog-preview-label"><span>LIGHT / BEFORE</span><small>无图原版</small></div>
+          <div class="blog-no-image-content">
+            <small>2026 年 8 月 19 日</small>
+            <h3>没有配图的文章也应该有自己的呼吸感</h3>
+            <p>当文章没有封面时，内容不需要被一个空图片框占位。</p>
+          </div>
+        </article>
+        <article class="blog-no-image-card blog-no-image-light blog-no-image-after">
+          <div class="blog-preview-label"><span>LIGHT / AFTER</span><small>无图优化版</small></div>
+          <div class="blog-no-image-content">
+            <div class="preview-section-title"><span>NOTE · 04 MIN</span><span>2026.08.19</span></div>
+            <h3>没有配图的文章也应该有自己的呼吸感</h3>
+            <p>直接使用完整文字宽度，保留摘要和阅读全文入口；结构与有图文章保持同一套节奏。</p>
+            <a href="#blog-diff-title">阅读全文<span class="link-arrow-icon" aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+        <article class="blog-no-image-card blog-no-image-riso">
+          <div class="blog-preview-label"><span>RISO / BEFORE</span><small>无图原版</small></div>
+          <div class="blog-no-image-content">
+            <small>2026 年 8 月 19 日</small>
+            <h3>没有配图的文章也应该有自己的呼吸感</h3>
+            <p>纸面主题存在，但文章卡片仍然像一条普通的分隔线。</p>
+          </div>
+        </article>
+        <article class="blog-no-image-card blog-no-image-riso blog-no-image-after">
+          <div class="blog-preview-label"><span>RISO / AFTER</span><small>无图优化版</small></div>
+          <div class="blog-no-image-content">
+            <div class="preview-section-title"><span>NOTE · 04 MIN</span><span>2026.08.19</span></div>
+            <h3>没有配图的文章也应该有自己的呼吸感</h3>
+            <p>用绿色标题错版、纸面卡片和轻量 CTA 保留 RISO 性格，但不制造假的图片占位。</p>
+            <a href="#blog-diff-title">阅读全文<span class="link-arrow-icon" aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+      </div>
+
+      <div class="blog-diff-notes" aria-label="优化说明">
+        <span><b>层级</b> 首屏主标题与 Featured 卡片更突出</span>
+        <span><b>交互</b> 菜单与链接拥有更大的触摸区域</span>
+        <span><b>节奏</b> 用编号和时间线区分内容模块</span>
+        <span><b>主题</b> RISO 错版只作用于重点元素，正文保持清晰</span>
+        <span><b>Hover Demo</b> 悬停优化版文章卡片，观察静态坐标下的油墨响应</span>
+      </div>
+    </section>
+
+    <section class="lab-section mobile-menu-lab" aria-labelledby="mobile-menu-lab-title">
+      <div class="blog-diff-heading">
+        <div>
+          <p class="blog-diff-kicker">Mobile navigation · motion demo</p>
+          <h2 id="mobile-menu-lab-title">移动菜单动效</h2>
+        </div>
+        <p>点击菜单按钮，比较 Light 与 RISO 中的折叠展开、图标变形和链接淡入。</p>
+      </div>
+
+      <div class="mobile-menu-demo-grid">
+        <article class="mobile-menu-demo" data-menu-demo>
+          <div class="blog-preview-label"><span>LIGHT</span><small>编辑式折叠</small></div>
+          <div class="mobile-menu-shell">
+            <div class="mobile-menu-bar">
+              <span class="mobile-menu-brand"><i aria-hidden="true">L</i>LavaC's Stash</span>
+              <button class="mobile-menu-trigger" type="button" aria-label="打开导航菜单" aria-expanded="false">
+                <span></span><span></span><span></span>
+              </button>
+            </div>
+            <div class="mobile-menu-reveal">
+              <div class="mobile-menu-reveal-inner">
+                <nav aria-label="Light 菜单动效示例">
+                  <a href="#mobile-menu-lab-title">首页</a><a href="#mobile-menu-lab-title">归档</a><a href="#mobile-menu-lab-title">相册</a><a href="#mobile-menu-lab-title">友链</a><a href="#mobile-menu-lab-title">关于</a>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="mobile-menu-demo mobile-menu-demo-riso" data-menu-demo>
+          <div class="blog-preview-label"><span>RISO</span><small>纸面叠印</small></div>
+          <div class="mobile-menu-shell">
+            <div class="mobile-menu-bar">
+              <span class="mobile-menu-brand"><i aria-hidden="true">L</i>LavaC's Stash</span>
+              <button class="mobile-menu-trigger" type="button" aria-label="打开导航菜单" aria-expanded="false">
+                <span></span><span></span><span></span>
+              </button>
+            </div>
+            <div class="mobile-menu-reveal">
+              <div class="mobile-menu-reveal-inner">
+                <nav aria-label="RISO 菜单动效示例">
+                  <a href="#mobile-menu-lab-title">首页</a><a href="#mobile-menu-lab-title">归档</a><a href="#mobile-menu-lab-title">相册</a><a href="#mobile-menu-lab-title">友链</a><a href="#mobile-menu-lab-title">关于</a>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="blog-diff-notes"><span><b>容器</b> 由顶部边界向下展开</span><span><b>图标</b> 原地变为关闭符号</span><span><b>文字</b> 仅淡入，不横向飞入</span><span><b>减弱动态</b> 直接切换最终状态</span></div>
+    </section>
+
+    <section class="lab-section article-structure-diff" aria-labelledby="article-structure-title">
+      <div class="blog-diff-heading">
+        <div>
+          <p class="blog-diff-kicker">Article detail · structure diff</p>
+          <h2 id="article-structure-title">文章内页结构 Diff</h2>
+        </div>
+        <p>比较标题区、导语、正文入口、目录与文末导航的阅读层级；封面始终是可选项。</p>
+      </div>
+
+      <p class="blog-diff-mode">LIGHT · 有图文章</p>
+      <div class="article-structure-grid">
+        <article class="article-structure-card article-structure-before">
+          <div class="blog-preview-label"><span>BEFORE</span><small>当前结构</small></div>
+          <div class="article-structure-page">
+            <h3>把生活整理成一座数字花园</h3>
+            <p class="article-structure-date">2026 年 8 月 22 日　<span>数字花园</span></p>
+            <p class="article-structure-excerpt">从内容来源到纸面界面，记录一个个人网站如何慢慢长出来。</p>
+            <div class="article-structure-cover" aria-hidden="true"></div>
+            <div class="article-structure-prose"><i></i><i></i><i></i><b></b><i></i><i></i></div>
+            <div class="article-structure-comments">WEBMENTIONS / COMMENTS</div>
+          </div>
+        </article>
+        <article class="article-structure-card article-structure-after">
+          <div class="blog-preview-label"><span>AFTER</span><small>阅读结构优化</small></div>
+          <div class="article-structure-page">
+            <div class="article-structure-path"><span>文章 / 2026</span><span>约 6 分钟</span></div>
+            <h3>把生活整理成一座数字花园</h3>
+            <p class="article-structure-excerpt">从内容来源到纸面界面，记录一个个人网站如何慢慢长出来。</p>
+            <div class="article-structure-meta"><time>2026.08.22</time><span class="article-structure-tag">数字花园</span><span class="article-structure-tag">Web</span></div>
+            <div class="article-structure-cover" aria-hidden="true"></div>
+            <div class="article-structure-entry" aria-hidden="true"></div>
+            <div class="article-structure-reading"><div class="article-structure-prose"><i></i><i></i><i></i><b></b><i></i><i></i></div><aside><span>01</span><span>02</span><span>03</span></aside></div>
+            <div class="article-structure-footer"><span>← 上一篇</span><span>下一篇 →</span></div>
+            <div class="article-structure-comments">WEBMENTIONS / COMMENTS</div>
+          </div>
+        </article>
+      </div>
+
+      <p class="blog-diff-mode">LIGHT · 无图文章</p>
+      <div class="article-structure-grid article-structure-no-cover">
+        <article class="article-structure-card article-structure-before">
+          <div class="blog-preview-label"><span>BEFORE</span><small>移除封面后直接接正文</small></div>
+          <div class="article-structure-page"><h3>没有封面的文章，也需要清晰的正文入口</h3><p class="article-structure-date">2026 年 8 月 19 日</p><p class="article-structure-excerpt">短篇记录不需要为了版式完整而制造一张图片。</p><div class="article-structure-prose"><i></i><i></i><i></i><b></b><i></i></div><div class="article-structure-comments">WEBMENTIONS / COMMENTS</div></div>
+        </article>
+        <article class="article-structure-card article-structure-after">
+          <div class="blog-preview-label"><span>AFTER</span><small>同一结构自然收起封面</small></div>
+          <div class="article-structure-page"><div class="article-structure-path"><span>文章 / 札记</span><span>约 4 分钟</span></div><h3>没有封面的文章，也需要清晰的正文入口</h3><p class="article-structure-excerpt">短篇记录不需要为了版式完整而制造一张图片。</p><div class="article-structure-meta"><time>2026.08.19</time><span class="article-structure-tag">随记</span></div><div class="article-structure-entry" aria-hidden="true"></div><div class="article-structure-reading"><div class="article-structure-prose"><i></i><i></i><i></i><b></b><i></i></div><aside><span>01</span><span>02</span></aside></div><div class="article-structure-footer"><span>← 上一篇</span><span>下一篇 →</span></div><div class="article-structure-comments">WEBMENTIONS / COMMENTS</div></div>
+        </article>
+      </div>
+
+      <p class="blog-diff-mode blog-diff-mode-riso">RISO · 有图 / 无图共用结构</p>
+      <div class="article-structure-grid article-structure-riso-grid">
+        <article class="article-structure-card article-structure-after article-structure-riso">
+          <div class="blog-preview-label"><span>WITH COVER</span><small>有图文章</small></div>
+          <div class="article-structure-page"><div class="article-structure-path"><span>文章 / 2026</span><span>约 6 分钟</span></div><h3>让印刷感停在阅读之外</h3><p class="article-structure-excerpt">标题和分隔承担错版表现，正文纸面主动降噪。</p><div class="article-structure-meta"><time>2026.08.22</time><span class="article-structure-tag">RISO</span></div><div class="article-structure-cover" aria-hidden="true"></div><div class="article-structure-entry" aria-hidden="true"></div><div class="article-structure-reading"><div class="article-structure-prose"><i></i><i></i><i></i><b></b><i></i></div><aside><span>01</span><span>02</span><span>03</span></aside></div><div class="article-structure-footer"><span>← 上一篇</span><span>下一篇 →</span></div></div>
+        </article>
+        <article class="article-structure-card article-structure-after article-structure-riso">
+          <div class="blog-preview-label"><span>NO COVER</span><small>无图文章</small></div>
+          <div class="article-structure-page"><div class="article-structure-path"><span>文章 / 札记</span><span>约 4 分钟</span></div><h3>无图不是缺失，而是更短的进入路径</h3><p class="article-structure-excerpt">封面模块消失后，章节线直接承接元信息与正文。</p><div class="article-structure-meta"><time>2026.08.19</time><span class="article-structure-tag">随记</span></div><div class="article-structure-entry" aria-hidden="true"></div><div class="article-structure-reading"><div class="article-structure-prose"><i></i><i></i><i></i><b></b><i></i></div><aside><span>01</span><span>02</span></aside></div><div class="article-structure-footer"><span>← 上一篇</span><span>下一篇 →</span></div></div>
+        </article>
+      </div>
+
+      <div class="blog-diff-notes" aria-label="文章结构设计说明"><span><b>共用骨架</b> 有图与无图只差封面模块</span><span><b>阅读入口</b> 章节线将 Hero 与正文明确分开</span><span><b>正文宽度</b> 保持稳定文字度量，目录退出主阅读列</span><span><b>讨论区</b> 通过文末导航缓冲，不再紧贴正文</span></div>
+    </section>
 
     <section class="lab-section" aria-labelledby="riso-lab-title">
       <h2 id="riso-lab-title" class="font-ui text-xl font-semibold text-text-primary mb-4">RISO 治愈小动物</h2>
@@ -259,7 +554,48 @@ import RisoPortraitLab from '../components/islands/RisoPortraitLab';
       <h2 id="onebit-lab-title" class="font-ui text-xl font-semibold text-text-primary mb-4">1-bit Lab</h2>
       <OneBitLab client:load />
     </section>
+
+    <section class="lab-section" aria-labelledby="eastward-lab-title">
+      <h2 id="eastward-lab-title" class="font-ui text-xl font-semibold text-text-primary mb-2">
+        风来之国 · CRT 菜单
+      </h2>
+      <p class="text-text-secondary text-sm mb-4">
+        CRT 扫描 + 像素感致敬小试验：扫描线、滚动扫描条、暗角曲面、色散与像素爱心，全部由 CSS / SVG 构成，无外部字体。
+      </p>
+      <EastwardMenuLab client:load />
+    </section>
   </div>
+
+  <script>
+    function initializeMenuDemos() {
+      document.querySelectorAll<HTMLElement>('[data-menu-demo]').forEach((demo) => {
+        if (demo.dataset.initialized === 'true') return;
+        demo.dataset.initialized = 'true';
+        const trigger = demo.querySelector<HTMLButtonElement>('.mobile-menu-trigger');
+        if (!trigger) return;
+
+        const setOpen = (isOpen: boolean) => {
+          demo.classList.toggle('is-open', isOpen);
+          trigger.setAttribute('aria-expanded', String(isOpen));
+          trigger.setAttribute('aria-label', isOpen ? '关闭导航菜单' : '打开导航菜单');
+        };
+
+        trigger.addEventListener('click', () => setOpen(!demo.classList.contains('is-open')));
+        demo.querySelectorAll<HTMLAnchorElement>('.mobile-menu-reveal a').forEach((link) => {
+          link.addEventListener('click', () => setOpen(false));
+        });
+        demo.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') {
+            setOpen(false);
+            trigger.focus();
+          }
+        });
+      });
+    }
+
+    initializeMenuDemos();
+    document.addEventListener('astro:page-load', initializeMenuDemos);
+  </script>
 </Layout>
 
 <style is:global>
@@ -1274,5 +1610,956 @@ import RisoPortraitLab from '../components/islands/RisoPortraitLab';
   color: var(--color-text-muted);
   text-align: center;
   margin-top: 1rem;
+}
+
+/* ============================================================
+   风来之国 · CRT 菜单试验（纯 CSS / SVG，无外部字体）
+   ============================================================ */
+.ewc-lab {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 60rem;
+  margin: 0 auto;
+}
+
+/* ---- CRT 屏幕管体 ---- */
+.ewc-screen {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border-radius: 0.85rem;
+  border: 2px solid #20232b;
+  background: #0a0c10;
+  color: #e8e6e0;
+  font-family: var(--font-ui);
+  user-select: none;
+  outline: none;
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 0 34px rgba(0, 0, 0, 0.62);
+}
+.ewc-screen:focus-visible {
+  outline: 2px solid rgba(122, 168, 255, 0.85);
+  outline-offset: 3px;
+}
+/* 重置屏幕内按钮，避免 RISO 主题的偏移阴影/位移渗出（选中光环由各自 .active 规则覆盖） */
+.ewc-screen .ewc-menu button {
+  margin: 0;
+  font-family: inherit;
+  background: none;
+  background-image: none;
+  box-shadow: none;
+}
+.ewc-screen .ewc-menu button:hover,
+.ewc-screen .ewc-menu button:active {
+  transform: none;
+}
+
+/* ---- 叠加层（不拦截交互） ---- */
+.ewc-layers {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+/* 像素结构层：单像素级(2px)棋盘式微抖动，放大看是"一个个像素、之间略暗"，整体连贯 */
+.ewc-pixels {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.10) 25%, transparent 25% 75%, rgba(0, 0, 0, 0.10) 75%),
+    linear-gradient(45deg, rgba(0, 0, 0, 0.10) 25%, transparent 25% 75%, rgba(0, 0, 0, 0.10) 75%);
+  background-position: 0 0, 1px 1px;
+  background-size: 2px 2px;
+  opacity: var(--ewc-dots, 0.4);
+}
+.ewc-glare {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.055) 40%, rgba(255, 255, 255, 0) 54%);
+  opacity: 0.6;
+}
+.ewc-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0) 16%, rgba(0, 0, 0, 0) 78%, rgba(0, 0, 0, 0.38)),
+    radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0, 0, 0, calc(var(--ewc-vig, 0.75) * 0.8)) 100%);
+}
+.ewc-grain {
+  position: absolute;
+  inset: 0;
+  opacity: calc(var(--ewc-grain, 0) * 0.4);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+/* ---- 菜单内容 ---- */
+.ewc-menu {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ewc-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.ewc-tabs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ewc-tab {
+  display: grid;
+  place-items: center;
+  padding: 4px 5px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.ewc-tab:hover { opacity: 0.9; background: rgba(255, 255, 255, 0.05); }
+.ewc-tab.active { opacity: 1; background: rgba(255, 255, 255, 0.07); }
+
+.ewc-topright {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.ewc-title {
+  font-family: var(--font-ui);
+  font-size: 1.06rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #f2f0ea;
+  text-shadow:
+    calc(var(--ewc-aber, 0.7) * -1px) 0 rgba(255, 82, 68, 0.5),
+    calc(var(--ewc-aber, 0.7) * 1px) 0 rgba(82, 178, 255, 0.5);
+}
+.ewc-money {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #e6c95a;
+}
+.ewc-money-num {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ewc-stage {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 12px 16px 6px;
+  position: relative;
+}
+.ewc-menu kbd {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 5px;
+  color: #c9c4b8;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+/* 系统设定 */
+.ewc-settings {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  max-width: 21rem;
+  margin: 0 auto;
+}
+.ewc-setup-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 14px;
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
+  color: #c9c4b8;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.ewc-setup-item:hover { border-color: rgba(255, 255, 255, 0.3); }
+.ewc-setup-item.active {
+  color: #f2f0ea;
+  font-weight: 700;
+  border-color: #ededf0;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 0 1px #ededf0;
+}
+.ewc-caret { color: #f2f0ea; font-size: 0.68rem; }
+
+/* 物品道具 */
+.ewc-inv {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ewc-inv-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #8f8b82;
+  font-size: 0.78rem;
+}
+.ewc-inv-head .ewc-pill { color: #f2f0ea; display: inline-flex; gap: 6px; align-items: center; }
+.ewc-pill b { font-weight: 700; }
+.ewc-key { display: inline-flex; align-items: center; gap: 6px; }
+.ewc-inv-body { display: flex; gap: 14px; flex: 1; min-height: 0; }
+.ewc-item-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  flex: 1;
+  align-content: start;
+}
+.ewc-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  color: var(--ewc-item, #c9c4b8);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.ewc-item:hover { border-color: rgba(255, 255, 255, 0.26); }
+.ewc-item.active {
+  color: #f2f0ea;
+  border-color: #d9b25a;
+  background: rgba(217, 178, 90, 0.1);
+  box-shadow: 0 0 0 2px rgba(217, 178, 90, 0.55), 0 0 14px rgba(217, 178, 90, 0.32);
+}
+.ewc-item-badge {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #10131a;
+  background: #d9b25a;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.ewc-inv-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #8f8b82;
+  font-size: 0.78rem;
+  padding-top: 2px;
+}
+.ewc-inv-stats span { display: flex; align-items: center; gap: 6px; }
+.ewc-desc {
+  background: rgba(0, 0, 0, 0.36);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 6px;
+  padding: 10px 14px;
+  min-height: 60px;
+}
+.ewc-desc-name {
+  margin: 0 0 6px;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 800;
+  color: #f2f0ea;
+}
+.ewc-desc-text {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #c9c4b8;
+  line-height: 1.7;
+}
+
+/* 料理配方 */
+.ewc-recipe {
+  height: 100%;
+  display: flex;
+  gap: 16px;
+  position: relative;
+}
+.ewc-recipe-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  flex: 1;
+  align-content: center;
+}
+.ewc-dish {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  color: var(--ewc-item, #c9c4b8);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ewc-dish:hover { border-color: rgba(255, 255, 255, 0.26); }
+.ewc-dish.active {
+  color: #f2f0ea;
+  border-color: #ededf0;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.24);
+}
+.ewc-bracket {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #e8e6e0;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
+  opacity: 0;
+  pointer-events: none;
+}
+.ewc-bracket-l { left: 1px; }
+.ewc-bracket-r { right: 1px; }
+.ewc-dish.active .ewc-bracket { opacity: 1; }
+.ewc-bracket-l::before { content: "["; }
+.ewc-bracket-r::before { content: "]"; }
+.ewc-recipe-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 15rem;
+  flex-shrink: 0;
+}
+.ewc-recipe-figure {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  color: var(--ewc-item, #c9c4b8);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+.ewc-recipe-name {
+  margin: 0 0 6px;
+  font-family: var(--font-ui);
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #f2f0ea;
+  text-shadow:
+    calc(var(--ewc-aber, 0.7) * -1px) 0 rgba(255, 82, 68, 0.4),
+    calc(var(--ewc-aber, 0.7) * 1px) 0 rgba(82, 178, 255, 0.4);
+}
+.ewc-recipe-desc {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+  color: #c9c4b8;
+  line-height: 1.7;
+}
+.ewc-ingredients {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+.ewc-ingredients-title {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f2f0ea;
+}
+.ewc-ingredients ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ewc-ingredients li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #c9c4b8;
+}
+.ewc-recipe-hint {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  color: #8f8b82;
+  font-size: 0.72rem;
+}
+
+/* 读取记录 */
+.ewc-saves {
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  align-items: center;
+}
+.ewc-save {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  color: #e8e6e0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.ewc-save:hover { border-color: rgba(255, 255, 255, 0.26); }
+.ewc-save.active {
+  border-color: #ededf0;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+}
+.ewc-autosave {
+  align-self: flex-start;
+  font-family: var(--font-ui);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #ff6b5a;
+}
+.ewc-thumb {
+  height: 72px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, var(--ewc-h1, #2c2433), var(--ewc-h2, #42314a) 55%, var(--ewc-h3, #5a3d55));
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5);
+}
+.ewc-save-meta { display: flex; flex-direction: column; gap: 6px; }
+.ewc-save-time { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.82rem; color: #e8e6e0; }
+.ewc-save-time b { font-variant-numeric: tabular-nums; }
+.ewc-save-chapter {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #c9c4b8;
+}
+.ewc-last-tip {
+  position: absolute;
+  top: -30px;
+  right: 0;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #f2f0ea;
+  background: rgba(10, 12, 16, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 4px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* 底部 */
+.ewc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.ewc-heartsbar { display: flex; align-items: center; gap: 10px; }
+.ewc-heartsbar-badge {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: rgba(232, 84, 63, 0.12);
+  border: 1px solid rgba(232, 84, 63, 0.5);
+  border-radius: 6px;
+}
+.ewc-hearts { display: flex; gap: 3px; }
+.ewc-heart { display: flex; }
+.ewc-hints {
+  display: flex;
+  gap: 14px;
+  color: #8f8b82;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+}
+.ewc-hints span { display: inline-flex; align-items: center; gap: 5px; }
+
+/* ---- CRT 控制面板（跟随主题） ---- */
+.ewc-controls {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  background: var(--color-background-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 0.6rem;
+}
+.ewc-controls-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.ewc-slider {
+  display: grid;
+  grid-template-columns: 6rem 1fr 3.4rem;
+  gap: 10px;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+.ewc-slider input[type="range"] {
+  width: 100%;
+  accent-color: var(--color-text-primary);
+}
+.ewc-val {
+  text-align: right;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.ewc-controls-row { display: flex; gap: 10px; }
+.ewc-controls-row button {
+  padding: 6px 12px;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ewc-controls-row button:hover { color: var(--color-text-primary); border-color: var(--color-text-muted); }
+.ewc-controls-row button.on {
+  color: var(--color-background);
+  background: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+}
+.ewc-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* ---- 响应式 / 减少动效 ---- */
+@media (max-width: 720px) {
+  .ewc-screen { aspect-ratio: auto; min-height: 560px; }
+  .ewc-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+  .ewc-stage { padding: 8px 12px 4px; }
+  .ewc-footer { flex-direction: column; align-items: flex-start; gap: 8px; padding: 8px 12px 10px; }
+  .ewc-item-grid { grid-template-columns: repeat(3, 1fr); }
+  .ewc-recipe-list { grid-template-columns: repeat(3, 1fr); }
+  .ewc-recipe { flex-direction: column; overflow-y: auto; }
+  .ewc-recipe-detail { width: 100%; }
+  .ewc-saves { grid-template-columns: repeat(2, 1fr); }
+  .ewc-settings { max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ewc-tab,
+  .ewc-item,
+  .ewc-dish,
+  .ewc-save,
+  .ewc-setup-item { transition: none; }
+}
+/* ---- 居中浮动 Header ---- */
+.floating-header-lab { margin-bottom: 4rem; }
+.floating-header-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.floating-header-demo { overflow: hidden; border: 1px solid var(--color-border); border-radius: 0.75rem; background: var(--color-background); }
+.floating-header-stage { min-height: 25rem; padding: 0.9rem 0.75rem 1.3rem; background: radial-gradient(rgba(24,24,24,.035) .7px, transparent .8px), linear-gradient(180deg, var(--color-background-alt), var(--color-background)); background-size: 8px 8px, auto; }
+.floating-header-shell { position: relative; z-index: 1; display: flex; align-items: center; width: min(100%, 51.25rem); min-height: 3.25rem; margin: 0 auto; padding: .3rem .4rem .3rem .55rem; border: 1px solid color-mix(in srgb, var(--color-border) 86%, var(--color-text-muted)); border-radius: .875rem; background: color-mix(in srgb, var(--color-background) 88%, transparent); box-shadow: 0 7px 22px rgba(20,20,20,.075), 0 1px 2px rgba(20,20,20,.06); backdrop-filter: blur(12px); }
+.floating-header-brand { display: flex; align-items: center; gap: .45rem; color: var(--color-text-primary); text-decoration: none; white-space: nowrap; }
+.floating-header-brand span { display: grid; place-items: center; width: 1.65rem; height: 1.65rem; border-radius: 50%; color: var(--color-background); background: var(--color-text-primary); font-size: .72rem; font-weight: 750; }
+.floating-header-brand b { font-size: .7rem; }
+.floating-header-shell nav { display: flex; align-items: center; gap: .05rem; margin-left: auto; }
+.floating-header-shell nav a { padding: .55rem .52rem; border-radius: .5rem; color: var(--color-text-secondary); font-size: .64rem; font-weight: 650; text-decoration: none; }
+.floating-header-shell nav a.is-current { color: var(--color-background); background: var(--color-text-primary); }
+.floating-header-shell button { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; margin-left: .15rem; padding: 0; border: 0; border-left: 1px solid var(--color-border); border-radius: 0; color: var(--color-text-secondary); background: transparent; cursor: pointer; }
+.floating-header-menu-icon { display: none; }
+.floating-header-content { padding: 5rem 1.1rem .8rem; }
+.floating-header-content small { color: var(--color-text-muted); font-size: .62rem; letter-spacing: .1em; }
+.floating-header-content h3 { margin: .6rem 0 0; color: var(--color-text-primary); font-size: clamp(1.7rem, 4vw, 2.6rem); letter-spacing: -.055em; }
+.floating-header-content p { max-width: 35ch; margin: .7rem 0 2rem; color: var(--color-text-secondary); font-size: .74rem; line-height: 1.65; }
+.floating-header-content > div { display: grid; gap: .65rem; padding-top: 1rem; border-top: 1px solid var(--color-border); }
+.floating-header-content > div i { display: block; width: 88%; height: .55rem; background: var(--color-border); }
+.floating-header-content > div i:last-child { width: 62%; }
+.floating-header-footer { margin-top: 3rem; padding: 1.2rem .75rem 0; color: var(--color-text-muted); text-align: center; }
+.floating-header-footer p { margin: 0; font-size: .58rem; line-height: 1.8; }
+.floating-header-footer span { color: var(--color-text-secondary); text-decoration: underline; text-underline-offset: .16rem; }
+.floating-header-demo-riso { color: #2b4b3b; border-color: #9dbca4; background: #e8f3dd; }
+.floating-header-demo-riso .blog-preview-label { color: #287b55; border-color: rgba(39,133,91,.3); }
+.floating-header-demo-riso .floating-header-stage { background: radial-gradient(rgba(18,58,41,.075) 1px, transparent 1.1px), linear-gradient(145deg, #f2f8e9, #e3f1d7); background-size: 7px 7px, auto; }
+.floating-header-demo-riso .floating-header-shell { border-color: #27855b; background: rgba(246,251,240,.82); box-shadow: 4px 3px 0 rgba(63,154,103,.22), -2px 5px 0 rgba(24,60,44,.1); }
+.floating-header-demo-riso .floating-header-brand, .floating-header-demo-riso .floating-header-content h3 { color: #173227; }
+.floating-header-demo-riso .floating-header-brand span, .floating-header-demo-riso .floating-header-shell nav a.is-current { color: #f2f8e9; background: rgba(23,133,91,.92); }
+.floating-header-demo-riso .floating-header-shell nav a, .floating-header-demo-riso .floating-header-shell button, .floating-header-demo-riso .floating-header-content p { color: #42604f; }
+.floating-header-demo-riso .floating-header-shell button, .floating-header-demo-riso .floating-header-content > div { border-color: rgba(39,133,91,.28); }
+.floating-header-demo-riso .floating-header-content small { color: #287b55; }
+.floating-header-demo-riso .floating-header-content h3 { text-shadow: 2px 2px 0 rgba(63,154,103,.26), -2px 2px 0 rgba(24,60,44,.14); }
+.floating-header-demo-riso .floating-header-content > div i { background: rgba(39,133,91,.18); }
+.floating-header-demo-riso .floating-header-footer { color: rgba(66,96,79,.72); }
+.floating-header-demo-riso .floating-header-footer span { color: #287b55; }
+
+/* ---- 首页优化 Diff ---- */
+.blog-diff {
+  margin-bottom: 4rem;
+}
+.blog-diff-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+.blog-diff-heading h2 { margin: 0.25rem 0 0; font-size: clamp(1.5rem, 3vw, 2.25rem); letter-spacing: -0.04em; }
+.blog-diff-heading > p { max-width: 28rem; margin: 0; color: var(--color-text-secondary); font-size: 0.875rem; line-height: 1.6; }
+.blog-diff-kicker, .blog-preview-label, .preview-eyebrow, .preview-section-title {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.blog-diff-kicker { margin: 0; }
+.blog-diff-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.blog-preview {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-background);
+}
+.blog-preview-before { color: var(--color-text-secondary); }
+.blog-preview-after {
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  border-color: var(--color-text-primary);
+  box-shadow: 3px 3px 0 var(--color-border);
+}
+.blog-preview-label { display: flex; justify-content: space-between; padding: 0.7rem 0.85rem; border-bottom: 1px solid var(--color-border); }
+.blog-preview-after .blog-preview-label { color: var(--color-text-secondary); border-color: var(--color-border); }
+.blog-preview-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1rem; border-bottom: 1px solid var(--color-border); font-size: 0.8rem; font-weight: 650; }
+.blog-preview-header button { margin-left: auto; min-width: 2.75rem; min-height: 2.75rem; border: 0; background: transparent; color: inherit; font-size: 1.1rem; cursor: pointer; }
+.blog-mini-logo { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--color-text-primary); color: var(--color-background); font-size: 0.75rem; }
+.blog-preview-after .blog-mini-logo { background: var(--color-text-primary); box-shadow: 2px 2px 0 var(--color-border); }
+.blog-preview-body { padding: 1.5rem; }
+.preview-eyebrow { margin: 0 0 0.65rem; }
+.preview-hero-title { margin: 0; color: var(--riso-ink, var(--color-text-primary)); font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.05; letter-spacing: -0.06em; }
+.blog-preview-after .preview-hero-title { text-shadow: 2px 2px 0 rgba(63, 154, 103, 0.25), -2px 2px 0 rgba(24, 60, 44, 0.12); }
+.preview-copy { max-width: 42ch; margin: 0.75rem 0 0; color: inherit; font-size: 0.82rem; line-height: 1.7; }
+.preview-links { display: flex; flex-wrap: wrap; gap: 0.5rem 0.85rem; margin-top: 1rem; font-size: 0.7rem; }
+.preview-links-pills span { padding: 0.3rem 0.5rem; border: 1px solid rgba(39, 133, 91, 0.4); border-radius: 999px; background: rgba(255, 255, 255, 0.4); color: #246b4b; }
+.preview-rule { height: 1px; margin: 1.5rem 0; background: var(--color-border); }
+.blog-preview-after .preview-rule { background: var(--color-border); }
+.preview-article { display: grid; grid-template-columns: 5rem minmax(0, 1fr); gap: 0.8rem; }
+.preview-article-featured { grid-template-columns: 7rem minmax(0, 1fr); padding: 0.75rem; border: 1px solid var(--color-text-primary); border-radius: 0.5rem; background: var(--color-background); box-shadow: 3px 3px 0 var(--color-border); transition: border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease; }
+.preview-article-featured,
+.blog-no-image-after .blog-no-image-content {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.preview-article-featured::before,
+.blog-no-image-after .blog-no-image-content::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 160' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cpattern id='b' width='8' height='8' patternUnits='userSpaceOnUse'%3E%3Cg fill='%231a1a1a'%3E%3Crect width='2' height='2'/%3E%3Crect x='4' width='1' height='1'/%3E%3Crect x='2' y='2' width='1' height='1'/%3E%3Crect x='6' y='2' width='2' height='2'/%3E%3Crect y='4' width='1' height='1'/%3E%3Crect x='4' y='4' width='2' height='2'/%3E%3Crect x='2' y='6' width='2' height='2'/%3E%3Crect x='6' y='6' width='1' height='1'/%3E%3C/g%3E%3C/pattern%3E%3C/defs%3E%3Cpath d='M0 145 C74 125 113 154 190 138 S318 101 400 118 L400 160 L0 160Z' fill='url(%23b)' opacity='.28'/%3E%3Cpath d='M220 160 C246 132 269 136 298 115 S352 77 400 88 L400 160Z' fill='url(%23b)' opacity='.2'/%3E%3Cpath d='M350 0 C358 22 374 38 400 46 L400 0Z' fill='url(%23b)' opacity='.16'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+  transform: translateX(-2%);
+  transform-origin: left center;
+  transition:
+    clip-path 240ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 180ms ease,
+    transform 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  content: "";
+}
+.preview-article-featured h3,
+.blog-no-image-after h3 {
+  transition: color 180ms ease, text-shadow 180ms ease;
+}
+.preview-article-featured .preview-thumb {
+  filter: saturate(0.78) contrast(0.96);
+  transition: filter 220ms ease;
+}
+.preview-article-featured a,
+.blog-no-image-after a {
+  position: relative;
+  text-decoration: none;
+}
+.preview-article-featured a::after,
+.blog-no-image-after a::after {
+  position: absolute;
+  right: 0;
+  bottom: -0.2rem;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  content: "";
+}
+.preview-thumb { aspect-ratio: 1.25; border-radius: 0.35rem; background: radial-gradient(circle at 30% 35%, rgba(255,255,255,.6) 0 2px, transparent 3px), linear-gradient(135deg, #9fc7a7, #276747 52%, #173227); background-size: 8px 8px, auto; }
+.preview-article small { color: var(--color-text-muted); font-size: 0.62rem; }
+.preview-article h3 { margin: 0.3rem 0 0; color: inherit; font-size: 0.95rem; line-height: 1.3; }
+.preview-article p { margin: 0.3rem 0 0; color: var(--color-text-secondary); font-size: 0.72rem; line-height: 1.5; }
+.preview-article a { display: inline-block; margin-top: 0.5rem; color: var(--color-text-primary); font-size: 0.72rem; font-weight: 700; text-decoration: none; }
+.preview-section-title { display: flex; justify-content: space-between; margin-bottom: 0.6rem; color: var(--color-text-secondary); }
+.preview-section-after { margin-top: 1.4rem; }
+.preview-feed-line { display: flex; justify-content: space-between; gap: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--color-border); color: var(--color-text-muted); font-size: 0.7rem; }
+.blog-preview-after .preview-feed-line { justify-content: flex-start; align-items: center; border-color: var(--color-border); }
+.preview-dot { width: 0.5rem; height: 0.5rem; flex: 0 0 auto; border-radius: 50%; background: var(--color-text-primary); box-shadow: 2px 1px 0 var(--color-border); }
+.blog-diff-mode { margin: 1.5rem 0 0.65rem; color: var(--color-text-muted); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; }
+.blog-diff-mode-riso { margin-top: 2.25rem; color: #27855b; }
+.blog-preview-riso-after {
+  color: #173227;
+  background: linear-gradient(135deg, #f2f8e9, #e3f1d7);
+  border-color: #27855b;
+  box-shadow: 4px 3px 0 rgba(63, 154, 103, 0.22), -2px 5px 0 rgba(24, 60, 44, 0.1);
+}
+.blog-preview-riso-before { background: #f2f8e9; color: #42604f; border-color: #9dbca4; }
+.blog-preview-riso .blog-preview-label { border-color: rgba(39, 133, 91, 0.3); color: #27855b; }
+.blog-preview-riso .blog-mini-logo { background: #17855b; color: #f2f8e9; }
+.blog-preview-riso .preview-rule, .blog-preview-riso .preview-feed-line { border-color: rgba(39, 133, 91, 0.35); }
+.blog-preview-riso .preview-section-title { color: #287b55; }
+.blog-preview-riso .preview-article-featured { border-color: rgba(39, 133, 91, 0.6); background: rgba(255, 255, 255, 0.45); box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.18); }
+.blog-preview-riso .preview-article-featured::before,
+.blog-no-image-riso.blog-no-image-after .blog-no-image-content::before {
+  background:
+    radial-gradient(rgba(23, 133, 91, 0.2) 0.8px, transparent 1px),
+    linear-gradient(120deg, transparent 10%, rgba(63, 154, 103, 0.16));
+  background-size: 7px 7px, auto;
+  background-repeat: repeat, no-repeat;
+}
+.blog-preview-riso .preview-article a { color: #176b48; }
+.blog-preview-riso .preview-dot { background: #17855b; box-shadow: 2px 1px 0 rgba(24, 60, 44, 0.2); }
+.blog-diff-notes { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; margin-top: 1rem; color: var(--color-text-secondary); font-size: 0.75rem; line-height: 1.5; }
+.blog-diff-notes b { color: var(--color-text-primary); }
+.blog-diff-no-image-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.blog-no-image-card { overflow: hidden; border: 1px solid var(--color-border); border-radius: 0.75rem; background: var(--color-background); }
+.blog-no-image-card .blog-preview-label { border-bottom: 1px solid var(--color-border); }
+.blog-no-image-content { padding: 1.25rem 1.5rem 1.5rem; }
+.blog-no-image-content small { color: var(--color-text-muted); font-size: 0.65rem; }
+.blog-no-image-content h3 { margin: 0.45rem 0 0; color: var(--color-text-primary); font-size: clamp(1.1rem, 2vw, 1.45rem); line-height: 1.25; letter-spacing: -0.03em; }
+.blog-no-image-content p { max-width: 52ch; margin: 0.55rem 0 0; color: var(--color-text-secondary); font-size: 0.8rem; line-height: 1.65; }
+.blog-no-image-content a { display: inline-block; margin-top: 0.85rem; color: var(--color-text-primary); font-size: 0.75rem; font-weight: 700; text-decoration: none; }
+.blog-no-image-after { border-color: var(--color-text-primary); box-shadow: 3px 3px 0 var(--color-border); transition: border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease; }
+.blog-no-image-riso { color: #42604f; background: #f2f8e9; border-color: #9dbca4; }
+.blog-no-image-riso .blog-preview-label { color: #27855b; border-color: rgba(39, 133, 91, 0.3); }
+.blog-no-image-riso .blog-no-image-content h3 { color: #173227; }
+.blog-no-image-riso .blog-no-image-content p { color: #42604f; }
+.blog-no-image-riso .preview-section-title { color: #287b55; }
+.blog-no-image-riso.blog-no-image-after { border-color: #27855b; box-shadow: 4px 3px 0 rgba(63, 154, 103, 0.22), -2px 5px 0 rgba(24, 60, 44, 0.1); background: linear-gradient(135deg, #f2f8e9, #e3f1d7); }
+.blog-no-image-riso .blog-no-image-content a { color: #176b48; }
+
+/* ===== Article detail structure diff ===== */
+.mobile-menu-demo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: start; }
+.mobile-menu-demo { overflow: hidden; background: var(--color-background); border: 1px solid var(--color-border); border-radius: 0.75rem; }
+.mobile-menu-demo .blog-preview-label { border-bottom: 1px solid var(--color-border); }
+.mobile-menu-shell { padding: 0 1rem; }
+.mobile-menu-bar { display: flex; align-items: center; justify-content: space-between; min-height: 3.5rem; }
+.mobile-menu-brand { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--color-text-primary); font-size: 0.9rem; font-weight: 700; }
+.mobile-menu-brand i { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; color: var(--color-background); background: var(--color-text-primary); border-radius: 50%; font-size: 0.7rem; font-style: normal; }
+.mobile-menu-trigger { position: relative; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; color: var(--color-text-primary); background: transparent; border: 0; border-radius: 0.3rem; cursor: pointer; }
+.mobile-menu-trigger:focus-visible { outline: 2px solid currentColor; outline-offset: -0.2rem; }
+.mobile-menu-trigger span { position: absolute; width: 1.15rem; height: 1.5px; background: currentColor; transform-origin: center; transition: opacity 140ms ease, transform 220ms cubic-bezier(.2,.72,.2,1); }
+.mobile-menu-trigger span:first-child { transform: translateY(-0.34rem); }
+.mobile-menu-trigger span:last-child { transform: translateY(0.34rem); }
+.mobile-menu-demo.is-open .mobile-menu-trigger span:first-child { transform: rotate(45deg); }
+.mobile-menu-demo.is-open .mobile-menu-trigger span:nth-child(2) { opacity: 0; }
+.mobile-menu-demo.is-open .mobile-menu-trigger span:last-child { transform: rotate(-45deg); }
+.mobile-menu-reveal { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 240ms cubic-bezier(.2,.72,.2,1), opacity 160ms ease; }
+.mobile-menu-reveal-inner { min-height: 0; overflow: hidden; border-top: 1px solid transparent; transition: border-color 180ms ease; }
+.mobile-menu-reveal nav { display: grid; padding: 0.5rem 0 0.8rem; }
+.mobile-menu-reveal a { display: flex; align-items: center; min-height: 2.75rem; padding: 0 0.75rem; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border-subtle); font-size: 0.82rem; font-weight: 600; text-decoration: none; opacity: 0; transition: color 160ms ease, opacity 160ms ease; }
+.mobile-menu-reveal a:hover, .mobile-menu-reveal a:focus-visible { color: var(--color-text-primary); }
+.mobile-menu-demo.is-open .mobile-menu-reveal { grid-template-rows: 1fr; opacity: 1; }
+.mobile-menu-demo.is-open .mobile-menu-reveal-inner { border-top-color: var(--color-border); }
+.mobile-menu-demo.is-open .mobile-menu-reveal a { opacity: 1; }
+.mobile-menu-demo.is-open .mobile-menu-reveal a:nth-child(2) { transition-delay: 25ms; }
+.mobile-menu-demo.is-open .mobile-menu-reveal a:nth-child(3) { transition-delay: 50ms; }
+.mobile-menu-demo.is-open .mobile-menu-reveal a:nth-child(4) { transition-delay: 75ms; }
+.mobile-menu-demo.is-open .mobile-menu-reveal a:nth-child(5) { transition-delay: 100ms; }
+.mobile-menu-demo-riso { color: #173227; background: radial-gradient(rgba(18,58,41,.065) 1px, transparent 1.1px), linear-gradient(145deg, #f2f8e9, #e3f1d7); background-size: 7px 7px, auto; border-color: #27855b; box-shadow: 4px 3px 0 rgba(63,154,103,.22), -2px 5px 0 rgba(24,60,44,.1); }
+.mobile-menu-demo-riso .blog-preview-label, .mobile-menu-demo-riso .mobile-menu-reveal-inner, .mobile-menu-demo-riso .mobile-menu-reveal a { border-color: rgba(39,133,91,.25); }
+.mobile-menu-demo-riso .blog-preview-label { color: #27855b; }
+.mobile-menu-demo-riso .mobile-menu-brand, .mobile-menu-demo-riso .mobile-menu-trigger { color: #173227; }
+.mobile-menu-demo-riso .mobile-menu-brand i { color: #f2f8e9; background: #17855b; box-shadow: 2px 2px 0 rgba(63,154,103,.25); }
+.mobile-menu-demo-riso .mobile-menu-reveal a { color: #42604f; }
+.mobile-menu-demo-riso .mobile-menu-reveal a:hover, .mobile-menu-demo-riso .mobile-menu-reveal a:focus-visible { color: #173227; background: rgba(63,154,103,.08); }
+.article-structure-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: start; }
+.article-structure-card { overflow: hidden; background: var(--color-background); border: 1px solid var(--color-border); border-radius: 0.75rem; }
+.article-structure-card .blog-preview-label { border-bottom: 1px solid var(--color-border); }
+.article-structure-after { border-color: var(--color-text-primary); box-shadow: 3px 3px 0 var(--color-border); }
+.article-structure-page { padding: clamp(1rem, 2.5vw, 1.5rem); }
+.article-structure-page h3 { max-width: 15ch; margin: 0; color: var(--color-text-primary); font-size: clamp(1.3rem, 3vw, 2rem); line-height: 1.08; letter-spacing: -0.045em; }
+.article-structure-before .article-structure-page h3 { font-size: clamp(1.2rem, 2.4vw, 1.65rem); }
+.article-structure-date, .article-structure-meta, .article-structure-path, .article-structure-entry, .article-structure-footer, .article-structure-comments { font-family: var(--font-sans); font-size: 0.62rem; }
+.article-structure-date { margin: 0.7rem 0 0; color: var(--color-text-muted); }
+.article-structure-date span { padding: 0.12rem 0.34rem; border: 1px solid var(--color-border); border-radius: 999px; }
+.article-structure-excerpt { max-width: 48ch; margin: 0.75rem 0 0; color: var(--color-text-secondary); font-size: 0.78rem; line-height: 1.65; }
+.article-structure-cover { min-height: 9rem; margin-top: 1.1rem; background: radial-gradient(rgba(255,255,255,.48) 1px, transparent 1.5px), linear-gradient(135deg, #9fc7a7, #276747 58%, #173227); background-size: 7px 7px, auto; border-radius: 0.4rem; }
+.article-structure-path, .article-structure-meta, .article-structure-entry, .article-structure-footer { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.article-structure-path { padding-bottom: 0.55rem; margin-bottom: 1.4rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); letter-spacing: 0.06em; }
+.article-structure-meta { justify-content: flex-start; flex-wrap: wrap; margin-top: 0.8rem; color: var(--color-text-muted); }
+.article-structure-meta time { margin-right: 0.15rem; font-variant-numeric: tabular-nums; }
+.article-structure-tag { padding: 0.12rem 0.36rem; color: var(--color-text-muted); background: transparent; border: 1px solid var(--color-border); border-radius: 0.25rem; font-weight: 600; line-height: 1.2; }
+.article-structure-entry { height: 1px; margin: 1.4rem 0 1rem; background: var(--color-border); }
+.article-structure-reading { display: grid; grid-template-columns: minmax(0, 1fr) 2.2rem; gap: 1rem; }
+.article-structure-reading aside { display: grid; align-content: start; gap: 0.45rem; padding-left: 0.55rem; color: var(--color-text-muted); font-size: 0.58rem; border-left: 1px solid var(--color-border); }
+.article-structure-prose { display: grid; gap: 0.48rem; margin-top: 1.2rem; }
+.article-structure-reading .article-structure-prose { margin-top: 0; }
+.article-structure-prose i, .article-structure-prose b { display: block; height: 0.35rem; border-radius: 999px; background: var(--color-border); }
+.article-structure-prose i:nth-child(2), .article-structure-prose i:nth-child(5) { width: 88%; }
+.article-structure-prose i:nth-child(3), .article-structure-prose i:nth-child(6) { width: 68%; }
+.article-structure-prose b { width: 42%; height: 0.55rem; margin: 0.6rem 0 0.15rem; background: var(--color-text-muted); }
+.article-structure-footer { margin-top: 1.5rem; padding: 0.8rem 0; color: var(--color-text-secondary); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+.article-structure-comments { margin-top: 1rem; padding: 0.7rem; color: var(--color-text-muted); text-align: center; letter-spacing: 0.08em; background: var(--color-background-alt); border-radius: 0.3rem; }
+.article-structure-riso-grid { padding: 1rem; background: radial-gradient(rgba(18,58,41,.065) 1px, transparent 1.1px), linear-gradient(145deg, #f2f8e9, #e3f1d7); background-size: 7px 7px, auto; border: 1px solid #9dbca4; border-radius: 0.75rem; }
+.article-structure-riso { color: #2b4b3b; background: rgba(255,255,255,.48); border-color: #27855b; box-shadow: 4px 3px 0 rgba(63,154,103,.22), -2px 5px 0 rgba(24,60,44,.1); }
+.article-structure-riso .blog-preview-label, .article-structure-riso .article-structure-path, .article-structure-riso .article-structure-footer, .article-structure-riso .article-structure-reading aside { border-color: rgba(39,133,91,.3); }
+.article-structure-riso .blog-preview-label, .article-structure-riso .article-structure-path, .article-structure-riso .article-structure-meta { color: #287b55; }
+.article-structure-riso .article-structure-tag { color: #42604f; background: rgba(255,255,255,.24); border-color: rgba(39,133,91,.28); }
+.article-structure-riso .article-structure-page h3 { color: #173227; text-shadow: 2px 2px 0 rgba(63,154,103,.26), -2px 2px 0 rgba(24,60,44,.14); }
+.article-structure-riso .article-structure-excerpt, .article-structure-riso .article-structure-footer { color: #42604f; }
+.article-structure-riso .article-structure-entry { background: rgba(39,133,91,.35); }
+.article-structure-riso .article-structure-prose i { background: rgba(39,133,91,.22); }
+.article-structure-riso .article-structure-prose b { background: rgba(23,133,91,.48); }
+.article-structure-riso .article-structure-comments { color: #52705f; background: rgba(63,154,103,.1); }
+@media (hover: hover) and (pointer: fine) {
+  .preview-article-featured:hover,
+  .preview-article-featured:focus-within {
+    border-color: var(--color-text-muted);
+    box-shadow: 3px 3px 0 var(--color-text-muted);
+  }
+  .preview-article-featured:hover::before,
+  .preview-article-featured:focus-within::before,
+  .blog-no-image-after:hover .blog-no-image-content::before,
+  .blog-no-image-after:focus-within .blog-no-image-content::before {
+    clip-path: inset(0);
+    opacity: 0.34;
+    transform: translateX(0);
+  }
+  .preview-article-featured:hover h3,
+  .preview-article-featured:focus-within h3,
+  .blog-no-image-after:hover h3,
+  .blog-no-image-after:focus-within h3 {
+    color: var(--color-accent);
+  }
+  .preview-article-featured:hover .preview-thumb,
+  .preview-article-featured:focus-within .preview-thumb {
+    filter: saturate(1.08) contrast(1.05);
+  }
+  .preview-article-featured:hover a::after,
+  .preview-article-featured:focus-within a::after,
+  .blog-no-image-after:hover a::after,
+  .blog-no-image-after:focus-within a::after {
+    transform: scaleX(1);
+  }
+  .blog-preview-riso .preview-article-featured:hover,
+  .blog-preview-riso .preview-article-featured:focus-within {
+    border-color: rgba(23, 133, 91, 0.78);
+    box-shadow: 3px 3px 0 rgba(63, 154, 103, 0.3), -2px 5px 0 rgba(24, 60, 44, 0.12);
+  }
+  .blog-preview-riso .preview-article-featured:hover::before,
+  .blog-preview-riso .preview-article-featured:focus-within::before,
+  .blog-no-image-riso.blog-no-image-after:hover .blog-no-image-content::before,
+  .blog-no-image-riso.blog-no-image-after:focus-within .blog-no-image-content::before {
+    opacity: 0.42;
+  }
+  .blog-preview-riso .preview-article-featured:hover h3,
+  .blog-preview-riso .preview-article-featured:focus-within h3,
+  .blog-no-image-riso.blog-no-image-after:hover h3,
+  .blog-no-image-riso.blog-no-image-after:focus-within h3 {
+    color: #173227;
+    text-shadow: 1px 1px 0 rgba(63, 154, 103, 0.3), -1px 1px 0 rgba(24, 60, 44, 0.14);
+  }
+  .blog-no-image-after:hover {
+    border-color: var(--color-text-muted);
+    box-shadow: 3px 3px 0 var(--color-text-muted);
+  }
+  .blog-no-image-riso.blog-no-image-after:hover,
+  .blog-no-image-riso.blog-no-image-after:focus-within {
+    border-color: rgba(23, 133, 91, 0.78);
+    box-shadow: 4px 3px 0 rgba(63, 154, 103, 0.3), -2px 5px 0 rgba(24, 60, 44, 0.14);
+  }
+}
+@media (max-width: 700px) {
+  .blog-diff-heading { display: block; }
+  .blog-diff-heading > p { margin-top: 0.65rem; }
+  .blog-diff-grid { grid-template-columns: 1fr; }
+  .blog-diff-no-image-grid { grid-template-columns: 1fr; }
+  .article-structure-grid { grid-template-columns: 1fr; }
+  .mobile-menu-demo-grid { grid-template-columns: 1fr; }
+  .floating-header-grid { grid-template-columns: 1fr; }
+  .floating-header-shell nav, .floating-header-shell button { display: none; }
+  .floating-header-menu-icon { display: grid; gap: .22rem; width: 2.75rem; height: 2.75rem; margin-left: auto; place-content: center; }
+  .floating-header-menu-icon i { display: block; width: 1.1rem; height: 1.5px; border-radius: 999px; background: currentColor; }
+  .floating-header-stage { min-height: 23rem; }
+  .floating-header-content { padding-top: 4rem; }
+  .article-structure-cover { min-height: 7rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu-trigger span,
+  .mobile-menu-reveal,
+  .mobile-menu-reveal-inner,
+  .mobile-menu-reveal a { transition: none; }
+  .blog-preview-header button { transition: none; }
+  .preview-article-featured::before,
+  .blog-no-image-after .blog-no-image-content::before,
+  .preview-article-featured,
+  .blog-no-image-after,
+  .preview-article-featured h3,
+  .blog-no-image-after h3,
+  .preview-article-featured .preview-thumb,
+  .preview-article-featured a::after,
+  .blog-no-image-after a::after { transition: none; }
 }
 </style>

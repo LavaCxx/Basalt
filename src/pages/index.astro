@@ -2,8 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import Sidebar from '../components/ui/Sidebar.astro';
 import FeedList from '../components/islands/FeedList';
-import { getFeedPage, getFeedStats, initRuntime } from '../lib/api';
-import type { FeedPage, FeedStats } from '../lib/types';
+import SmartImage from '../components/islands/SmartImage';
+import { getFeedPage, getFeedStats, getLatestArticle, initRuntime } from '../lib/api';
+import type { ArticleFeedItem, FeedPage, FeedStats } from '../lib/types';
 
 // Initialize D1 binding from Cloudflare runtime env
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
@@ -14,10 +15,12 @@ if (runtimeEnv) {
 // Fetch feed items server-side (reads from D1)
 let feedPage: FeedPage = { items: [], nextCursor: null };
 let stats: FeedStats = { articles: 0, photos: 0, microblogs: 0, media: 0 };
+let latestArticle: ArticleFeedItem | null = null;
 try {
-  [feedPage, stats] = await Promise.all([
+  [feedPage, stats, latestArticle] = await Promise.all([
     getFeedPage({ limit: 30 }),
     getFeedStats(),
+    getLatestArticle(),
   ]);
 } catch (e) {
   console.error('Failed to fetch feed items:', e);
@@ -28,16 +31,442 @@ const serializedItems = feedPage.items.map((item) => ({
   ...item,
   date: item.date instanceof Date ? item.date.toISOString() : item.date,
 }));
+const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
 ---
 
-<Layout title="首页" description="数字花园与内容聚合站" withSidebar>
-  <FeedList client:load items={serializedItems} nextCursor={feedPage.nextCursor} />
+<Layout title="首页" description="数字花园与内容聚合站">
+  <div class="home-page">
+    <header class="home-intro">
+      <h1>你好，我是 LavaC。</h1>
+      <p class="home-intro-copy">
+        一个 95 后前端工作者；这里收集写下的文章、生活里的随手记、照片，以及最近在看在玩。
+        它们不是不同的数据源，而是同一段生活留下的证据。
+      </p>
+      <nav class="home-contact-links" aria-label="联系方式与站外链接">
+        <a href="https://github.com/LavaCxx" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <a href="https://steamcommunity.com/id/ArcRains/" target="_blank" rel="noopener noreferrer" aria-label="Steam" title="Steam">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z"/></svg>
+        </a>
+        <a href="/rss.xml" aria-label="RSS" title="RSS">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/></svg>
+        </a>
+        <a href="mailto:lavac@foxmail.com" aria-label="Email" title="Email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg>
+        </a>
+        <a href="/drive" class="home-drive-link" aria-label="Voxel Drive" title="Voxel Drive">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 13l1.5-4.5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.5L21 13v5h-2a2 2 0 0 1-2-2H7a2 2 0 0 1-2 2H3v-5zm3.5-4L5.3 12h13.4l-1.2-3h-11zM6.5 15.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm11 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>
+        </a>
+      </nav>
+    </header>
 
-  <!-- Sidebar Slot -->
-  <Sidebar slot="sidebar" stats={stats} />
+    <div class="home-content-layout">
+      <main class="home-main-content">
+        {latestArticle && (
+          <section class="latest-article" aria-labelledby="latest-article-heading">
+            <div class="home-section-heading">
+              <span aria-hidden="true">01 / FEATURED</span>
+              <h2 id="latest-article-heading">最新文章</h2>
+            </div>
+            <a
+              href={latestArticle.url || '/archives'}
+              class:list={['latest-article-link group', { 'latest-article-link--no-image': !latestArticle.image }]}
+            >
+              {latestArticle.image && (
+                <SmartImage
+                  src={latestArticle.image}
+                  alt={latestArticle.title || ''}
+                  class="latest-article-image"
+                  width={352}
+                  height={272}
+                />
+              )}
+              <div class="latest-article-body">
+                <div class="latest-article-meta">
+                  <time datetime={latestArticle.date.toISOString()}>{formatArticleDate(latestArticle.date)}</time>
+                  {latestArticle.metadata?.readingTime && <span>约 {latestArticle.metadata.readingTime} 分钟</span>}
+                </div>
+                <h3>{latestArticle.title}</h3>
+                {latestArticle.metadata?.excerpt && <p>{latestArticle.metadata.excerpt}</p>}
+                <span class="latest-article-read">阅读全文<span class="latest-article-arrow link-arrow-icon" aria-hidden="true">↗</span></span>
+              </div>
+            </a>
+          </section>
+        )}
+
+        <FeedList
+          client:load
+          items={serializedItems}
+          nextCursor={feedPage.nextCursor}
+          excludeItemId={latestArticle?.id}
+        />
+      </main>
+
+      <aside class="home-sidebar">
+        <Sidebar stats={stats} showSocialLinks={false} />
+      </aside>
+    </div>
+  </div>
 </Layout>
 
 <style>
+  .home-page {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  .home-content-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18rem;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .home-sidebar {
+    position: sticky;
+    top: 5rem;
+  }
+
+  .home-intro {
+    padding: 0;
+    margin-bottom: 2.5rem;
+  }
+
+  .home-intro h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+  }
+
+  .home-intro-copy {
+    max-width: 42rem;
+    margin: 1rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .latest-article-read {
+    position: relative;
+    display: inline-block;
+    margin-top: 1rem;
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .latest-article-read::after {
+    position: absolute;
+    right: 0;
+    bottom: -0.2rem;
+    left: 0;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    content: '';
+  }
+
+  .latest-article-arrow {
+    opacity: 0.48;
+    transition: opacity 180ms ease;
+  }
+
+  .latest-article {
+    margin: 0 0 3.5rem;
+  }
+
+  .home-section-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    color: var(--color-text-secondary);
+  }
+
+  .home-section-heading > span {
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+  }
+
+  .home-section-heading h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .latest-article-link {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr);
+    gap: 1.25rem;
+    padding: 1.25rem;
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid var(--color-border);
+    border-radius: 0.65rem;
+    background: color-mix(in srgb, var(--color-background) 86%, var(--color-background-alt));
+    box-shadow: 3px 3px 0 var(--color-border-subtle);
+    transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .latest-article-link::before {
+    position: absolute;
+    inset: 0 -24px;
+    z-index: 0;
+    background-image: var(--onebit-strata-texture);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    opacity: 0;
+    transform: translateX(-16px);
+    transform-origin: left center;
+    transition:
+      opacity 100ms linear,
+      transform 320ms cubic-bezier(0.16, 0.72, 0.24, 1);
+    content: '';
+    pointer-events: none;
+  }
+
+  .latest-article-link > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .latest-article-link:hover {
+    border-color: var(--color-text-muted);
+    background: color-mix(in srgb, var(--color-background) 72%, var(--color-background-alt));
+    box-shadow: 3px 3px 0 var(--color-border);
+  }
+
+  .latest-article-link:active {
+    border-color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--color-background) 64%, var(--color-background-alt));
+    box-shadow: 3px 3px 0 var(--color-text-muted);
+  }
+
+  .latest-article .home-section-heading {
+    margin-bottom: 0.25rem;
+  }
+
+  .home-contact-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-top: 1.25rem;
+  }
+
+  .home-contact-links a {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .home-contact-links svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .home-drive-link svg {
+    opacity: 0;
+    transition: opacity 240ms ease;
+  }
+
+  .home-drive-link:hover svg,
+  .home-drive-link:focus-visible svg {
+    opacity: 1;
+  }
+
+  .home-contact-links a:hover {
+    border-color: var(--color-border);
+    background: color-mix(in srgb, var(--color-background) 68%, var(--color-background-alt));
+    color: var(--color-text-primary);
+  }
+
+  .home-contact-links a:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+  }
+
+  .latest-article-image {
+    width: 100%;
+    height: 8.5rem;
+    border-radius: 0.5rem;
+  }
+
+  .latest-article-link--no-image {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 1.5rem;
+  }
+
+  .latest-article-link--no-image .latest-article-body {
+    max-width: 46rem;
+  }
+
+  .latest-article-link--no-image .latest-article-body h3 {
+    max-width: 34ch;
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+  }
+
+  .latest-article-meta {
+    display: flex;
+    gap: 0.75rem;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+  }
+
+  .latest-article-body h3 {
+    margin: 0.35rem 0 0;
+    font-size: 1.25rem;
+    line-height: 1.35;
+    transition: color 180ms ease, text-shadow 180ms ease;
+  }
+
+  .latest-article-body p {
+    margin: 0.4rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  .latest-article-read {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  :global(.riso) .home-intro h1 {
+    text-shadow: var(--riso-title-shadow-h1);
+  }
+
+  :global(.riso) .latest-article-link {
+    background: rgba(255, 255, 255, 0.42);
+    border-color: var(--riso-border-ink);
+    box-shadow: var(--riso-offset-shadow);
+  }
+
+  :global(.riso) .latest-article-link::before {
+    background:
+      radial-gradient(rgba(23, 133, 91, 0.2) 0.8px, transparent 1px),
+      linear-gradient(120deg, transparent 10%, rgba(63, 154, 103, 0.16));
+    background-repeat: repeat, no-repeat;
+    background-size: 7px 7px, auto;
+  }
+
+  :global(.riso) .latest-article-link:hover {
+    background: rgba(255, 255, 255, 0.55);
+    border-color: rgba(23, 133, 91, 0.65);
+    box-shadow: 4px 3px 0 rgba(63, 154, 103, 0.28), -2px 5px 0 rgba(24, 60, 44, 0.14);
+  }
+
+  :global(.riso) .latest-article-link:active {
+    background: rgba(63, 154, 103, 0.14);
+    border-color: rgba(23, 133, 91, 0.78);
+    box-shadow: 4px 3px 0 rgba(63, 154, 103, 0.2), -2px 5px 0 rgba(24, 60, 44, 0.12);
+  }
+
+  :global(.riso) .home-section-heading > span {
+    color: var(--riso-muted-ink);
+  }
+
+  :global(.riso) .latest-article-link--no-image .latest-article-body h3 {
+    text-shadow: var(--riso-title-shadow-h2);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .latest-article-link:hover::before {
+      opacity: 0.34;
+      transform: translateX(0);
+    }
+
+    .latest-article-link:hover .latest-article-read::after {
+      transform: scaleX(1);
+    }
+
+    .latest-article-link:hover .latest-article-arrow {
+      opacity: 1;
+    }
+
+    .latest-article-link:hover .latest-article-body h3 {
+      color: var(--color-accent);
+    }
+
+    .latest-article-link:hover .latest-article-image {
+      filter: saturate(1.08) contrast(1.05);
+    }
+
+    :global(.riso) .latest-article-link:hover::before {
+      opacity: 0.42;
+    }
+
+    :global(.riso) .latest-article-link:hover .latest-article-body h3 {
+      color: var(--riso-ink);
+      text-shadow: var(--riso-title-shadow-h2);
+    }
+  }
+
+  .latest-article-link:focus-visible::before {
+    opacity: 0.34;
+    transform: translateX(0);
+  }
+
+  .latest-article-link:focus-visible .latest-article-read::after {
+    transform: scaleX(1);
+  }
+
+  .latest-article-link:focus-visible .latest-article-arrow {
+    opacity: 1;
+  }
+
+  .latest-article-image {
+    filter: saturate(0.78) contrast(0.96);
+    transition: filter 220ms ease;
+  }
+
+  @media (max-width: 640px) {
+    .home-page { padding: 2rem 1rem 4rem; }
+    .home-content-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+    .home-sidebar { position: static; }
+    .home-intro { padding-top: 0; }
+    .latest-article-link { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 1rem; padding: 1rem; }
+    .latest-article-link--no-image { grid-template-columns: minmax(0, 1fr); padding: 1.25rem; }
+    .latest-article-image { height: 6.25rem; }
+    .latest-article-body h3 { font-size: 1.0625rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-drive-link svg,
+    .latest-article-link::before,
+    .latest-article-read::after,
+    .latest-article-arrow,
+    .latest-article-image,
+    .latest-article-body h3 {
+      transition: none;
+    }
+  }
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;

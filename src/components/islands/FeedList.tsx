@@ -3,7 +3,7 @@
  * Data is passed from server-side render (index.astro)
  */
 
-import { createSignal, Show, For, Switch, Match } from 'solid-js';
+import { createMemo, createSignal, Show, For, Switch, Match } from 'solid-js';
 import type { FeedItem } from '../../lib/types';
 import MicroblogCard from './feed-cards/MicroblogCard';
 import PhotoCard from './feed-cards/PhotoCard';
@@ -13,6 +13,7 @@ import ArticleCard from './feed-cards/ArticleCard';
 interface FeedListProps {
   items?: SerializedFeedItem[];
   nextCursor?: string | null;
+  excludeItemId?: string;
 }
 
 type SerializedFeedItem = FeedItem extends infer Item
@@ -31,6 +32,31 @@ export default function FeedList(props: FeedListProps) {
   const [nextCursor, setNextCursor] = createSignal(props.nextCursor || null);
   const [loading, setLoading] = createSignal(false);
   const [error, setError] = createSignal('');
+  const isVisible = (item: FeedItem) => item.id !== props.excludeItemId;
+  const visibleItems = createMemo(() => items().filter(isVisible));
+  const groups = createMemo(() => {
+    const grouped: Array<{ key: string; date: Date; items: FeedItem[] }> = [];
+
+    for (const item of visibleItems()) {
+      const date = item.date;
+      const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+      const lastGroup = grouped.at(-1);
+      if (lastGroup?.key === key) {
+        lastGroup.items.push(item);
+      } else {
+        grouped.push({ key, date, items: [item] });
+      }
+    }
+
+    return grouped;
+  });
+
+  const formatDay = (date: Date) => date.toLocaleDateString('zh-CN', {
+    ...(date.getFullYear() !== new Date().getFullYear() ? { year: 'numeric' } : {}),
+    month: 'long',
+    day: 'numeric',
+  });
+  const formatWeekday = (date: Date) => date.toLocaleDateString('zh-CN', { weekday: 'short' });
 
   const loadMore = async () => {
     const cursor = nextCursor();
@@ -61,29 +87,44 @@ export default function FeedList(props: FeedListProps) {
   };
 
   return (
-    <div class="space-y-0">
+    <div class="feed-timeline">
+      <div class="feed-timeline-heading">
+        <h2>近期轨迹</h2>
+      </div>
       <Show when={error()}>
         <p class="pt-4 text-center text-sm text-text-muted" role="status">{error()}</p>
       </Show>
 
-      <For each={items()}>
-        {(item) => (
-          <article class="group">
-            <Switch fallback={<div></div>}>
-              <Match when={item.type === 'microblog'}>
-                <MicroblogCard item={item as any} />
-              </Match>
-              <Match when={item.type === 'photo' && item.image}>
-                <PhotoCard item={item as any} />
-              </Match>
-              <Match when={item.type === 'media'}>
-                <MediaCard item={item as any} />
-              </Match>
-              <Match when={item.type === 'article'}>
-                <ArticleCard item={item as any} />
-              </Match>
-            </Switch>
-          </article>
+      <For each={groups()}>
+        {(group) => (
+          <section class="feed-timeline-day">
+            <header class="feed-timeline-date">
+              <time datetime={group.date.toISOString()}>{formatDay(group.date)}</time>
+              <span>{formatWeekday(group.date)}</span>
+            </header>
+            <div class="feed-timeline-day-items">
+              <For each={group.items}>
+                {(item) => (
+                  <article class={`feed-timeline-entry feed-timeline-entry--${item.type} group`}>
+                    <Switch fallback={<div></div>}>
+                      <Match when={item.type === 'microblog'}>
+                        <MicroblogCard item={item as any} />
+                      </Match>
+                      <Match when={item.type === 'photo' && item.image}>
+                        <PhotoCard item={item as any} />
+                      </Match>
+                      <Match when={item.type === 'media'}>
+                        <MediaCard item={item as any} />
+                      </Match>
+                      <Match when={item.type === 'article'}>
+                        <ArticleCard item={item as any} />
+                      </Match>
+                    </Switch>
+                  </article>
+                )}
+              </For>
+            </div>
+          </section>
         )}
       </For>
 

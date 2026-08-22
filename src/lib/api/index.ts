@@ -2,12 +2,11 @@
  * Unified data access module — D1 backed.
  *
  * The blog reads ALL content from D1 (populated by the sync worker).
- * In development mode, if D1 is not available, we fall back to mock data.
+ * Development and production both read from D1. Missing bindings and query
+ * failures return empty results rather than substituting mock content.
  */
 
-import type { FeedItem, ArchiveGroup, CurrentItem, FeedPage, FeedStats } from '../types';
-import { mockFeedItems, mockArchiveGroups, mockCurrentItems, mockCurrentGames } from '../mock-data';
-import { getDemoSteamSnapshot } from '../steam';
+import type { ArticleFeedItem, FeedItem, ArchiveGroup, CurrentItem, FeedPage, FeedStats } from '../types';
 import type { ManualGame, SteamSnapshot } from '../types';
 
 import {
@@ -43,14 +42,14 @@ export function initRuntime(env: Record<string, any>): void {
  */
 export async function getFeedItems(): Promise<FeedItem[]> {
   if (!isDBAvailable()) {
-    return import.meta.env.DEV ? mockFeedItems : [];
+    return [];
   }
 
   try {
     return await queryItems();
   } catch (error) {
     console.error('Error fetching feed items from D1:', error);
-    return import.meta.env.DEV ? mockFeedItems : [];
+    return [];
   }
 }
 
@@ -59,26 +58,24 @@ export async function getFeedPage(options: { limit: number; cursor?: string }): 
   if (options.cursor && !cursor) throw new Error('Invalid feed cursor');
 
   if (!isDBAvailable()) {
-    const items = import.meta.env.DEV ? mockFeedItems.slice(0, options.limit) : [];
-    return { items, nextCursor: null };
+    return { items: [], nextCursor: null };
   }
 
   try {
     return await queryFeedPage({ limit: options.limit, cursor: cursor ?? undefined });
   } catch (error) {
     console.error('Error fetching feed page from D1:', error);
-    const items = import.meta.env.DEV ? mockFeedItems.slice(0, options.limit) : [];
-    return { items, nextCursor: null };
+    return { items: [], nextCursor: null };
   }
 }
 
 export async function getFeedStats(): Promise<FeedStats> {
-  if (!isDBAvailable()) return countFeedItems(import.meta.env.DEV ? mockFeedItems : []);
+  if (!isDBAvailable()) return countFeedItems([]);
   try {
     return await queryFeedStats();
   } catch (error) {
     console.error('Error fetching feed stats from D1:', error);
-    return countFeedItems(import.meta.env.DEV ? mockFeedItems : []);
+    return countFeedItems([]);
   }
 }
 
@@ -96,14 +93,29 @@ function countFeedItems(items: FeedItem[]): FeedStats {
  */
 export async function getArticles(): Promise<FeedItem[]> {
   if (!isDBAvailable()) {
-    return import.meta.env.DEV ? mockFeedItems.filter((i) => i.type === 'article') : [];
+    return [];
   }
 
   try {
     return await queryItems({ types: ['article'] });
   } catch (error) {
     console.error('Error fetching articles from D1:', error);
-    return import.meta.env.DEV ? mockFeedItems.filter((i) => i.type === 'article') : [];
+    return [];
+  }
+}
+
+/** Get the most recently published article for the homepage reading entry. */
+export async function getLatestArticle(): Promise<ArticleFeedItem | null> {
+  if (!isDBAvailable()) {
+    return null;
+  }
+
+  try {
+    const [article] = await queryItems({ types: ['article'], limit: 1 });
+    return article?.type === 'article' ? article : null;
+  } catch (error) {
+    console.error('Error fetching latest article:', error);
+    return null;
   }
 }
 
@@ -112,13 +124,6 @@ export async function getArticles(): Promise<FeedItem[]> {
  */
 export async function getArticleBySlug(slug: string): Promise<FeedItem | null> {
   if (!isDBAvailable()) {
-    if (import.meta.env.DEV) {
-      return (
-        mockFeedItems.find(
-          (item) => item.type === 'article' && item.url?.endsWith(slug)
-        ) || null
-      );
-    }
     return null;
   }
 
@@ -126,12 +131,7 @@ export async function getArticleBySlug(slug: string): Promise<FeedItem | null> {
     return await queryArticleBySlug(slug);
   } catch (error) {
     console.error(`Error fetching article ${slug}:`, error);
-    if (!import.meta.env.DEV) return null;
-    return (
-      mockFeedItems.find(
-        (item) => item.type === 'article' && item.url?.endsWith(slug)
-      ) || null
-    );
+    return null;
   }
 }
 
@@ -140,11 +140,6 @@ export async function getArticleBySlug(slug: string): Promise<FeedItem | null> {
  */
 export async function getAllArticleSlugs(): Promise<string[]> {
   if (!isDBAvailable()) {
-    if (import.meta.env.DEV) {
-      return mockFeedItems
-        .filter((item) => item.type === 'article')
-        .map((item) => item.url?.split('/').pop() || item.id);
-    }
     return [];
   }
 
@@ -161,14 +156,14 @@ export async function getAllArticleSlugs(): Promise<string[]> {
  */
 export async function getArchiveItems(): Promise<ArchiveGroup[]> {
   if (!isDBAvailable()) {
-    return import.meta.env.DEV ? mockArchiveGroups : [];
+    return [];
   }
 
   try {
     return await queryArchiveGroups();
   } catch (error) {
     console.error('Error fetching archive items:', error);
-    return import.meta.env.DEV ? mockArchiveGroups : [];
+    return [];
   }
 }
 
@@ -193,45 +188,41 @@ export async function getPhotosByYear(): Promise<Record<number, FeedItem[]>> {
  */
 export async function getCurrentItems(): Promise<CurrentItem[]> {
   if (!isDBAvailable()) {
-    return import.meta.env.DEV ? mockCurrentItems : [];
+    return [];
   }
 
   try {
     const items = await queryCurrentItems();
-    if (items.length > 0) return items;
-    return import.meta.env.DEV ? mockCurrentItems : [];
+    return items;
   } catch (error) {
     console.error('Error fetching current items:', error);
-    return import.meta.env.DEV ? mockCurrentItems : [];
+    return [];
   }
 }
 
 export async function getSteamSnapshot(): Promise<SteamSnapshot> {
   if (!isDBAvailable()) {
-    return import.meta.env.DEV ? getDemoSteamSnapshot() : { games: [], status: { online: false } };
+    return { games: [], status: { online: false } };
   }
 
   try {
     return await querySteamSnapshot();
   } catch (error) {
     console.error('Error fetching Steam snapshot from D1:', error);
-    return import.meta.env.DEV
-      ? getDemoSteamSnapshot()
-      : { games: [], status: { online: false } };
+    return { games: [], status: { online: false } };
   }
 }
 
 export async function getCurrentGames(): Promise<ManualGame[]> {
   if (!isDBAvailable()) {
-    return import.meta.env.DEV ? mockCurrentGames : [];
+    return [];
   }
 
   try {
-    const games = await queryCurrentGames();
-    return import.meta.env.DEV && games.length === 0 ? mockCurrentGames : games;
+    return await queryCurrentGames();
   } catch (error) {
     console.error('Error fetching current games:', error);
-    return import.meta.env.DEV ? mockCurrentGames : [];
+    return [];
   }
 }
 

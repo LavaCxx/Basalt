@@ -2,7 +2,7 @@ import { createSignal, onMount, Show, For, type JSX } from 'solid-js';
 import type { MicroblogFeedItem } from '../../../lib/types';
 import SourceBadge from '../SourceBadge';
 import SmartImage from '../SmartImage';
-import { formatDate } from './formatDate';
+import { formatTime } from './formatDate';
 
 interface PhotoItem {
   id: string;
@@ -113,10 +113,10 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
   });
 
   return (
-    <div class="py-4 border-b border-border-subtle">
+    <div class="py-4">
       <div class="flex items-center gap-1.5 mb-2 text-xs text-text-muted">
         <SourceBadge source={item().source} channel={item().metadata?.channel} />
-        <time class="ml-auto">{formatDate(item().date)}</time>
+        <time class="feed-card-time">{formatTime(item().date)}</time>
       </div>
       <div
         ref={setContentElement}

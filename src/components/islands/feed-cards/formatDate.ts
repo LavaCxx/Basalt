@@ -1,14 +1,7 @@
 /**
- * Shared date formatter for feed cards
+ * Shared time formatter for feed cards. Dates are rendered by the timeline.
  */
-export function formatDate(date: Date): string {
+export function formatTime(date: Date): string {
   const d = new Date(date);
-  const now = new Date();
-  const isCurrentYear = d.getFullYear() === now.getFullYear();
-
-  if (isCurrentYear) {
-    return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  } else {
-    return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
+  return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
 }

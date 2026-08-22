@@ -54,38 +54,28 @@ const currentPath = Astro.url.pathname;
       <!-- Mobile Menu Button -->
       <button
         type="button"
-        class="sm:hidden p-2 text-text-secondary hover:text-text-primary"
-        aria-label="Toggle menu"
+        class="mobile-menu-button sm:hidden min-w-11 min-h-11 inline-flex items-center justify-center p-2 text-text-secondary hover:text-text-primary"
+        aria-label="打开导航菜单"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
         id="mobile-menu-button"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
       </button>
     </div>
 
     <!-- Mobile Navigation -->
-    <div class="sm:hidden hidden" id="mobile-menu">
-    <div class="py-3 space-y-1 border-t border-border">
+    <div class="mobile-menu sm:hidden" id="mobile-menu" aria-hidden="true" inert>
+    <div class="mobile-menu-inner py-3 space-y-1 border-t border-border">
         {navItems.map((item) => (
           <a
             href={item.href}
             data-astro-prefetch="hover"
             data-nav-link
            class:list={[
-          'block px-3 py-2 text-sm font-medium transition-colors',
+          'flex min-h-11 items-center px-3 py-2 text-sm font-medium transition-colors',
            currentPath === item.href
                 ? 'text-text-primary underline underline-offset-4 font-semibold'
                 : 'text-text-secondary hover:text-text-primary hover:underline hover:underline-offset-4',
@@ -99,15 +89,116 @@ const currentPath = Astro.url.pathname;
   </nav>
 </header>
 
-<script>
-  // Simple mobile menu toggle
-  const button = document.getElementById('mobile-menu-button');
-  const menu = document.getElementById('mobile-menu');
+<style>
+  .mobile-menu-button {
+    position: relative;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
 
-  if (button && menu) {
-    button.addEventListener('click', () => {
-      menu.classList.toggle('hidden');
-    });
+  .mobile-menu-button span {
+    position: absolute;
+    width: 1.25rem;
+    height: 2px;
+    background: currentColor;
+    border-radius: 999px;
+    transform-origin: center;
+    transition: opacity 140ms ease, transform 220ms cubic-bezier(0.2, 0.72, 0.2, 1);
+  }
+
+  .mobile-menu-button span:first-child { transform: translateY(-0.375rem); }
+  .mobile-menu-button span:last-child { transform: translateY(0.375rem); }
+  .mobile-menu-button[aria-expanded='true'] span:first-child { transform: rotate(45deg); }
+  .mobile-menu-button[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
+  .mobile-menu-button[aria-expanded='true'] span:last-child { transform: rotate(-45deg); }
+
+  .mobile-menu {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 240ms cubic-bezier(0.2, 0.72, 0.2, 1), opacity 160ms ease;
+  }
+
+  .mobile-menu-inner {
+    min-height: 0;
+    overflow: hidden;
+    border-top-color: transparent;
+    transition: border-color 180ms ease;
+  }
+
+  .mobile-menu a {
+    opacity: 0;
+    transition: color 160ms ease, opacity 160ms ease;
+  }
+
+  .mobile-menu.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .mobile-menu.is-open .mobile-menu-inner { border-top-color: var(--color-border); }
+  .mobile-menu.is-open a { opacity: 1; }
+  .mobile-menu.is-open a:nth-child(2) { transition-delay: 25ms; }
+  .mobile-menu.is-open a:nth-child(3) { transition-delay: 50ms; }
+  .mobile-menu.is-open a:nth-child(4) { transition-delay: 75ms; }
+  .mobile-menu.is-open a:nth-child(5) { transition-delay: 100ms; }
+  .mobile-menu.is-open a:nth-child(6) { transition-delay: 125ms; }
+
+  :global(html.riso) .mobile-menu-button,
+  :global(html.riso) .mobile-menu-button:hover,
+  :global(html.riso) .mobile-menu-button:active {
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+  }
+
+  :global(html.riso) .mobile-menu.is-open .mobile-menu-inner {
+    border-top-color: var(--riso-border-ink);
+    background-image: radial-gradient(rgba(18, 58, 41, 0.04) 1px, transparent 1.1px);
+    background-size: 7px 7px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-menu-button span,
+    .mobile-menu,
+    .mobile-menu-inner,
+    .mobile-menu a {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  function initializeMobileMenu() {
+    const button = document.getElementById('mobile-menu-button');
+    const menu = document.getElementById('mobile-menu');
+    if (!(button instanceof HTMLButtonElement) || !(menu instanceof HTMLElement)) return;
+
+    const setOpen = (isOpen: boolean) => {
+      menu.classList.toggle('is-open', isOpen);
+      menu.toggleAttribute('inert', !isOpen);
+      menu.setAttribute('aria-hidden', String(!isOpen));
+      button.setAttribute('aria-expanded', String(isOpen));
+      button.setAttribute('aria-label', isOpen ? '关闭导航菜单' : '打开导航菜单');
+    };
+
+    if (button.dataset.menuInitialized !== 'true') {
+      button.dataset.menuInitialized = 'true';
+      button.addEventListener('click', () => setOpen(button.getAttribute('aria-expanded') !== 'true'));
+      menu.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setOpen(false)));
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+          setOpen(false);
+          button.focus();
+        }
+      });
+      window.matchMedia('(min-width: 640px)').addEventListener('change', (event) => {
+        if (event.matches) setOpen(false);
+      });
+    }
+
+    setOpen(false);
   }
 
   // Update active nav state on page navigation (for View Transitions)
@@ -127,9 +218,11 @@ const currentPath = Astro.url.pathname;
     });
   }
 
-  // Run on initial load
+  initializeMobileMenu();
   updateActiveNav();
 
-  // Run on View Transitions navigation
-  document.addEventListener('astro:page-load', updateActiveNav);
+  document.addEventListener('astro:page-load', () => {
+    initializeMobileMenu();
+    updateActiveNav();
+  });
 </script>

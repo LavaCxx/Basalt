@@ -1,7 +1,6 @@
 ---
 import type { CurrentItem, ManualGame, SteamStatus, SteamGame, SteamSnapshot } from '../../lib/types';
 import { getCurrentGames, getCurrentItems, getSteamSnapshot, initRuntime } from '../../lib/api';
-import { mockCurrentItems } from '../../lib/mock-data';
 import { mediaTypeLabels } from '../../lib/media-config';
 import SmartImage from '../islands/SmartImage';
 
@@ -11,6 +10,7 @@ interface Props {
   steamGames?: SteamGame[];
   steamSnapshot?: SteamSnapshot;
   currentGames?: ManualGame[];
+  showSocialLinks?: boolean;
 }
 
 // Inject Cloudflare runtime env if available
@@ -19,8 +19,8 @@ if (runtimeEnv) {
   initRuntime(runtimeEnv);
 }
 
-// Fetch current items - with fallback to mock data on error
-let currentItems: CurrentItem[] = mockCurrentItems;
+// Fetch current items from D1 only.
+let currentItems: CurrentItem[] = [];
 try {
   const fetched = await getCurrentItems();
   if (fetched.length > 0) {
@@ -48,6 +48,7 @@ const currentGames = Astro.props.currentGames || await getCurrentGames();
 const steamGameNames = new Set(steamGames.map((game) => game.name.trim().toLowerCase()));
 const manualGames = currentGames.filter((game) => !steamGameNames.has(game.title.trim().toLowerCase()));
 const stats = Astro.props.stats || {};
+const showSocialLinks = Astro.props.showSocialLinks !== false;
 
 const typeLabels: Record<string, string> = {
   reading: '阅读中',
@@ -83,7 +84,7 @@ function formatWastedDays(date?: Date): string {
 <aside class="space-y-6">
  <!-- Recent non-game media -->
 {currentItems.length > 0 && (
-   <section class="border-t border-border pt-5 mt-5">
+   <section class="pt-5 mt-5">
       <h3 class="text-sm font-medium text-text-secondary uppercase tracking-wider mb-3">
         在看
       </h3>
@@ -239,6 +240,7 @@ function formatWastedDays(date?: Date): string {
     </div>
   </section>
 
+  {showSocialLinks && (
   <!-- Social Links -->
   <section class="border-t border-border pt-5 mt-5">
     <div class="flex items-center gap-4">
@@ -259,6 +261,7 @@ function formatWastedDays(date?: Date): string {
       </a>
     </div>
   </section>
+  )}
 </aside>
 
 <style>

@@ -2,16 +2,16 @@ import { Show } from 'solid-js';
 import type { PhotoFeedItem } from '../../../lib/types';
 import SourceBadge from '../SourceBadge';
 import SmartImage from '../SmartImage';
-import { formatDate } from './formatDate';
+import { formatTime } from './formatDate';
 
 export default function PhotoCard(props: { item: PhotoFeedItem }) {
   const item = () => props.item;
 
   return (
-    <div class="py-4 border-b border-border-subtle">
+    <div class="py-4">
       <div class="flex items-center gap-1.5 mb-2 text-xs text-text-muted">
         <SourceBadge source={item().source} />
-        <time class="ml-auto">{formatDate(item().date)}</time>
+        <time class="feed-card-time">{formatTime(item().date)}</time>
       </div>
       <div class="flex gap-4">
         <Show

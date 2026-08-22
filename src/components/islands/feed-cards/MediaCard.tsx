@@ -4,7 +4,7 @@ import type { MediaType } from '../../../lib/media-config';
 import { mediaTypeLabels, getStatusLabel } from '../../../lib/media-config';
 import SourceBadge from '../SourceBadge';
 import SmartImage from '../SmartImage';
-import { formatDate } from './formatDate';
+import { formatTime } from './formatDate';
 
 export default function MediaCard(props: { item: MediaFeedItem }) {
   const item = () => props.item;
@@ -24,13 +24,15 @@ export default function MediaCard(props: { item: MediaFeedItem }) {
   };
 
   return (
-    <div class="py-4 border-b border-border-subtle">
+    <div class="py-4">
       <div class="flex items-center gap-1.5 mb-2 text-xs text-text-muted">
         <SourceBadge
           source={item().source}
           mediaTypeLabel={meta() ? mediaTypeLabels[meta()!.mediaType as MediaType] : undefined}
         />
-        <time class="ml-auto">{formatDate(item().date)}</time>
+        <Show when={item().source !== 'douban'}>
+          <time class="feed-card-time">{formatTime(item().date)}</time>
+        </Show>
       </div>
       <div class="flex gap-4 items-start">
         <Show when={item().image}>

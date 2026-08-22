@@ -8,7 +8,7 @@
  */
 
 import Layout from '../../layouts/Layout.astro';
-import { getArticleBySlug, initRuntime } from '../../lib/api';
+import { getArticleBySlug, getArticles, initRuntime } from '../../lib/api';
 import ArticleEnhancements from '../../components/islands/ArticleEnhancements';
 import TableOfContents from '../../components/islands/TableOfContents';
 import Comments from '../../components/islands/Comments';
@@ -34,6 +34,12 @@ const tags = (metadata as any)?.tags || [];
 const readingTime = (metadata as any)?.readingTime || 5;
 const canonicalUrl = `https://blog.lavac.cc/articles/${slug}`;
 const publishedDate = date instanceof Date ? date : new Date(date);
+const articles = await getArticles();
+const currentArticleIndex = articles.findIndex((item) =>
+  item.id === article.id || item.url?.split('/').pop() === slug
+);
+const previousArticle = currentArticleIndex >= 0 ? articles[currentArticleIndex + 1] : undefined;
+const nextArticle = currentArticleIndex > 0 ? articles[currentArticleIndex - 1] : undefined;
 ---
 
 <Layout title={title} description={(metadata as any)?.excerpt || title} canonical={canonicalUrl}>
@@ -45,9 +51,16 @@ const publishedDate = date instanceof Date ? date : new Date(date);
         <data class="p-name" value="LavaC"></data>
         <img class="u-photo" src="/avatar.jpg" alt="" />
       </a>
-      {/* Header - Minimal */}
+      {/* Header - Editorial reading hierarchy */}
       <header class="article-header">
+        <div class="article-path">
+          <a href="/">文章 / {publishedDate.getFullYear()}</a>
+          <span>约 {readingTime} 分钟</span>
+        </div>
         <h1 class="article-title p-name">{title}</h1>
+        {(metadata as any)?.excerpt && (
+          <p class="article-excerpt">{(metadata as any).excerpt}</p>
+        )}
         <div class="article-meta">
           <time class="dt-published" datetime={publishedDate.toISOString()}>
             {publishedDate.toLocaleDateString('zh-CN', {
@@ -66,11 +79,6 @@ const publishedDate = date instanceof Date ? date : new Date(date);
         </div>
       </header>
 
-      {/* Excerpt - Italic intro */}
-      {(metadata as any)?.excerpt && (
-        <p class="article-excerpt">{(metadata as any).excerpt}</p>
-      )}
-
       {/* Cover Image */}
       {image && (
         <figure class="article-cover">
@@ -78,22 +86,39 @@ const publishedDate = date instanceof Date ? date : new Date(date);
         </figure>
       )}
 
+      <div class="article-entry-rule" aria-hidden="true"></div>
+
       {/* Content */}
       <div class="article-content prose-basalt e-content">
         <ArticleEnhancements client:only="solid-js" />
         <div class="article-content-html" set:html={content} />
       </div>
 
-      {/* Webmentions */}
-      <Webmentions target={Astro.url.href} client:visible />
-
-      {/* Comments */}
-      <Comments client:load />
-
       {/* Footer */}
       <footer class="article-footer">
+        {(previousArticle || nextArticle) && (
+          <nav class="article-adjacent" aria-label="相邻文章">
+            {previousArticle ? (
+              <a href={previousArticle.url || `/articles/${previousArticle.id}`} class="article-adjacent-link article-adjacent-previous">
+                <span>← 上一篇</span>
+                <strong>{previousArticle.title || '未命名文章'}</strong>
+              </a>
+            ) : <span></span>}
+            {nextArticle && (
+              <a href={nextArticle.url || `/articles/${nextArticle.id}`} class="article-adjacent-link article-adjacent-next">
+                <span>下一篇 →</span>
+                <strong>{nextArticle.title || '未命名文章'}</strong>
+              </a>
+            )}
+          </nav>
+        )}
         <a href="/" class="back-link">← 返回首页</a>
       </footer>
+
+      <section class="article-discussion" aria-label="文章讨论">
+        <Webmentions target={Astro.url.href} client:visible />
+        <Comments client:load />
+      </section>
     </article>
 
     {/* Sidebar - Table of Contents */}
@@ -133,13 +158,36 @@ const publishedDate = date instanceof Date ? date : new Date(date);
   @media (min-width: 1280px) {
     .article-sidebar {
       display: block;
-      padding-top: 6rem; /* Align with content */
     }
   }
 
   /* Header */
   .article-header {
+    margin-bottom: 2.25rem;
+  }
+
+  .article-path {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.75rem;
     margin-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  .article-path a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .article-path a:hover {
+    color: var(--color-text-primary);
   }
 
   .article-meta {
@@ -150,7 +198,7 @@ const publishedDate = date instanceof Date ? date : new Date(date);
     font-family: var(--font-sans);
     font-size: 0.8125rem;
     color: var(--color-text-muted);
-    margin-bottom: 1.25rem;
+    margin-top: 1.25rem;
   }
 
   .article-tags {
@@ -161,17 +209,15 @@ const publishedDate = date instanceof Date ? date : new Date(date);
 
   .article-tag {
     font-family: var(--font-sans);
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    background: var(--color-background-alt);
-    padding: 0.125rem 0.625rem;
-    border-radius: 999px;
-    transition: background 0.2s;
-  }
-
-  .article-tag:hover {
-    background: var(--color-border);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-text-muted);
+    background: transparent;
+    padding: 0.125rem 0.4rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--color-border);
+    box-shadow: none;
   }
 
   .article-title {
@@ -181,7 +227,7 @@ const publishedDate = date instanceof Date ? date : new Date(date);
     line-height: 1.25;
     color: var(--color-text-primary);
     letter-spacing: -0.02em;
-    margin-bottom: 1rem;
+    margin: 0;
   }
 
   @media (min-width: 768px) {
@@ -199,15 +245,15 @@ const publishedDate = date instanceof Date ? date : new Date(date);
   .article-excerpt {
     font-family: var(--font-sans);
     font-size: 1.125rem;
-    font-style: italic;
     line-height: 1.6;
     color: var(--color-text-secondary);
-    margin-bottom: 2rem;
+    max-width: 52ch;
+    margin: 1rem 0 0;
   }
 
   /* Cover */
   .article-cover {
-    margin: 0 0 2.5rem;
+    margin: 0 0 2rem;
   }
 
   .article-cover img {
@@ -216,14 +262,69 @@ const publishedDate = date instanceof Date ? date : new Date(date);
     border-radius: 0.375rem;
   }
 
+  .article-entry-rule {
+    height: 1px;
+    margin: 0 0 2.5rem;
+    background: var(--color-border);
+  }
+
   /* Content - Book-like prose */
   /* Prose styles moved to global.css .prose-basalt */
 
   /* Footer */
   .article-footer {
     margin-top: 4rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--color-border-subtle, #e5e5e5);
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .article-adjacent {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .article-adjacent-link {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    text-decoration: none;
+  }
+
+  .article-adjacent-link span {
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+  }
+
+  .article-adjacent-link strong {
+    overflow: hidden;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 180ms ease;
+  }
+
+  .article-adjacent-link:hover strong,
+  .article-adjacent-link:focus-visible strong {
+    color: var(--color-accent);
+  }
+
+  .article-adjacent-link:focus-visible {
+    border-radius: 0.2rem;
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 0.25rem;
+  }
+
+  .article-adjacent-next {
+    text-align: right;
   }
 
   .back-link {
@@ -237,7 +338,48 @@ const publishedDate = date instanceof Date ? date : new Date(date);
     transition: color 0.2s;
   }
 
+  @media (max-width: 520px) {
+    .article-adjacent {
+      grid-template-columns: 1fr;
+    }
+
+    .article-adjacent > span:empty {
+      display: none;
+    }
+
+    .article-adjacent-next {
+      text-align: left;
+    }
+  }
+
   .back-link:hover {
     color: var(--color-text-primary);
+  }
+
+  .article-discussion {
+    margin-top: 2.5rem;
+  }
+
+  :global(html.riso) .article-title {
+    color: var(--riso-ink);
+    text-shadow: var(--riso-title-shadow-h1);
+  }
+
+  :global(html.riso) .article-path,
+  :global(html.riso) .article-entry-rule,
+  :global(html.riso) .article-footer,
+  :global(html.riso) .article-adjacent {
+    border-color: var(--riso-border-ink);
+  }
+
+  :global(html.riso) .article-entry-rule {
+    background: var(--riso-border-ink);
+  }
+
+  :global(html.riso) .article-tag {
+    color: #42604f;
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(39, 133, 91, 0.28);
+    box-shadow: none;
   }
 </style>
