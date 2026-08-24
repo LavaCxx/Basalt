@@ -94,7 +94,9 @@ export async function fetchCurrentItems(options?: {
     const endStr = props.结束时间?.date?.start;
 
     const mediaType = mapMediaType(typeStr);
-    const status = mapStatus(statusStr);
+    // A recorded end date is a stronger completion signal than the Notion status
+    // label, whose wording may not be covered by mapStatus yet.
+    const status: MediaMetadata['status'] = endStr ? 'completed' : mapStatus(statusStr);
 
     // Use start date as primary (for sorting), fallback to end date, fallback to page creation time
     const dateStr = startStr || endStr;

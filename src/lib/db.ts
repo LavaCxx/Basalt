@@ -349,16 +349,14 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
 
   for (const row of result.results) {
     const metadata = row.metadata_json ? JSON.parse(row.metadata_json) : {};
-    // Exclude wishlist and paused items
-    if (metadata.status === 'wishlist' || metadata.status === 'paused') continue;
-
     const endDateStr = metadata.endDate;
     if (endDateStr) {
-      // Completed items: only show if endDate is within the last 90 days
+      // A recorded end date takes precedence over stale or unrecognized status
+      // labels. Keep recently completed items alongside in-progress ones.
       const endDate = new Date(endDateStr);
-      const ninetyDaysAgo = new Date();
-      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-      if (endDate < ninetyDaysAgo) continue;
+      const fourteenDaysAgo = new Date();
+      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+      if (Number.isNaN(endDate.getTime()) || endDate < fourteenDaysAgo) continue;
     } else {
       // No endDate: only show items still in progress
       if (metadata.status !== 'in_progress') continue;
