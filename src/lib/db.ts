@@ -389,11 +389,15 @@ export async function queryCurrentItems(): Promise<CurrentItem[]> {
       url: row.url || undefined,
       ...(endDateStr ? { endDate: new Date(endDateStr) } : {}),
     });
-
-    if (currentItems.length >= 8) break;
   }
 
-  return currentItems;
+  return currentItems
+    .sort((item, otherItem) => {
+      const itemSortTime = (item.endDate || item.date).getTime();
+      const otherSortTime = (otherItem.endDate || otherItem.date).getTime();
+      return otherSortTime - itemSortTime;
+    })
+    .slice(0, 8);
 }
 
 export async function queryCurrentGames(): Promise<ManualGame[]> {
