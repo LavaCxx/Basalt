@@ -9,6 +9,15 @@ import { getNotionClient, getArticlesDatabaseId } from './client';
 import { type NotionArticleProperties, getPlainText, getCoverImage } from './properties';
 import { fetchBlockChildren, calculateReadingTime, type BlockRenderOptions } from './blocks-to-html';
 
+const aiInvolvementOptions = ['未使用', '辅助润色', '协作创作', '主要生成'] as const;
+
+function getAiInvolvement(
+  props: NotionArticleProperties
+): ArticleMetadata['aiInvolvement'] {
+  const value = props.AI参与度?.select?.name;
+  return aiInvolvementOptions.find((option) => option === value);
+}
+
 /**
  * Fetch articles from Notion database
  */
@@ -39,9 +48,11 @@ export async function fetchArticles(options?: {
     const excerpt = getPlainText(props.摘要?.rich_text || props.Excerpt?.rich_text);
     const tags = (props.标签?.multi_select || props.Tags?.multi_select || []).map((t) => t.name);
     const featured = props.精选?.checkbox ?? props.Featured?.checkbox ?? false;
+    const aiInvolvement = getAiInvolvement(props);
     const date = new Date((page as any).created_time);
+    const updatedDate = new Date((page as any).last_edited_time);
     const image = getCoverImage(props.封面?.files || props.Cover?.files);
-    const slug = getPlainText(props.Slug?.rich_text || props.slug?.rich_text) || page.id;
+    const slug = getPlainText(props.路径?.rich_text || props.Slug?.rich_text || props.slug?.rich_text) || page.id;
 
     return {
       id: page.id,
@@ -49,10 +60,11 @@ export async function fetchArticles(options?: {
       title,
       content: '',
       date,
+      updatedDate,
       source: 'notion' as const,
       url: `/articles/${slug}`,
       image,
-      metadata: { excerpt, tags, featured, readingTime: 5 } as ArticleMetadata,
+      metadata: { excerpt, tags, featured, aiInvolvement, readingTime: 5 } as ArticleMetadata,
     };
   });
 
@@ -76,9 +88,11 @@ export async function fetchArticle(
     const excerpt = getPlainText(props.摘要?.rich_text || props.Excerpt?.rich_text);
     const tags = (props.标签?.multi_select || props.Tags?.multi_select || []).map((t) => t.name);
     const featured = props.精选?.checkbox ?? props.Featured?.checkbox ?? false;
+    const aiInvolvement = getAiInvolvement(props);
     const date = new Date((page as any).created_time);
+    const updatedDate = new Date((page as any).last_edited_time);
     const image = getCoverImage(props.封面?.files || props.Cover?.files);
-    const slug = getPlainText(props.Slug?.rich_text || props.slug?.rich_text) || pageId;
+    const slug = getPlainText(props.路径?.rich_text || props.Slug?.rich_text || props.slug?.rich_text) || pageId;
     const content = await fetchBlockChildren(pageId, renderOptions);
 
     return {
@@ -87,10 +101,11 @@ export async function fetchArticle(
       title,
       content,
       date,
+      updatedDate,
       source: 'notion',
       url: `/articles/${slug}`,
       image,
-      metadata: { excerpt, tags, featured, readingTime: calculateReadingTime(content) },
+      metadata: { excerpt, tags, featured, aiInvolvement, readingTime: calculateReadingTime(content) },
     };
   } catch (error) {
     console.error(`Error fetching article ${pageId}:`, error);

@@ -17,10 +17,12 @@ export interface NotionArticleProperties {
   Tags?: { multi_select: { name: string }[] };
   精选?: { checkbox: boolean };
   Featured?: { checkbox: boolean };
+  AI参与度?: { select: { name: string } | null };
   发布?: { checkbox: boolean };
   Published?: { checkbox: boolean };
   封面?: { files: { type: string; file?: { url: string }; external?: { url: string } }[] };
   Cover?: { files: { type: string; file?: { url: string }; external?: { url: string } }[] };
+  路径?: { rich_text: RichTextItemResponse[] };
   Slug?: { rich_text: RichTextItemResponse[] };
   slug?: { rich_text: RichTextItemResponse[] };
 }

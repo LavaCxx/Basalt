@@ -13,7 +13,7 @@ const friends = [
   {
     name: 'Niracler的博物志',
     url: 'https://niracler.com/',
-    avatar: 'https://niracler.com/favicon.ico',
+    avatar: 'https://niracler.com/favicon.svg',
     description: '长门大明神会梦到外星羊么？',
   },
   {
@@ -21,77 +21,113 @@ const friends = [
     url: 'https://tedding.dev/',
   },
 ];
+
+const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '');
 ---
 
 <Layout title="友链" description="朋友们的网站">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Page Header -->
+  <div class="page-shell">
     <header class="mb-12">
-      <h1 class="font-ui text-4xl font-bold text-text-primary mb-2">
-        友链
-      </h1>
-      <p class="text-text-secondary">
-        优秀的伙伴们与他们的数字花园
-      </p>
+      <h1 class="font-ui text-4xl font-bold text-text-primary mb-2">友链</h1>
+      <p class="text-text-secondary">ALONE isn't always ALONE，</p>
     </header>
 
-    <!-- Friends List -->
-    <div>
-      {friends.map((friend) => (
-        <a
-         href={friend.url}
-         target="_blank"
-         rel="noopener noreferrer"
-          class="group flex items-center gap-4 py-4 border-b border-border-subtle transition-colors"
-        >
-          {friend.avatar ? (
-            <SmartImage
-              src={friend.avatar}
-              alt={friend.name}
-              class="rounded-full w-10 h-10 flex-shrink-0"
-              client:visible
+    <div class="friend-grid">
+      {friends.map((friend, index) => (
+        <a href={friend.url} target="_blank" rel="noopener noreferrer" class="friend-card">
+          <svg class="friend-card-texture" viewBox="0 0 320 180" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <pattern id={`friend-dots-${index}`} width="5" height="5" patternUnits="userSpaceOnUse">
+                <rect width="2" height="2" fill="currentColor" />
+                <rect x="3" y="3" width="1" height="1" fill="currentColor" />
+              </pattern>
+              <filter id={`friend-noise-${index}`} x="-15%" y="-15%" width="130%" height="130%">
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency={`${0.011 + index * 0.002} ${0.019 + index * 0.003}`}
+                  numOctaves="3"
+                  seed={17 + index * 23}
+                  result="noise"
+                />
+                <feComponentTransfer in="noise" result="threshold">
+                  <feFuncR type="discrete" tableValues="0 0 0 0.18 0.42 0.72 1 1" />
+                  <feFuncG type="discrete" tableValues="0 0 0 0.18 0.42 0.72 1 1" />
+                  <feFuncB type="discrete" tableValues="0 0 0 0.18 0.42 0.72 1 1" />
+                </feComponentTransfer>
+                <feComposite in="SourceGraphic" in2="threshold" operator="in" />
+              </filter>
+              <linearGradient id={`friend-fade-${index}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="black" stop-opacity="0" />
+                <stop offset="0.38" stop-color="white" stop-opacity="0.18" />
+                <stop offset="1" stop-color="white" />
+              </linearGradient>
+              <mask id={`friend-mask-${index}`}>
+                <rect width="320" height="180" fill={`url(#friend-fade-${index})`} />
+              </mask>
+            </defs>
+            <rect
+              width="320"
+              height="180"
+              fill={`url(#friend-dots-${index})`}
+              filter={`url(#friend-noise-${index})`}
+              mask={`url(#friend-mask-${index})`}
             />
-          ) : (
-            <div class="w-10 h-10 rounded-full bg-text-primary text-background flex items-center justify-center font-semibold flex-shrink-0">
-              {friend.name.charAt(0)}
-            </div>
-          )}
-          <div class="flex-1 min-w-0 flex items-baseline gap-3">
-            <h3 class="font-medium text-text-primary group-hover:underline underline-offset-4 transition-colors">
-              {friend.name}
-            </h3>
-            {friend.description && (
-              <p class="text-sm text-text-muted truncate">
-                {friend.description}
-              </p>
-            )}
-          </div>
-          <!-- Arrow icon -->
-          <svg
-            class="w-5 h-5 text-text-muted group-hover:text-text-primary transition-colors flex-shrink-0"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-            <polyline points="15 3 21 3 21 9" />
-            <line x1="10" y1="14" x2="21" y2="3" />
           </svg>
+          <div class="friend-card-overline" aria-hidden="true">
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <span class="friend-card-bayer" data-variant={index % 3}>
+              {Array.from({ length: 16 }, () => <i></i>)}
+            </span>
+          </div>
+          <div class="friend-card-header">
+            {friend.avatar ? (
+              <SmartImage
+                src={friend.avatar}
+                alt=""
+                class="rounded-full w-12 h-12 flex-shrink-0 object-cover"
+                width={48}
+                height={48}
+                client:visible
+              />
+            ) : (
+              <div class="friend-avatar-fallback" aria-hidden="true">
+                {friend.name.charAt(0)}
+              </div>
+            )}
+            <div class="friend-card-title">
+              <h2>{friend.name}</h2>
+              <span>{getHostname(friend.url)}</span>
+            </div>
+          </div>
+          <p class:list={['friend-card-description', { 'friend-card-description--fallback': !friend.description }]}>
+            {friend.description || `访问 ${getHostname(friend.url)}`}
+          </p>
+          <div class="friend-card-footer">
+            <span>访问网站</span>
+            <svg
+              class="friend-card-arrow"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+          </div>
         </a>
       ))}
     </div>
 
-    <!-- Add friend CTA -->
     <div class="mt-12 text-center">
-      <p class="text-text-muted mb-4">
-        想要交换友链？欢迎联系！
-      </p>
+      <p class="text-text-muted mb-4">想要交换友链？欢迎联系！</p>
       <a
-       href="mailto:lavac@foxmail.com"
+        href="mailto:lavac@foxmail.com"
         class="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-md text-text-secondary hover:text-text-primary hover:border-text-muted transition-colors"
       >
         <svg
@@ -111,7 +147,251 @@ const friends = [
       </a>
     </div>
 
-    <!-- Comments -->
     <Comments client:load mapping="specific" term="friends" />
   </div>
 </Layout>
+
+<style>
+  .friend-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .friend-card {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    min-height: 10rem;
+    padding: 1rem 1.25rem 1.1rem;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--color-background) 92%, white);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(20, 20, 20, 0.04);
+    transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .friend-card-texture {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    color: var(--color-text-primary);
+    opacity: 0.1;
+    transition: opacity 180ms ease;
+    pointer-events: none;
+  }
+
+  .friend-card > :not(.friend-card-texture) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .friend-card:hover {
+    border-color: var(--color-text-muted);
+    background: color-mix(in srgb, var(--color-background) 84%, var(--color-border));
+    box-shadow: 0 8px 24px rgba(20, 20, 20, 0.08);
+  }
+
+  .friend-card:hover .friend-card-texture {
+    opacity: 0.2;
+  }
+
+  .friend-card:active {
+    background: color-mix(in srgb, var(--color-background) 78%, var(--color-border));
+    box-shadow: 0 1px 2px rgba(20, 20, 20, 0.04);
+  }
+
+  .friend-card:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 3px;
+  }
+
+  .friend-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+  }
+
+  .friend-card-overline {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    color: var(--color-text-muted);
+    font-size: 0.625rem;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+  }
+
+  .friend-card-bayer {
+    display: grid;
+    grid-template-columns: repeat(4, 2px);
+    gap: 2px;
+  }
+
+  .friend-card-bayer i {
+    width: 2px;
+    height: 2px;
+    background: currentColor;
+    opacity: 0.2;
+  }
+
+  .friend-card-bayer[data-variant='0'] i:nth-child(1),
+  .friend-card-bayer[data-variant='0'] i:nth-child(4),
+  .friend-card-bayer[data-variant='0'] i:nth-child(6),
+  .friend-card-bayer[data-variant='0'] i:nth-child(7),
+  .friend-card-bayer[data-variant='0'] i:nth-child(10),
+  .friend-card-bayer[data-variant='0'] i:nth-child(13),
+  .friend-card-bayer[data-variant='1'] i:nth-child(2),
+  .friend-card-bayer[data-variant='1'] i:nth-child(5),
+  .friend-card-bayer[data-variant='1'] i:nth-child(8),
+  .friend-card-bayer[data-variant='1'] i:nth-child(11),
+  .friend-card-bayer[data-variant='1'] i:nth-child(12),
+  .friend-card-bayer[data-variant='1'] i:nth-child(15),
+  .friend-card-bayer[data-variant='2'] i:nth-child(1),
+  .friend-card-bayer[data-variant='2'] i:nth-child(3),
+  .friend-card-bayer[data-variant='2'] i:nth-child(6),
+  .friend-card-bayer[data-variant='2'] i:nth-child(9),
+  .friend-card-bayer[data-variant='2'] i:nth-child(14),
+  .friend-card-bayer[data-variant='2'] i:nth-child(16) {
+    opacity: 0.9;
+  }
+
+  .friend-card :global(.smart-image) {
+    flex: 0 0 3rem;
+    width: 3rem;
+    height: 3rem;
+    aspect-ratio: 1;
+  }
+
+  .friend-avatar-fallback {
+    display: grid;
+    flex: 0 0 auto;
+    width: 3rem;
+    height: 3rem;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--color-text-primary);
+    color: var(--color-background);
+    font-weight: 650;
+  }
+
+  .friend-card-title {
+    min-width: 0;
+  }
+
+  .friend-card-title h2 {
+    margin: 0;
+    overflow: hidden;
+    font-size: 1rem;
+    font-weight: 650;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .friend-card-title span {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+  }
+
+  .friend-card-description {
+    display: -webkit-box;
+    min-height: 2.9rem;
+    margin: 1rem 0 0;
+    overflow: hidden;
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.65;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .friend-card-description--fallback {
+    color: var(--color-text-muted);
+  }
+
+  .friend-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+    padding-top: 0.65rem;
+    border-top: 1px dashed var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+  }
+
+  .friend-card-arrow {
+    width: 1rem;
+    height: 1rem;
+    color: inherit;
+    transition: color 180ms ease;
+  }
+
+  .friend-card:hover .friend-card-footer {
+    color: var(--color-text-primary);
+  }
+
+  :global(html.riso) .friend-card {
+    border-color: var(--riso-border-ink);
+    background: var(--riso-standard-surface);
+    box-shadow: var(--riso-offset-shadow);
+  }
+
+  :global(html.riso) .friend-card-texture {
+    color: #27855b;
+    opacity: 0.18;
+    mix-blend-mode: multiply;
+  }
+
+  :global(html.riso) .friend-card:hover .friend-card-texture {
+    opacity: 0.28;
+  }
+
+  :global(html.riso) .friend-card-footer {
+    border-color: var(--riso-border-ink);
+  }
+
+  :global(html.riso) .friend-card:hover {
+    border-color: #27855b;
+    background: var(--riso-expressive-surface);
+    box-shadow: var(--riso-offset-shadow);
+  }
+
+  :global(html.riso) .friend-card:active {
+    background: var(--riso-plate-a);
+    box-shadow: var(--riso-offset-shadow);
+  }
+
+  @media (max-width: 900px) {
+    .friend-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 600px) {
+    .friend-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .friend-card {
+      min-height: 10rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .friend-card,
+    .friend-card-arrow {
+      transition: none;
+    }
+  }
+</style>

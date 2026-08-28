@@ -39,7 +39,7 @@ export default function MemoriesGallery(props: MemoriesGalleryProps) {
   const [loading] = createSignal(false);
 
   return (
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="page-shell">
       {/* Header */}
       <header class="mb-12">
         <h1 class="font-ui text-4xl font-bold text-text-primary mb-2">

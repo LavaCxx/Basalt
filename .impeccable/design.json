@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-28T00:00:00+08:00",
+  "title": "Design System: LavaC's Stash",
+  "extensions": {
+    "colorMeta": {
+      "paper": { "role": "neutral", "displayName": "Warm Paper", "canonical": "#faf9f6", "tonalRamp": ["#262522", "#4b4945", "#716f6a", "#97958f", "#bbb9b3", "#d5d3cd", "#eceae4", "#faf9f6"] },
+      "ink": { "role": "primary", "displayName": "Archive Ink", "canonical": "#1a1a1a", "tonalRamp": ["#1a1a1a", "#2f2f2f", "#444444", "#5a5a5a", "#707070", "#898989", "#a3a3a3", "#bdbdbd"] },
+      "riso-paper": { "role": "neutral", "displayName": "RISO Paper", "canonical": "#f2f8e9", "tonalRamp": ["#173227", "#315440", "#4d7659", "#6d966f", "#8db184", "#aec99d", "#d2e5c1", "#f2f8e9"] },
+      "riso-accent": { "role": "primary", "displayName": "RISO Accent Green", "canonical": "#17855b", "tonalRamp": ["#173227", "#145d42", "#167c55", "#17855b", "#47a777", "#79c398", "#addfba", "#dff0d4"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "SN Pro Display", "purpose": "Page titles and distinctive introductions." },
+      "prose": { "displayName": "Newsreader Prose", "purpose": "Sustained article reading content." }
+    },
+    "shadows": [
+      { "name": "light-card-offset", "value": "3px 3px 0 var(--color-border-subtle)", "purpose": "Quiet separation for Light-mode cards." },
+      { "name": "riso-plate-offset", "value": "4px 3px 0 rgba(63,154,103,.18), -2px 5px 0 rgba(24,60,44,.09)", "purpose": "Graphic misregistered print depth in RISO mode." }
+    ],
+    "motion": [
+      { "name": "state-transition", "value": "220ms ease", "purpose": "Subtle border, surface, and offset changes for interactive states." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    { "name": "Primary Button", "kind": "button", "refersTo": "button-primary", "description": "Ink-filled compact action with a restrained editorial silhouette.", "html": "<button class=\"ds-btn-primary\">OPEN ARCHIVE</button>", "css": ".ds-btn-primary { background: var(--color-text-primary); color: var(--color-background); padding: .5rem 1rem; border: 1px solid var(--color-text-primary); border-radius: .5rem; font: 650 .75rem/1.4 var(--font-sans); letter-spacing: .06em; text-transform: uppercase; transition: border-color 220ms ease, background-color 220ms ease, transform 220ms ease; } .ds-btn-primary:hover { background: var(--color-text-secondary); border-color: var(--color-text-secondary); transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-text-primary); outline-offset: 2px; } .ds-btn-primary:active { transform: translateY(0); }" },
+    { "name": "RISO Button", "kind": "button", "refersTo": "button-riso-primary", "description": "Green overprint action with tactile plate registration.", "html": "<button class=\"ds-riso-btn\">ENTER LAB</button>", "css": ".ds-riso-btn { background: rgba(23,133,91,.9); color: #f2f8e9; padding: .5rem 1rem; border: 1px solid rgba(39,133,91,.35); border-radius: .5rem; font: 650 .75rem/1.4 var(--font-sans); letter-spacing: .06em; text-transform: uppercase; box-shadow: 4px 3px 0 rgba(63,154,103,.18), -2px 5px 0 rgba(24,60,44,.09); transition: box-shadow 220ms ease, transform 220ms ease; } .ds-riso-btn:hover { box-shadow: 6px 5px 0 rgba(63,154,103,.26), -3px 6px 0 rgba(24,60,44,.13); transform: translateY(-1px); } .ds-riso-btn:focus-visible { outline: 2px solid #173227; outline-offset: 2px; } .ds-riso-btn:active { box-shadow: 1px 1px 0 rgba(63,154,103,.18); transform: translate(2px, 2px); }" },
+    { "name": "Archive Card", "kind": "card", "refersTo": "card", "description": "Quiet editorial container for archive entries and feed items.", "html": "<article class=\"ds-card\"><small>ARCHIVE / 2026</small><h3>Reading Notes</h3><p>A compact entry with metadata and a short summary.</p></article>", "css": ".ds-card { background: var(--color-background); color: var(--color-text-primary); padding: 1rem; border: 1px solid var(--color-border); border-radius: .5rem; box-shadow: 3px 3px 0 var(--color-border-subtle); } .ds-card small { color: var(--color-text-muted); font: 650 .75rem/1.4 var(--font-sans); letter-spacing: .06em; } .ds-card h3 { margin: .5rem 0 0; font: 700 1.25rem/1.2 var(--font-sans); letter-spacing: -.03em; } .ds-card p { margin: .5rem 0 0; color: var(--color-text-secondary); font: 400 1rem/1.6 var(--font-sans); }" }
+  ],
+  "narrative": {
+    "northStar": "The Personal Editorial Desk",
+    "overview": "LavaC's Stash treats a personal website as an editorial desk: part reading room, part archive, and part laboratory. The interface is quiet enough for text and images to lead, but has a distinct point of view through precise typography, fine rules, small labels, and occasional one-bit or RISO interventions.\n\nThe default light world is restrained, off-white, and ink-led. The RISO world is not a dark-mode variant; it is a paper-green overprint material with halftone texture, translucent surfaces, and deliberately misregistered plate shadows. `/lab` can be more experimental, while `/drive` remains its own visual experience.",
+    "keyCharacteristics": ["Editorial and archive-oriented rather than dashboard-like.", "Restrained neutral surfaces with a single ink-led accent in Light mode.", "Paper green, halftone dots, translucent overprint, and offset plates in RISO mode.", "Typography and spacing carry hierarchy; decoration stays purposeful."],
+    "rules": [{ "name": "The Material Theme Rule", "body": "RISO changes the material language—paper, dots, overprint, and plate shadows—not only the background color.", "section": "colors" }, { "name": "The Two-Voice Rule", "body": "Use SN Pro for navigation and interface structure; reserve Newsreader for sustained reading.", "section": "typography" }],
+    "dos": ["Do preserve the Light ↔ RISO theme model; the visible choice is not Dark/System.", "Do let typography, whitespace, and fine rules establish hierarchy before adding decoration.", "Do keep RISO halftone texture restrained and maintain readable body contrast.", "Do use offset shadows as graphic print registration, especially for RISO interactive surfaces.", "Do keep `/drive` visually independent from the site-wide paper system."],
+    "donts": ["Don't introduce a visible dark theme toggle without explicit approval.", "Don't flatten RISO into a simple green background swap.", "Don't use heavy soft shadows, excessive nested cards, or generic SaaS gradients.", "Don't add noisy halftone texture to long-form text or code blocks.", "Don't use rounded pills for every control; reserve them for tags and compact metadata."]
+  }
+}

@@ -24,6 +24,8 @@ interface FeedItemBase {
   content: string;
   /** Publication date */
   date: Date;
+  /** Last modification time reported by the content source */
+  updatedDate?: Date;
   /** Content source */
   source: ContentSource;
   /** External URL (e.g., original Notion page, Telegram message) */
@@ -85,6 +87,8 @@ export interface ArticleMetadata {
   excerpt?: string;
   /** Whether the article is featured */
   featured?: boolean;
+  /** Degree to which AI assisted with the article */
+  aiInvolvement?: '未使用' | '辅助润色' | '协作创作' | '主要生成';
 }
 
 /**

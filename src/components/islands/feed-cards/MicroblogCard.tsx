@@ -1,5 +1,7 @@
-import { createSignal, onMount, Show, For, type JSX } from 'solid-js';
+import { createSignal, onCleanup, onMount, Show, For, type JSX } from 'solid-js';
+import { isServer } from 'solid-js/web';
 import type { MicroblogFeedItem } from '../../../lib/types';
+import Lightbox from '../Lightbox';
 import SourceBadge from '../SourceBadge';
 import SmartImage from '../SmartImage';
 import { formatTime } from './formatDate';
@@ -90,6 +92,8 @@ function getPhotoItems(item: MicroblogFeedItem): PhotoItem[] {
 export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
   const item = () => props.item;
   const [expanded, setExpanded] = createSignal(false);
+  const [lightboxOpen, setLightboxOpen] = createSignal(false);
+  const [lightboxIndex, setLightboxIndex] = createSignal(0);
   const [contentElement, setContentElement] = createSignal<HTMLDivElement>();
   const photos = () => getPhotoItems(item());
   const content = () =>
@@ -103,14 +107,37 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
     }
   };
   const [naturalHeight, setNaturalHeight] = createSignal(0);
-  const collapsedHeight = () => 350;
-  const isOversized = () => naturalHeight() > 350;
+  const collapsedHeight = () => 300;
+  const isOversized = () => naturalHeight() > collapsedHeight();
 
   onMount(() => {
     const element = contentElement();
     if (!element) return;
     setNaturalHeight(element.scrollHeight);
   });
+
+  onCleanup(() => {
+    if (!isServer) document.body.style.overflow = '';
+  });
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+    if (!isServer) document.body.style.overflow = 'hidden';
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    if (!isServer) document.body.style.overflow = '';
+  };
+
+  const goToPrevious = () => {
+    setLightboxIndex((index) => (index > 0 ? index - 1 : photos().length - 1));
+  };
+
+  const goToNext = () => {
+    setLightboxIndex((index) => (index < photos().length - 1 ? index + 1 : 0));
+  };
 
   return (
     <div class="py-4">
@@ -159,16 +186,23 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
         <Show when={photos().length >= 1}>
           <div class="mt-3 flex gap-1">
             <For each={photos().slice(0, 3)}>
-              {(photo) => (
-                <SmartImage
-                  src={photo.thumbnail}
-                  alt={photo.alt}
-                  class="rounded"
-                  naturalSizing={photos().length === 1}
-                  width={photo.width}
-                  height={photo.height}
-                  classList={{ 'max-w-xs': photos().length === 1, 'w-24 h-24': photos().length > 1 }}
-                />
+              {(photo, index) => (
+                <button
+                  type="button"
+                  class="block cursor-zoom-in border-0 bg-transparent p-0"
+                  aria-label={`查看图片 ${index() + 1}，共 ${photos().length} 张`}
+                  onClick={() => openLightbox(index())}
+                >
+                  <SmartImage
+                    src={photo.thumbnail}
+                    alt={photo.alt}
+                    class="rounded"
+                    naturalSizing={photos().length === 1}
+                    width={photo.width}
+                    height={photo.height}
+                    classList={{ 'max-w-xs': photos().length === 1, 'w-24 h-24': photos().length > 1 }}
+                  />
+                </button>
               )}
             </For>
           </div>
@@ -191,6 +225,14 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
           <span>{item().metadata!.replies} 评论</span>
         </Show>
       </div>
+      <Lightbox
+        open={lightboxOpen()}
+        photos={photos()}
+        index={lightboxIndex()}
+        onClose={closeLightbox}
+        onPrevious={goToPrevious}
+        onNext={goToNext}
+      />
     </div>
   );
 }

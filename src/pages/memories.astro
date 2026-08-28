@@ -31,7 +31,13 @@ for (const [year, photos] of Object.entries(photoGroups)) {
   <MemoriesGallery client:load photoGroups={serializedGroups} />
 
   <!-- Comments -->
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+  <div class="page-shell memories-discussion">
     <Comments client:load mapping="specific" term="memories" />
   </div>
 </Layout>
+
+<style>
+  .memories-discussion {
+    padding-top: 0;
+  }
+</style>

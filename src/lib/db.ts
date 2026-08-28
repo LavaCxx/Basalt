@@ -74,6 +74,7 @@ function rowToFeedItem(row: any): FeedItem {
     title: row.title || undefined,
     content: row.content || '',
     date: new Date(row.date),
+    updatedDate: row.source_updated_at ? new Date(row.source_updated_at) : undefined,
     url: row.url || undefined,
     image: row.image || undefined,
     metadata,

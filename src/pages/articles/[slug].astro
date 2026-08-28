@@ -14,6 +14,8 @@ import TableOfContents from '../../components/islands/TableOfContents';
 import Comments from '../../components/islands/Comments';
 import Webmentions from '../../components/islands/Webmentions';
 import SmartImage from '../../components/islands/SmartImage';
+import RisoMusicPlayer from '../../components/islands/RisoMusicPlayer';
+import { parseMusicEmbeds } from '../../lib/utils/parse-music-embeds';
 
 // Initialize D1 binding from Cloudflare runtime env
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
@@ -25,27 +27,38 @@ const { slug } = Astro.params;
 const article = await getArticleBySlug(slug as string);
 
 if (!article) {
-  return Astro.rewrite('/404');
+  return Astro.redirect('/404');
 }
 
-const { content, date, image, metadata } = article;
+const { content, date, updatedDate, image, metadata } = article;
 const title = article.title || 'Untitled';
 const tags = (metadata as any)?.tags || [];
 const readingTime = (metadata as any)?.readingTime || 5;
+const aiInvolvement = (metadata as any)?.aiInvolvement;
+const showAiDisclosure = aiInvolvement && aiInvolvement !== '未使用';
 const canonicalUrl = `https://blog.lavac.cc/articles/${slug}`;
 const publishedDate = date instanceof Date ? date : new Date(date);
+const modifiedDate = updatedDate
+  ? (updatedDate instanceof Date ? updatedDate : new Date(updatedDate))
+  : undefined;
+const formatArticleDate = (value: Date) => value.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
 const articles = await getArticles();
 const currentArticleIndex = articles.findIndex((item) =>
   item.id === article.id || item.url?.split('/').pop() === slug
 );
 const previousArticle = currentArticleIndex >= 0 ? articles[currentArticleIndex + 1] : undefined;
 const nextArticle = currentArticleIndex > 0 ? articles[currentArticleIndex - 1] : undefined;
+const contentBlocks = parseMusicEmbeds(content);
 ---
 
 <Layout title={title} description={(metadata as any)?.excerpt || title} canonical={canonicalUrl}>
-  <div class="article-layout">
+  <div class="article-layout page-shell">
     {/* Main content */}
-    <article class="article-page h-entry">
+    <article class="article-page page-reading-column h-entry">
       <data class="u-url" value={canonicalUrl}></data>
       <a class="p-author h-card" href="https://blog.lavac.cc" hidden>
         <data class="p-name" value="LavaC"></data>
@@ -57,41 +70,67 @@ const nextArticle = currentArticleIndex > 0 ? articles[currentArticleIndex - 1] 
           <a href="/">文章 / {publishedDate.getFullYear()}</a>
           <span>约 {readingTime} 分钟</span>
         </div>
+
+        {image && (
+          <figure class="article-cover">
+            <SmartImage src={image} alt={title} loading="eager" class="article-cover-image" client:load />
+          </figure>
+        )}
+
         <h1 class="article-title p-name">{title}</h1>
         {(metadata as any)?.excerpt && (
           <p class="article-excerpt">{(metadata as any).excerpt}</p>
         )}
         <div class="article-meta">
-          <time class="dt-published" datetime={publishedDate.toISOString()}>
-            {publishedDate.toLocaleDateString('zh-CN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </time>
+          {modifiedDate ? (
+            <details class="article-date-details">
+              <summary>
+                <span>最后编辑于</span>
+                <time class="dt-updated" datetime={modifiedDate.toISOString()}>{formatArticleDate(modifiedDate)}</time>
+                <svg class="article-date-chevron" viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="m4 6 4 4 4-4" />
+                </svg>
+              </summary>
+              <div class="article-date-popover">
+                首次发布于
+                <time class="dt-published" datetime={publishedDate.toISOString()}>{formatArticleDate(publishedDate)}</time>
+              </div>
+            </details>
+          ) : (
+            <span class="article-date">
+              发布于 <time class="dt-published" datetime={publishedDate.toISOString()}>{formatArticleDate(publishedDate)}</time>
+            </span>
+          )}
           {tags.length > 0 && (
             <div class="article-tags">
               {tags.map((tag: string) => (
-                <span class="article-tag">{tag}</span>
+                <span class="article-tag" aria-label={`标签：${tag}`}>
+                  <span class="article-tag-prefix" aria-hidden="true">#</span>{tag}
+                </span>
               ))}
             </div>
           )}
+          {showAiDisclosure && (
+            <span class="article-ai-disclosure">AI 参与：{aiInvolvement}</span>
+          )}
         </div>
       </header>
-
-      {/* Cover Image */}
-      {image && (
-        <figure class="article-cover">
-          <SmartImage src={image} alt={title} loading="eager" class="rounded-md w-full aspect-video" client:load />
-        </figure>
-      )}
 
       <div class="article-entry-rule" aria-hidden="true"></div>
 
       {/* Content */}
       <div class="article-content prose-basalt e-content">
         <ArticleEnhancements client:only="solid-js" />
-        <div class="article-content-html" set:html={content} />
+        {contentBlocks.map((block) => block.type === 'music' ? (
+          <RisoMusicPlayer
+            type={block.musicType}
+            id={block.id}
+            variant="article"
+            client:visible
+          />
+        ) : (
+          <div class="article-content-html" set:html={block.html} />
+        ))}
       </div>
 
       {/* Footer */}
@@ -134,20 +173,14 @@ const nextArticle = currentArticleIndex > 0 ? articles[currentArticleIndex - 1] 
     display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
-    max-width: 72rem;
-    margin: 0 auto;
-    padding: 3rem 1.5rem 6rem;
   }
 
   @media (min-width: 1280px) {
     .article-layout {
-      grid-template-columns: 1fr 220px;
-      padding: 4rem 2rem 6rem;
+      grid-template-columns: minmax(0, 42rem) 13rem;
+      justify-content: center;
+      gap: 3.5rem;
     }
-  }
-
-  .article-page {
-    max-width: 42rem;
   }
 
   /* Sidebar */
@@ -163,7 +196,7 @@ const nextArticle = currentArticleIndex > 0 ? articles[currentArticleIndex - 1] 
 
   /* Header */
   .article-header {
-    margin-bottom: 2.25rem;
+    margin-bottom: 1.75rem;
   }
 
   .article-path {
@@ -172,7 +205,7 @@ const nextArticle = currentArticleIndex > 0 ? articles[currentArticleIndex - 1] 
     justify-content: space-between;
     gap: 1rem;
     padding-bottom: 0.75rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     border-bottom: 1px solid var(--color-border);
     color: var(--color-text-muted);
     font-family: var(--font-sans);
@@ -197,8 +230,72 @@ const nextArticle = currentArticleIndex > 0 ? articles[currentArticleIndex - 1] 
     gap: 0.75rem;
     font-family: var(--font-sans);
     font-size: 0.8125rem;
-    color: var(--color-text-muted);
-    margin-top: 1.25rem;
+    color: var(--color-text-secondary);
+    margin-top: 1rem;
+  }
+
+  .article-date-details {
+    position: relative;
+  }
+
+  .article-date-details summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 2rem;
+    margin: -0.35rem 0 -0.35rem -0.35rem;
+    padding: 0.2rem 0.35rem;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    list-style: none;
+    transition: color 160ms ease, background-color 160ms ease, transform 120ms ease;
+  }
+
+  .article-date-details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .article-date-details summary:hover,
+  .article-date-details summary:focus-visible {
+    color: var(--color-text-primary);
+    background: var(--color-background-alt);
+  }
+
+  .article-date-details summary:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 0.15rem;
+  }
+
+  .article-date-details summary:active {
+    transform: translateY(1px);
+  }
+
+  .article-date-chevron {
+    width: 0.8rem;
+    height: 0.8rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    transition: transform 160ms ease;
+  }
+
+  .article-date-details[open] .article-date-chevron {
+    transform: rotate(180deg);
+  }
+
+  .article-date-popover {
+    position: absolute;
+    top: calc(100% + 0.45rem);
+    left: 0;
+    z-index: 10;
+    width: max-content;
+    max-width: min(18rem, calc(100vw - 3rem));
+    padding: 0.6rem 0.75rem;
+    color: var(--color-text-secondary);
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 0.4rem;
+    box-shadow: 0 0.55rem 1.5rem rgba(0, 0, 0, 0.08);
   }
 
   .article-tags {
@@ -207,24 +304,40 @@ const nextArticle = currentArticleIndex > 0 ? articles[currentArticleIndex - 1] 
     gap: 0.3rem;
   }
 
-  .article-tag {
-    font-family: var(--font-sans);
-    font-size: 0.6875rem;
-    font-weight: 600;
-    line-height: 1.25;
+  .article-ai-disclosure {
     color: var(--color-text-muted);
-    background: transparent;
-    padding: 0.125rem 0.4rem;
-    border-radius: 0.25rem;
-    border: 1px solid var(--color-border);
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .article-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.12em;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.025em;
+    line-height: 1.35;
+    white-space: nowrap;
+    color: #256b4d;
+    background: rgba(39, 133, 91, 0.09);
+    padding: 0.18rem 0.55rem 0.2rem 0.48rem;
+    border-radius: 999px;
+    border: 1px solid rgba(39, 133, 91, 0.22);
     box-shadow: none;
+  }
+
+  .article-tag-prefix {
+    font-weight: 700;
+    opacity: 0.72;
   }
 
   .article-title {
     font-family: var(--font-sans);
-    font-size: 2rem;
-    font-weight: 500;
-    line-height: 1.25;
+    font-size: 2.25rem;
+    font-weight: 600;
+    line-height: 1.16;
     color: var(--color-text-primary);
     letter-spacing: -0.02em;
     margin: 0;
@@ -232,13 +345,13 @@ const nextArticle = currentArticleIndex > 0 ? articles[currentArticleIndex - 1] 
 
   @media (min-width: 768px) {
     .article-title {
-      font-size: 2.5rem;
+      font-size: 2.875rem;
     }
   }
 
   @media (min-width: 1024px) {
     .article-title {
-      font-size: 2.875rem;
+      font-size: 3.25rem;
     }
   }
 
@@ -254,12 +367,21 @@ const nextArticle = currentArticleIndex > 0 ? articles[currentArticleIndex - 1] 
   /* Cover */
   .article-cover {
     margin: 0 0 2rem;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
   }
 
-  .article-cover img {
+  :global(.article-cover-image.smart-image) {
     width: 100%;
-    height: auto;
-    border-radius: 0.375rem;
+    aspect-ratio: 2.15 / 1;
+    border-radius: 0;
+  }
+
+  @media (max-width: 640px) {
+    :global(.article-cover-image.smart-image) {
+      aspect-ratio: 16 / 9;
+    }
   }
 
   .article-entry-rule {
@@ -377,9 +499,28 @@ const nextArticle = currentArticleIndex > 0 ? articles[currentArticleIndex - 1] 
   }
 
   :global(html.riso) .article-tag {
-    color: #42604f;
-    background: rgba(255, 255, 255, 0.24);
-    border-color: rgba(39, 133, 91, 0.28);
+    color: #285f43;
+    background: rgba(63, 154, 103, 0.18);
+    border-color: rgba(39, 133, 91, 0.38);
     box-shadow: none;
+  }
+
+  :global(html.riso) .article-cover {
+    border-color: var(--riso-border-ink);
+    box-shadow: var(--riso-offset-shadow);
+  }
+
+  :global(html.riso) .article-date-details summary:hover,
+  :global(html.riso) .article-date-details summary:focus-visible,
+  :global(html.riso) .article-date-popover {
+    background: var(--riso-standard-surface);
+    border-color: var(--riso-border-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .article-date-details summary,
+    .article-date-chevron {
+      transition: none;
+    }
   }
 </style>

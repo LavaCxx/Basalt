@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import OneBitLab from '../components/islands/OneBitLab';
 import RisoPortraitLab from '../components/islands/RisoPortraitLab';
 import EastwardMenuLab from '../components/islands/EastwardMenuLab';
+import RisoMusicPlayer from '../components/islands/RisoMusicPlayer';
 ---
 
 <Layout title="Lab" description="网页视觉实验：1-bit 抖动与 RISO 插画风格">
@@ -30,7 +31,6 @@ import EastwardMenuLab from '../components/islands/EastwardMenuLab';
             <div class="floating-header-shell">
               <a class="floating-header-brand" href="#floating-header-title" aria-label="返回首页"><span aria-hidden="true">L</span><b>LavaC's Stash</b></a>
               <nav aria-label="Light 浮动导航示例"><a class="is-current" href="#floating-header-title">首页</a><a href="#floating-header-title">归档</a><a href="#floating-header-title">相册</a><a href="#floating-header-title">友链</a><a href="#floating-header-title">关于</a></nav>
-              <button type="button" aria-label="切换主题"><span aria-hidden="true">◐</span></button>
               <span class="floating-header-menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
             </div>
             <div class="floating-header-content"><small>数字花园 · 内容聚合 · 生活证据</small><h3>你好，我是 LavaC。</h3><p>文章、随手记、照片，以及最近在看在玩的东西。</p><div aria-hidden="true"><i></i><i></i></div></div>
@@ -44,7 +44,6 @@ import EastwardMenuLab from '../components/islands/EastwardMenuLab';
             <div class="floating-header-shell">
               <a class="floating-header-brand" href="#floating-header-title" aria-label="返回首页"><span aria-hidden="true">L</span><b>LavaC's Stash</b></a>
               <nav aria-label="RISO 浮动导航示例"><a class="is-current" href="#floating-header-title">首页</a><a href="#floating-header-title">归档</a><a href="#floating-header-title">相册</a><a href="#floating-header-title">友链</a><a href="#floating-header-title">关于</a></nav>
-              <button type="button" aria-label="切换主题"><span aria-hidden="true">◐</span></button>
               <span class="floating-header-menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
             </div>
             <div class="floating-header-content"><small>数字花园 · 内容聚合 · 生活证据</small><h3>你好，我是 LavaC。</h3><p>网点留在纸面边缘，导航文字本身保持清楚稳定。</p><div aria-hidden="true"><i></i><i></i></div></div>
@@ -53,7 +52,7 @@ import EastwardMenuLab from '../components/islands/EastwardMenuLab';
         </article>
       </div>
 
-      <div class="blog-diff-notes"><span><b>宽度</b> 桌面端最大 820px</span><span><b>位置</b> 顶部保留 14px 呼吸区</span><span><b>形状</b> 14px 圆角，不做完整胶囊</span><span><b>Footer</b> 去掉铺满背景与顶边框，只保留居中文字</span></div>
+      <div class="blog-diff-notes"><span><b>宽度</b> 随内容收缩，桌面端不铺满</span><span><b>位置</b> 顶部保留 14px 呼吸区</span><span><b>导航</b> 只保留身份与页面入口，不承载主题切换</span><span><b>Footer</b> 去掉铺满背景与顶边框，只保留居中文字</span></div>
     </section>
 
     <section class="lab-section blog-diff" aria-labelledby="blog-diff-title">
@@ -548,6 +547,18 @@ import EastwardMenuLab from '../components/islands/EastwardMenuLab';
           </article>
         </div>
       </div>
+    </section>
+
+    <section class="lab-section riso-music-lab" aria-labelledby="riso-music-lab-title">
+      <div class="blog-diff-heading">
+        <div>
+          <p class="blog-diff-kicker">Audio island · static fixture</p>
+          <h2 id="riso-music-lab-title">RISO Music Player</h2>
+        </div>
+        <p>先隔离验证播放器本体：原生音频、可拖动进度、音量与播放目录。网易云解析会在交互和视觉确认后接入。</p>
+      </div>
+      <RisoMusicPlayer client:load />
+      <p class="riso-music-note">实验页通过同源接口读取网易云歌单；公共服务不可用时会自动切回 SoundHelix 测试音频。</p>
     </section>
 
     <section class="lab-section" aria-labelledby="onebit-lab-title">
@@ -2211,14 +2222,13 @@ import EastwardMenuLab from '../components/islands/EastwardMenuLab';
 .floating-header-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .floating-header-demo { overflow: hidden; border: 1px solid var(--color-border); border-radius: 0.75rem; background: var(--color-background); }
 .floating-header-stage { min-height: 25rem; padding: 0.9rem 0.75rem 1.3rem; background: radial-gradient(rgba(24,24,24,.035) .7px, transparent .8px), linear-gradient(180deg, var(--color-background-alt), var(--color-background)); background-size: 8px 8px, auto; }
-.floating-header-shell { position: relative; z-index: 1; display: flex; align-items: center; width: min(100%, 51.25rem); min-height: 3.25rem; margin: 0 auto; padding: .3rem .4rem .3rem .55rem; border: 1px solid color-mix(in srgb, var(--color-border) 86%, var(--color-text-muted)); border-radius: .875rem; background: color-mix(in srgb, var(--color-background) 88%, transparent); box-shadow: 0 7px 22px rgba(20,20,20,.075), 0 1px 2px rgba(20,20,20,.06); backdrop-filter: blur(12px); }
+.floating-header-shell { position: relative; z-index: 1; display: flex; align-items: center; width: fit-content; max-width: 100%; min-height: 3.25rem; margin: 0 auto; padding: .3rem .55rem; border: 1px solid color-mix(in srgb, var(--color-border) 86%, var(--color-text-muted)); border-radius: .875rem; background: color-mix(in srgb, var(--color-background) 88%, transparent); box-shadow: 0 7px 22px rgba(20,20,20,.075), 0 1px 2px rgba(20,20,20,.06); backdrop-filter: blur(12px); }
 .floating-header-brand { display: flex; align-items: center; gap: .45rem; color: var(--color-text-primary); text-decoration: none; white-space: nowrap; }
 .floating-header-brand span { display: grid; place-items: center; width: 1.65rem; height: 1.65rem; border-radius: 50%; color: var(--color-background); background: var(--color-text-primary); font-size: .72rem; font-weight: 750; }
 .floating-header-brand b { font-size: .7rem; }
 .floating-header-shell nav { display: flex; align-items: center; gap: .05rem; margin-left: auto; }
 .floating-header-shell nav a { padding: .55rem .52rem; border-radius: .5rem; color: var(--color-text-secondary); font-size: .64rem; font-weight: 650; text-decoration: none; }
 .floating-header-shell nav a.is-current { color: var(--color-background); background: var(--color-text-primary); }
-.floating-header-shell button { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; margin-left: .15rem; padding: 0; border: 0; border-left: 1px solid var(--color-border); border-radius: 0; color: var(--color-text-secondary); background: transparent; cursor: pointer; }
 .floating-header-menu-icon { display: none; }
 .floating-header-content { padding: 5rem 1.1rem .8rem; }
 .floating-header-content small { color: var(--color-text-muted); font-size: .62rem; letter-spacing: .1em; }
@@ -2236,8 +2246,8 @@ import EastwardMenuLab from '../components/islands/EastwardMenuLab';
 .floating-header-demo-riso .floating-header-shell { border-color: #27855b; background: rgba(246,251,240,.82); box-shadow: 4px 3px 0 rgba(63,154,103,.22), -2px 5px 0 rgba(24,60,44,.1); }
 .floating-header-demo-riso .floating-header-brand, .floating-header-demo-riso .floating-header-content h3 { color: #173227; }
 .floating-header-demo-riso .floating-header-brand span, .floating-header-demo-riso .floating-header-shell nav a.is-current { color: #f2f8e9; background: rgba(23,133,91,.92); }
-.floating-header-demo-riso .floating-header-shell nav a, .floating-header-demo-riso .floating-header-shell button, .floating-header-demo-riso .floating-header-content p { color: #42604f; }
-.floating-header-demo-riso .floating-header-shell button, .floating-header-demo-riso .floating-header-content > div { border-color: rgba(39,133,91,.28); }
+.floating-header-demo-riso .floating-header-shell nav a, .floating-header-demo-riso .floating-header-content p { color: #42604f; }
+.floating-header-demo-riso .floating-header-content > div { border-color: rgba(39,133,91,.28); }
 .floating-header-demo-riso .floating-header-content small { color: #287b55; }
 .floating-header-demo-riso .floating-header-content h3 { text-shadow: 2px 2px 0 rgba(63,154,103,.26), -2px 2px 0 rgba(24,60,44,.14); }
 .floating-header-demo-riso .floating-header-content > div i { background: rgba(39,133,91,.18); }
@@ -2539,7 +2549,8 @@ import EastwardMenuLab from '../components/islands/EastwardMenuLab';
   .article-structure-grid { grid-template-columns: 1fr; }
   .mobile-menu-demo-grid { grid-template-columns: 1fr; }
   .floating-header-grid { grid-template-columns: 1fr; }
-  .floating-header-shell nav, .floating-header-shell button { display: none; }
+  .floating-header-shell { width: 100%; }
+  .floating-header-shell nav { display: none; }
   .floating-header-menu-icon { display: grid; gap: .22rem; width: 2.75rem; height: 2.75rem; margin-left: auto; place-content: center; }
   .floating-header-menu-icon i { display: block; width: 1.1rem; height: 1.5px; border-radius: 999px; background: currentColor; }
   .floating-header-stage { min-height: 23rem; }

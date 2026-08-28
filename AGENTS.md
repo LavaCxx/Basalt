@@ -42,6 +42,8 @@ Never commit credentials, private Notion tokens, or database contents. Secrets m
 ## Agent Workflow
 
 For style-related features, pause before committing so the user can inspect the local result first. For other changes, test and build, then push directly to the repository to trigger the Cloudflare Pages deployment; afterward, the user will verify the result online.
+- Unless the user explicitly asks, do not start a development server (such as `pnpm dev` or the sync worker's dev process); the user will start and manage local development servers themselves.
+- Unless the user explicitly asks, do not launch Playwright or similar browser-automation or UI-verification tools. Leave interactive and visual verification to the user; continue to run non-interactive checks such as builds when required.
 - The `/lab` RISO UI section is the reference implementation. Its component recipe is:
   - **Paper:** gradient `#f2f8e9 → #e3f1d7`, fine dot overlay `rgba(18,58,41,0.075)` at `7px`, soft green edge, and dual offset plate shadows.
   - **Cards:** translucent white fill (`rgba(255,255,255,0.48)`), `#27855b` border, dual misregistration shadows (`rgba(63,154,103,0.22)` and `rgba(24,60,44,0.1)`), generous padding, and rounded paper corners.

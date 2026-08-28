@@ -26,8 +26,8 @@ export type { D1Database };
 export async function upsertItem(db: D1Database, item: FeedItem): Promise<void> {
   await db
     .prepare(
-      `INSERT INTO items (id, type, source, title, content, url, image, date, metadata_json, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `INSERT INTO items (id, type, source, title, content, url, image, date, source_updated_at, metadata_json, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
        ON CONFLICT(id) DO UPDATE SET
          type = excluded.type,
          source = excluded.source,
@@ -36,6 +36,7 @@ export async function upsertItem(db: D1Database, item: FeedItem): Promise<void> 
          url = excluded.url,
          image = excluded.image,
          date = excluded.date,
+         source_updated_at = excluded.source_updated_at,
          metadata_json = excluded.metadata_json,
          updated_at = datetime('now')`
     )
@@ -48,6 +49,9 @@ export async function upsertItem(db: D1Database, item: FeedItem): Promise<void> 
       item.url || null,
       item.image || null,
       item.date instanceof Date ? item.date.toISOString() : new Date(item.date).toISOString(),
+      item.updatedDate
+        ? (item.updatedDate instanceof Date ? item.updatedDate : new Date(item.updatedDate)).toISOString()
+        : null,
       item.metadata ? JSON.stringify(item.metadata) : null
     )
     .run();

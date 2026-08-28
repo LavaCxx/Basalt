@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Sidebar from '../components/ui/Sidebar.astro';
 import FeedList from '../components/islands/FeedList';
+import HomeSignalArt from '../components/islands/HomeSignalArt';
 import SmartImage from '../components/islands/SmartImage';
 import { getFeedPage, getFeedStats, getLatestArticle, initRuntime } from '../lib/api';
 import type { ArticleFeedItem, FeedPage, FeedStats } from '../lib/types';
@@ -36,17 +37,21 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
   month: 'long',
   day: 'numeric',
 });
+const currentYear = new Intl.DateTimeFormat('en', {
+  year: 'numeric',
+  timeZone: 'Asia/Shanghai',
+}).format(new Date());
 ---
 
 <Layout title="首页" description="数字花园与内容聚合站">
-  <div class="home-page">
+  <div class="home-page page-shell">
     <header class="home-intro">
-      <h1>你好，我是 LavaC。</h1>
-      <p class="home-intro-copy">
-        一个 95 后前端工作者；这里收集写下的文章、生活里的随手记、照片，以及最近在看在玩。
-        它们不是不同的数据源，而是同一段生活留下的证据。
-      </p>
-      <nav class="home-contact-links" aria-label="联系方式与站外链接">
+      <div class="home-intro-content">
+        <h1>你好，我是 LavaC。</h1>
+        <p class="home-intro-copy">
+          前端啊，请再爱我一次吧
+        </p>
+        <nav class="home-contact-links" aria-label="联系方式与站外链接">
         <a href="https://github.com/LavaCxx" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
         </a>
@@ -62,7 +67,17 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
         <a href="/drive" class="home-drive-link" aria-label="Voxel Drive" title="Voxel Drive">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 13l1.5-4.5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.5L21 13v5h-2a2 2 0 0 1-2-2H7a2 2 0 0 1-2 2H3v-5zm3.5-4L5.3 12h13.4l-1.2-3h-11zM6.5 15.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm11 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>
         </a>
-      </nav>
+        </nav>
+      </div>
+
+      <aside class="home-signal" aria-label="LavaC 数字花园">
+        <HomeSignalArt client:visible />
+        <div class="home-signal-meta" aria-hidden="true">
+          <span>lavac.cc</span>
+          <span>22.27° N · 113.57° E</span>
+        </div>
+        <div class="home-signal-index" aria-hidden="true">{currentYear}</div>
+      </aside>
     </header>
 
     <div class="home-content-layout">
@@ -70,7 +85,6 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
         {latestArticle && (
           <section class="latest-article" aria-labelledby="latest-article-heading">
             <div class="home-section-heading">
-              <span aria-hidden="true">01 / FEATURED</span>
               <h2 id="latest-article-heading">最新文章</h2>
             </div>
             <a
@@ -79,6 +93,7 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
             >
               {latestArticle.image && (
                 <SmartImage
+                  client:load
                   src={latestArticle.image}
                   alt={latestArticle.title || ''}
                   class="latest-article-image"
@@ -108,19 +123,15 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
       </main>
 
       <aside class="home-sidebar">
-        <Sidebar stats={stats} showSocialLinks={false} />
+        <div class="home-sidebar-sticky">
+          <Sidebar stats={stats} showSocialLinks={false} />
+        </div>
       </aside>
     </div>
   </div>
 </Layout>
 
 <style>
-  .home-page {
-    max-width: 80rem;
-    margin: 0 auto;
-    padding: 3rem 1.5rem 5rem;
-  }
-
   .home-content-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 18rem;
@@ -129,13 +140,28 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
   }
 
   .home-sidebar {
+    align-self: stretch;
+    padding-top: 2.5rem;
+  }
+
+  .home-sidebar-sticky {
     position: sticky;
     top: 5rem;
   }
 
+  .home-sidebar-sticky :global(aside > section:first-child) {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
   .home-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18rem;
+    gap: 2rem;
+    align-items: center;
+    min-height: 15.75rem;
     padding: 0;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2.75rem;
   }
 
   .home-intro h1 {
@@ -151,6 +177,63 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
     color: var(--color-text-secondary);
     font-size: 1rem;
     line-height: 1.75;
+  }
+
+  .home-signal {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    width: 100%;
+    min-height: 13.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--color-background) 74%, var(--color-background-alt));
+    box-shadow: 3px 3px 0 var(--color-border-subtle);
+  }
+
+  :global(.home-signal-canvas) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+
+  .home-signal-meta,
+  .home-signal-index {
+    position: absolute;
+    z-index: 1;
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .home-signal-meta {
+    right: 1rem;
+    bottom: 0.5rem;
+    left: 1rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .home-signal-meta span {
+    min-width: 0;
+  }
+
+  .home-signal-meta span:last-child {
+    max-width: 10.5rem;
+    margin-left: auto;
+    font-size: 0.6875rem;
+    line-height: 1.35;
+    text-align: right;
+  }
+
+  .home-signal-index {
+    top: 0.5rem;
+    right: 1rem;
   }
 
   .latest-article-read {
@@ -189,16 +272,8 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
     display: flex;
     align-items: baseline;
     justify-content: flex-start;
-    gap: 0.75rem;
     padding-bottom: 0.75rem;
     color: var(--color-text-secondary);
-  }
-
-  .home-section-heading > span {
-    color: var(--color-text-muted);
-    font-size: 0.6875rem;
-    font-weight: 650;
-    letter-spacing: 0.1em;
   }
 
   .home-section-heading h2 {
@@ -267,13 +342,13 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
   .home-contact-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0;
+    gap: 1.25rem;
     margin-top: 1.25rem;
   }
 
   .home-contact-links a {
     display: grid;
-    width: 2.75rem;
+    width: 1.125rem;
     height: 2.75rem;
     place-items: center;
     align-items: center;
@@ -361,6 +436,12 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
     text-shadow: var(--riso-title-shadow-h1);
   }
 
+  :global(.riso) .home-signal {
+    background: rgba(255, 255, 255, 0.36);
+    border-color: var(--riso-border-ink);
+    box-shadow: var(--riso-offset-shadow);
+  }
+
   :global(.riso) .latest-article-link {
     background: rgba(255, 255, 255, 0.42);
     border-color: var(--riso-border-ink);
@@ -385,10 +466,6 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
     background: rgba(63, 154, 103, 0.14);
     border-color: rgba(23, 133, 91, 0.78);
     box-shadow: 4px 3px 0 rgba(63, 154, 103, 0.2), -2px 5px 0 rgba(24, 60, 44, 0.12);
-  }
-
-  :global(.riso) .home-section-heading > span {
-    color: var(--riso-muted-ink);
   }
 
   :global(.riso) .latest-article-link--no-image .latest-article-body h3 {
@@ -448,12 +525,30 @@ const formatArticleDate = (date: Date) => date.toLocaleDateString('zh-CN', {
   @media (max-width: 640px) {
     .home-page { padding: 2rem 1rem 4rem; }
     .home-content-layout { grid-template-columns: 1fr; gap: 2.5rem; }
-    .home-sidebar { position: static; }
-    .home-intro { padding-top: 0; }
+    .home-sidebar { align-self: start; }
+    .home-sidebar-sticky { position: static; }
+    .home-intro { grid-template-columns: 1fr; gap: 1.5rem; min-height: 0; padding-top: 0; }
+    .home-signal { min-height: 10rem; }
+    .home-signal-meta span:last-child { display: none; }
     .latest-article-link { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 1rem; padding: 1rem; }
     .latest-article-link--no-image { grid-template-columns: minmax(0, 1fr); padding: 1.25rem; }
     .latest-article-image { height: 6.25rem; }
     .latest-article-body h3 { font-size: 1.0625rem; }
+  }
+
+  @media (min-width: 641px) and (max-width: 900px) {
+    .home-intro {
+      grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.72fr);
+      gap: 2rem;
+    }
+
+    .home-signal {
+      min-height: 12rem;
+    }
+
+    .home-signal-meta span:last-child {
+      display: none;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -41,7 +41,7 @@ export default function ArchiveList(props: ArchiveListProps) {
   const totalCount = () => groups().reduce((sum, g) => sum + g.count, 0);
 
   return (
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="page-shell">
       {/* Header */}
       <header class="mb-12">
         <h1 class="font-ui text-4xl font-bold text-text-primary mb-2">

@@ -73,6 +73,26 @@ body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
   line-height: 1.6;
+  text-autospace: normal;
+}
+
+/* ===== Shared Page Geometry ===== */
+.page-shell {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding: 3rem 1.5rem 6rem;
+}
+
+.page-reading-column {
+  width: 100%;
+  max-width: 42rem;
+}
+
+@media (min-width: 1280px) {
+  .page-shell {
+    padding: 4rem 2rem 6rem;
+  }
 }
 
 /* Dot Grid Background Pattern */
@@ -978,7 +998,6 @@ body {
 
 .prose-basalt a:hover {
   text-decoration-color: currentColor;
-  font-weight: 500;
 }
 
 /* Compact marker for links embedded in prose or shown as a URL. */
