@@ -97,17 +97,6 @@ export function useScrollSpy(options?: ScrollSpyOptions) {
       }
     });
 
-    // If no heading has passed the threshold yet, highlight the first one
-    if (!activeId) {
-      for (const heading of headings) {
-        const id = (heading as Element).id;
-        if (id && knownHeadingIds.has(id)) {
-          activeId = id;
-          break;
-        }
-      }
-    }
-
     setActiveIds(activeId ? new Set<string>([activeId]) : new Set<string>());
   }
 

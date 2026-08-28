@@ -79,18 +79,32 @@ export default function TableOfContents() {
       </button>
 
       <Show when={isExpanded()}>
-        <ul class="toc-list">
-          <For each={items()}>
-            {(item) => (
-              <li class={`toc-item toc-item-level-${item.level} ${activeIds().has(item.id) ? 'toc-item-active' : ''}`}>
-                <button class="toc-link" onClick={() => scrollToHeading(item.id)}>
-                  <span class="toc-dot" />
-                  <span class="toc-text">{item.text}</span>
-                </button>
-              </li>
-            )}
-          </For>
-        </ul>
+        <div class="toc-start-wrap">
+          <button
+            class={`toc-start ${activeIds().size === 0 ? 'toc-start-active' : ''}`}
+            onClick={() => scrollToHeading('article-start')}
+            aria-current={activeIds().size === 0 ? 'location' : undefined}
+          >
+            <svg class="toc-start-icon" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 13V3M4.5 6.5 8 3l3.5 3.5" />
+            </svg>
+            <span>开篇</span>
+          </button>
+        </div>
+        <Show when={items().length > 0}>
+          <ul class="toc-list">
+            <For each={items()}>
+              {(item) => (
+                <li class={`toc-item toc-item-level-${item.level} ${activeIds().has(item.id) ? 'toc-item-active' : ''}`}>
+                  <button class="toc-link" onClick={() => scrollToHeading(item.id)}>
+                    <span class="toc-dot" />
+                    <span class="toc-text">{item.text}</span>
+                  </button>
+                </li>
+              )}
+            </For>
+          </ul>
+        </Show>
       </Show>
     </nav>
   );

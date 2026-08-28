@@ -119,7 +119,7 @@ const contentBlocks = parseMusicEmbeds(content);
       <div class="article-entry-rule" aria-hidden="true"></div>
 
       {/* Content */}
-      <div class="article-content prose-basalt e-content">
+      <div id="article-start" class="article-content prose-basalt e-content">
         <ArticleEnhancements client:only="solid-js" />
         {contentBlocks.map((block) => block.type === 'music' ? (
           <RisoMusicPlayer
