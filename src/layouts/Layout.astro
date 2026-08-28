@@ -4,6 +4,7 @@ import { ClientRouter } from 'astro:transitions';
 import Footer from '../components/ui/Footer.astro';
 import Header from '../components/ui/Header.astro';
 import OneBitBackground from '../components/islands/OneBitBackground';
+import OneBitControls from '../components/islands/OneBitControls';
 
 interface Props {
   title?: string;
@@ -98,6 +99,7 @@ const fullTitle = title === "LavaC's Stash" ? title : `${title} | LavaC's Stash`
 
     <!-- Dynamic 1-bit background -->
     <OneBitBackground client:only="solid-js" />
+    {import.meta.env.DEV && <OneBitControls client:only="solid-js" />}
 
     <script is:inline data-astro-rerun>
       (() => {

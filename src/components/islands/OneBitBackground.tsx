@@ -1,21 +1,10 @@
-import { createSignal, onMount, onCleanup, Show } from "solid-js";
+import { createSignal, onMount, onCleanup } from "solid-js";
 // dither 逻辑已内联到渲染循环中以减少遍历次数
-import { persistentAtom } from "@nanostores/persistent";
 import { useStore } from "@nanostores/solid";
+import { opacityStore, thresholdStore, speedStore, resolutionStore } from "./onebit-settings";
 
 // ===== 持久化设置 =====
 // persistentAtom 默认以字符串存储，需要显式指定 number 编解码器
-const numStore = (key: string, def: number) =>
-  persistentAtom<number>(key, def, {
-    encode: String,
-    decode: Number,
-  });
-
-const opacityStore = numStore("bg-opacity", 0.03);
-const thresholdStore = numStore("bg-threshold", 140);
-const speedStore = numStore("bg-speed", 0.15);
-const resStore = numStore("bg-resolution", 1200);
-
 export default function OneBitBackground() {
   let canvasRef: HTMLCanvasElement | undefined;
   let timerId: ReturnType<typeof setTimeout> | 0 = 0;
@@ -25,10 +14,9 @@ export default function OneBitBackground() {
   const opacity = useStore(opacityStore);
   const threshold = useStore(thresholdStore);
   const speed = useStore(speedStore);
-  const resolution = useStore(resStore);
+  const resolution = useStore(resolutionStore);
 
-  const [panelOpen, setPanelOpen] = createSignal(false);
-  const [fps, setFps] = createSignal(0);
+  const [, setFps] = createSignal(0);
 
   onMount(() => {
     const canvas = canvasRef!;
@@ -42,7 +30,7 @@ export default function OneBitBackground() {
 
     const resize = () => {
       // 双重限制：不超过用户设置、屏幕宽度、以及 1200 硬上限
-      w = Math.min(resolution(), window.screen.width, 1200);
+        w = Math.min(resolution(), window.screen.width, 1200);
       h = Math.round((w * window.innerHeight) / window.innerWidth);
       canvas.width = w;
       canvas.height = h;
@@ -154,48 +142,6 @@ export default function OneBitBackground() {
   return (
     <>
       <canvas ref={canvasRef} class="onebit-bg-canvas" style={{ opacity: opacity() }} aria-hidden="true" />
-
-      {/* 折叠控制面板 */}
-      <div class="onebit-panel">
-        <Show when={panelOpen()}>
-          <div class="onebit-panel-body">
-            <label class="onebit-row">
-              <span>不透明度</span>
-              <input type="range" min="0" max="0.3" step="0.01" value={opacity()}
-                onInput={(e) => opacityStore.set(+e.currentTarget.value)} />
-              <span class="onebit-val">{Math.round(opacity() * 100)}%</span>
-            </label>
-            <label class="onebit-row">
-              <span>阈值</span>
-              <input type="range" min="0" max="255" step="1" value={threshold()}
-                onInput={(e) => thresholdStore.set(+e.currentTarget.value)} />
-              <span class="onebit-val">{threshold()}</span>
-            </label>
-            <label class="onebit-row">
-              <span>速度</span>
-              <input type="range" min="0" max="1" step="0.05" value={speed()}
-                onInput={(e) => speedStore.set(+e.currentTarget.value)} />
-              <span class="onebit-val">{speed().toFixed(2)}x</span>
-            </label>
-            <label class="onebit-row">
-              <span>分辨率</span>
-              <input type="range" min="200" max="1200" step="100" value={resolution()}
-                onInput={(e) => resStore.set(+e.currentTarget.value)} />
-              <span class="onebit-val">{resolution()}px</span>
-            </label>
-            <button class="onebit-reset" onClick={() => {
-              opacityStore.set(0.03); thresholdStore.set(140);
-              speedStore.set(0.15); resStore.set(1200);
-            }}>重置默认</button>
-            <div class="onebit-fps">{fps()} FPS</div>
-          </div>
-       </Show>
-        <Show when={import.meta.env.DEV}>
-          <button class="onebit-toggle" onClick={() => setPanelOpen(!panelOpen())} aria-label="背景设置">
-            <span>▦</span>
-          </button>
-        </Show>
-      </div>
     </>
   );
 }
