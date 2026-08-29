@@ -65,7 +65,7 @@ export default function HomeSignalArt() {
       } else {
         sourceHeight = avatar.naturalWidth / targetRatio;
         const centeredY = (avatar.naturalHeight - sourceHeight) / 2;
-        sourceY = Math.min(avatar.naturalHeight - sourceHeight, centeredY + sourceHeight * 0.03);
+        sourceY = Math.max(0, centeredY - sourceHeight * 0.06);
       }
 
       sampleContext.drawImage(
