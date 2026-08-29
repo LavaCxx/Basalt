@@ -47,9 +47,9 @@ const currentYear = new Intl.DateTimeFormat('en', {
   <div class="home-page page-shell">
     <header class="home-intro">
       <div class="home-intro-content">
-        <h1>你好，我是 LavaC。</h1>
+        <h1>Hi，这里是LavaC</h1>
         <p class="home-intro-copy">
-          前端啊，请再爱我一次吧
+          INFP-T / 自娱自乐型人类 / 自认为是前端开发 / 不是二次元 / 一个好人
         </p>
         <nav class="home-contact-links" aria-label="联系方式与站外链接">
         <a href="https://github.com/LavaCxx" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">
@@ -156,7 +156,7 @@ const currentYear = new Intl.DateTimeFormat('en', {
 
   .home-intro {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 18rem;
+    grid-template-columns: minmax(0, 1fr) 22rem;
     gap: 2rem;
     align-items: center;
     min-height: 15.75rem;
@@ -352,12 +352,11 @@ const currentYear = new Intl.DateTimeFormat('en', {
     height: 2.75rem;
     place-items: center;
     align-items: center;
-    border: 1px solid transparent;
-    border-radius: 0.5rem;
+    border: 0;
     background: transparent;
     color: var(--color-text-secondary);
     text-decoration: none;
-    transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+    transition: color 160ms ease;
   }
 
   .home-contact-links svg {
@@ -376,8 +375,6 @@ const currentYear = new Intl.DateTimeFormat('en', {
   }
 
   .home-contact-links a:hover {
-    border-color: var(--color-border);
-    background: color-mix(in srgb, var(--color-background) 68%, var(--color-background-alt));
     color: var(--color-text-primary);
   }
 

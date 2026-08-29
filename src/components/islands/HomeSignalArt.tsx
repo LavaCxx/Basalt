@@ -49,17 +49,31 @@ export default function HomeSignalArt() {
       sampleCanvas.width = width;
       sampleCanvas.height = height;
 
-      const sourceRatio = width / height;
-      const sourceWidth = avatar.naturalWidth;
-      const sourceHeight = sourceWidth / sourceRatio;
-      const sourceY = Math.max(0, Math.min(avatar.naturalHeight - sourceHeight, avatar.naturalHeight * 0.12));
+      sampleContext.fillStyle = '#fff';
+      sampleContext.fillRect(0, 0, width, height);
+
+      const sourceRatio = avatar.naturalWidth / avatar.naturalHeight;
+      const targetRatio = width / height;
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = avatar.naturalWidth;
+      let sourceHeight = avatar.naturalHeight;
+
+      if (sourceRatio > targetRatio) {
+        sourceWidth = avatar.naturalHeight * targetRatio;
+        sourceX = (avatar.naturalWidth - sourceWidth) / 2;
+      } else {
+        sourceHeight = avatar.naturalWidth / targetRatio;
+        const centeredY = (avatar.naturalHeight - sourceHeight) / 2;
+        sourceY = Math.min(avatar.naturalHeight - sourceHeight, centeredY + sourceHeight * 0.03);
+      }
 
       sampleContext.drawImage(
         avatar,
-        0,
+        sourceX,
         sourceY,
         sourceWidth,
-        Math.min(sourceHeight, avatar.naturalHeight),
+        sourceHeight,
         0,
         0,
         width,
