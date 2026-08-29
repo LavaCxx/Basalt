@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show, type JSX } from 'solid-js';
+import { createSignal, onCleanup, onMount, Show, type JSX } from 'solid-js';
 
 interface SmartImageProps {
   src?: string | null;
@@ -32,7 +32,25 @@ export default function SmartImage(props: SmartImageProps) {
   };
 
   onMount(() => {
+    if (!imageRef) return;
+
+    const handleLoad = () => {
+      setState('loaded');
+      props.onStateChange?.('loaded');
+    };
+    const handleError = () => {
+      setState('error');
+      props.onStateChange?.('error');
+    };
+
+    imageRef.addEventListener('load', handleLoad);
+    imageRef.addEventListener('error', handleError);
     syncImageState();
+
+    onCleanup(() => {
+      imageRef?.removeEventListener('load', handleLoad);
+      imageRef?.removeEventListener('error', handleError);
+    });
   });
 
   return (
@@ -98,14 +116,6 @@ export default function SmartImage(props: SmartImageProps) {
         width={props.width}
         height={props.height}
         style={props.src && state() !== 'error' ? undefined : 'display: none'}
-        onLoad={() => {
-          setState('loaded');
-          props.onStateChange?.('loaded');
-        }}
-        onError={() => {
-          setState('error');
-          props.onStateChange?.('error');
-        }}
         ref={(node) => {
           imageRef = node;
         }}
