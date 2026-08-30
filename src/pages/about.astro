@@ -7,14 +7,15 @@ import { getPageByPath, initRuntime } from '../lib/api';
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
 if (runtimeEnv) initRuntime(runtimeEnv);
 const aboutPage = await getPageByPath('/about');
+const pageTitle = aboutPage?.title || '关于';
 ---
 
-<Layout title="关于" description="LavaC 的自述">
+<Layout title={pageTitle} description="LavaC 的自述">
   <div class="about-layout page-shell">
     <article class="about-page page-reading-column">
       <header class="about-header">
         <h1 class="font-ui text-4xl font-bold text-text-primary">
-          关于
+          {pageTitle}
         </h1>
       </header>
 
