@@ -6,7 +6,7 @@
  * failures return empty results rather than substituting mock content.
  */
 
-import type { ArticleFeedItem, FeedItem, ArchiveGroup, CurrentItem, FeedPage, FeedStats } from '../types';
+import type { ArticleFeedItem, FeedItem, ArchiveGroup, CurrentItem, FeedPage, FeedStats, Friend } from '../types';
 import type { ManualGame, SteamSnapshot } from '../types';
 
 import {
@@ -23,6 +23,8 @@ import {
   queryCurrentGames,
   queryCurrentItems,
   querySteamSnapshot,
+  queryPageByPath,
+  queryFriends,
 } from '../db';
 
 // Re-export env utilities (still needed for Notion client used in sync worker)
@@ -132,6 +134,26 @@ export async function getArticleBySlug(slug: string): Promise<FeedItem | null> {
   } catch (error) {
     console.error(`Error fetching article ${slug}:`, error);
     return null;
+  }
+}
+
+export async function getPageByPath(path: string): Promise<FeedItem | null> {
+  if (!isDBAvailable()) return null;
+  try {
+    return await queryPageByPath(path);
+  } catch (error) {
+    console.error(`Error fetching page ${path}:`, error);
+    return null;
+  }
+}
+
+export async function getFriends(): Promise<Friend[]> {
+  if (!isDBAvailable()) return [];
+  try {
+    return await queryFriends();
+  } catch (error) {
+    console.error('Error fetching friends:', error);
+    return [];
   }
 }
 

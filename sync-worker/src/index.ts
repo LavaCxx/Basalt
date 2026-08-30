@@ -10,7 +10,7 @@
 
 import { setRuntimeEnv } from '../../src/lib/api/env';
 import { verifyBearerToken } from '../../src/lib/auth';
-import { syncNotionArticles, syncNotionPhotos, syncTelegram, syncDouban, syncNotionCurrent, syncSteam } from './sync';
+import { syncNotionArticles, syncNotionPhotos, syncTelegram, syncDouban, syncNotionCurrent, syncNotionFriends, syncSteam } from './sync';
 import { releaseSyncLock, tryAcquireSyncLock, type D1Database } from './db';
 
 export interface Env {
@@ -20,6 +20,7 @@ export interface Env {
   NOTION_ARTICLES_DATABASE_ID: string;
   NOTION_PHOTOS_DATABASE_ID: string;
   NOTION_CURRENT_DATABASE_ID?: string;
+  NOTION_FRIENDS_DATABASE_ID?: string;
   // Telegram (RSSHub)
   TELEGRAM_CHANNEL_USERNAME?: string;
   RSSHUB_INSTANCE?: string;
@@ -55,6 +56,9 @@ async function runSync(env: Env): Promise<Record<string, 'ok' | 'error'>> {
 
   if (env.NOTION_CURRENT_DATABASE_ID) {
     sources.push({ name: 'notion:current', fn: () => syncNotionCurrent(env.DB, envRecord) });
+  }
+  if (env.NOTION_FRIENDS_DATABASE_ID) {
+    sources.push({ name: 'notion:friends', fn: () => syncNotionFriends(env.DB, envRecord) });
   }
   if (env.TELEGRAM_CHANNEL_USERNAME) {
     sources.push({ name: 'telegram', fn: () => syncTelegram(env.DB, envRecord) });

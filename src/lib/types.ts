@@ -5,7 +5,9 @@
 /**
  * Feed item types supported by the aggregator
  */
-export type FeedItemType = 'article' | 'microblog' | 'media' | 'photo';
+export type FeedItemType = 'article' | 'page' | 'microblog' | 'media' | 'photo';
+
+export type PublicFeedItemType = Exclude<FeedItemType, 'page'>;
 
 /**
  * Content sources for the aggregator
@@ -39,6 +41,11 @@ export interface ArticleFeedItem extends FeedItemBase {
   metadata?: ArticleMetadata;
 }
 
+export interface PageFeedItem extends FeedItemBase {
+  type: 'page';
+  metadata?: ArticleMetadata;
+}
+
 export interface MicroblogFeedItem extends FeedItemBase {
   type: 'microblog';
   metadata?: MicroblogMetadata;
@@ -54,7 +61,25 @@ export interface PhotoFeedItem extends FeedItemBase {
   metadata?: PhotoMetadata;
 }
 
-export type FeedItem = ArticleFeedItem | MicroblogFeedItem | MediaFeedItem | PhotoFeedItem;
+export type FeedItem = ArticleFeedItem | PageFeedItem | MicroblogFeedItem | MediaFeedItem | PhotoFeedItem;
+
+export interface FriendLatestPost {
+  title: string;
+  url: string;
+  publishedAt?: Date;
+}
+
+export interface Friend {
+  id: string;
+  title: string;
+  url: string;
+  iconUrl?: string;
+  description?: string;
+  rssUrl?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  latestPost?: FriendLatestPost;
+}
 
 export interface FeedCursor {
   date: string;

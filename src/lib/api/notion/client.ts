@@ -31,3 +31,7 @@ export function getPhotosDatabaseId() {
 export function getCurrentDatabaseId() {
   return getEnv('NOTION_CURRENT_DATABASE_ID');
 }
+
+export function getFriendsDatabaseId() {
+  return getEnv('NOTION_FRIENDS_DATABASE_ID');
+}

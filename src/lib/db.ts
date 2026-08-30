@@ -5,7 +5,7 @@
  * instead of making real-time API calls to third-party sources.
  */
 
-import type { FeedItem, FeedItemType, ContentSource, ArchiveGroup, ArchiveItem, CurrentItem, ManualGame, SteamSnapshot, SteamStatus, FeedCursor, FeedPage, FeedStats } from './types';
+import type { FeedItem, FeedItemType, ContentSource, ArchiveGroup, ArchiveItem, CurrentItem, ManualGame, SteamSnapshot, SteamStatus, FeedCursor, FeedPage, FeedStats, Friend } from './types';
 
 // ============================================================
 // D1 binding access
@@ -113,6 +113,9 @@ export async function queryItems(options?: {
   const conditions: string[] = [];
 
   const types = options?.types;
+  if (!types || !types.includes('page')) {
+    conditions.push(`type != 'page'`);
+  }
   if (!types || types.includes('media')) {
     conditions.push(`NOT (type = 'media' AND source = 'notion')`);
   }
@@ -168,7 +171,7 @@ export async function queryFeedStats(): Promise<FeedStats> {
     .prepare(
       `SELECT type, COUNT(*) AS count
        FROM items
-       WHERE NOT (type = 'media' AND source = 'notion')
+       WHERE type != 'page' AND NOT (type = 'media' AND source = 'notion')
        GROUP BY type`
     )
     .all();
@@ -183,6 +186,47 @@ export async function queryFeedStats(): Promise<FeedStats> {
   }
 
   return stats;
+}
+
+/** Get a standalone Notion page by its normalized public path. */
+export async function queryPageByPath(path: string): Promise<FeedItem | null> {
+  const normalized = `/${path.trim().replace(/^\/+|\/+$/g, '')}`;
+  const row = await getDB()
+    .prepare(
+      `SELECT i.*, b.html, b.reading_time
+       FROM items i
+       LEFT JOIN article_bodies b ON i.id = b.item_id
+       WHERE i.type = 'page' AND i.url = ?
+       LIMIT 1`
+    )
+    .bind(normalized)
+    .first();
+  if (!row) return null;
+  const item = rowToFeedItem(row);
+  if (row.html) item.content = row.html;
+  return item;
+}
+
+export async function queryFriends(): Promise<Friend[]> {
+  const result = await getDB()
+    .prepare('SELECT * FROM friends ORDER BY source_created_at ASC, id ASC')
+    .all();
+
+  return result.results.map((row: any) => ({
+    id: row.id,
+    title: row.title,
+    url: row.url,
+    iconUrl: row.icon_url || undefined,
+    description: row.description || undefined,
+    rssUrl: row.rss_url || undefined,
+    createdAt: new Date(row.source_created_at),
+    updatedAt: new Date(row.source_updated_at),
+    latestPost: row.latest_post_title && row.latest_post_url ? {
+      title: row.latest_post_title,
+      url: row.latest_post_url,
+      publishedAt: row.latest_post_published_at ? new Date(row.latest_post_published_at) : undefined,
+    } : undefined,
+  }));
 }
 
 export function encodeFeedCursor(cursor: FeedCursor): string {

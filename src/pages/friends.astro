@@ -2,27 +2,18 @@
 import Layout from '../layouts/Layout.astro';
 import Comments from '../components/islands/Comments';
 import SmartImage from '../components/islands/SmartImage';
+import { getFriends, initRuntime } from '../lib/api';
 
-const friends = [
-  {
-    name: '5had0w',
-    url: 'https://www.5had0w.com/',
-    avatar: 'https://www.5had0w.com/assets/logo.png',
-    description: '一个游走在互联网边缘的影子，希望在这个世界留下一点痕迹。',
-  },
-  {
-    name: 'Niracler的博物志',
-    url: 'https://niracler.com/',
-    avatar: 'https://niracler.com/favicon.svg',
-    description: '长门大明神会梦到外星羊么？',
-  },
-  {
-    name: 'tedding',
-    url: 'https://tedding.dev/',
-  },
-];
+const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
+if (runtimeEnv) initRuntime(runtimeEnv);
+const friends = await getFriends();
 
 const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '');
+const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
 ---
 
 <Layout title="友链" description="朋友们的网站">
@@ -32,9 +23,10 @@ const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '')
       <p class="text-text-secondary">ALONE isn't always ALONE，</p>
     </header>
 
+    {friends.length > 0 ? (
     <div class="friend-grid">
       {friends.map((friend, index) => (
-        <a href={friend.url} target="_blank" rel="noopener noreferrer" class="friend-card">
+        <article class="friend-card">
           <svg class="friend-card-texture" viewBox="0 0 320 180" preserveAspectRatio="none" aria-hidden="true">
             <defs>
               <pattern id={`friend-dots-${index}`} width="5" height="5" patternUnits="userSpaceOnUse">
@@ -80,29 +72,40 @@ const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '')
             </span>
           </div>
           <div class="friend-card-header">
-            {friend.avatar ? (
+            {friend.iconUrl ? (
               <SmartImage
-                src={friend.avatar}
+                src={friend.iconUrl}
                 alt=""
                 class="rounded-full w-12 h-12 flex-shrink-0 object-cover"
                 width={48}
                 height={48}
                 client:visible
-              />
+              >
+                <span class="friend-avatar-inline-fallback" aria-hidden="true">{friend.title.charAt(0)}</span>
+              </SmartImage>
             ) : (
               <div class="friend-avatar-fallback" aria-hidden="true">
-                {friend.name.charAt(0)}
+                {friend.title.charAt(0)}
               </div>
             )}
             <div class="friend-card-title">
-              <h2>{friend.name}</h2>
+              <h2><a href={friend.url} target="_blank" rel="noopener noreferrer">{friend.title}</a></h2>
               <span>{getHostname(friend.url)}</span>
             </div>
           </div>
           <p class:list={['friend-card-description', { 'friend-card-description--fallback': !friend.description }]}>
             {friend.description || `访问 ${getHostname(friend.url)}`}
           </p>
-          <div class="friend-card-footer">
+          {friend.latestPost && (
+            <a class="friend-latest" href={friend.latestPost.url} target="_blank" rel="noopener noreferrer">
+              <span class="friend-latest-label">
+                最近更新
+                {friend.latestPost.publishedAt && <time datetime={friend.latestPost.publishedAt.toISOString()}>{formatLatestDate(friend.latestPost.publishedAt)}</time>}
+              </span>
+              <strong>{friend.latestPost.title}</strong>
+            </a>
+          )}
+          <a class="friend-card-footer" href={friend.url} target="_blank" rel="noopener noreferrer">
             <span>访问网站</span>
             <svg
               class="friend-card-arrow"
@@ -119,10 +122,16 @@ const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '')
               <polyline points="15 3 21 3 21 9" />
               <line x1="10" y1="14" x2="21" y2="3" />
             </svg>
-          </div>
-        </a>
+          </a>
+        </article>
       ))}
     </div>
+    ) : (
+      <div class="friend-empty">
+        <p>友链还在整理中。</p>
+        <span>稍后再来看看吧。</span>
+      </div>
+    )}
 
     <div class="mt-12 text-center">
       <p class="text-text-muted mb-4">想要交换友链？欢迎联系！</p>
@@ -161,7 +170,7 @@ const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '')
   .friend-card {
     position: relative;
     display: grid;
-    grid-template-rows: auto auto 1fr auto;
+    grid-template-rows: auto auto 1fr auto auto;
     min-height: 10rem;
     padding: 1rem 1.25rem 1.1rem;
     overflow: hidden;
@@ -206,7 +215,7 @@ const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '')
     box-shadow: 0 1px 2px rgba(20, 20, 20, 0.04);
   }
 
-  .friend-card:focus-visible {
+  .friend-card:focus-within {
     outline: 2px solid var(--color-text-primary);
     outline-offset: 3px;
   }
@@ -280,6 +289,21 @@ const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '')
     font-weight: 650;
   }
 
+  .friend-avatar-inline-fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--color-text-primary);
+    color: var(--color-background);
+    font-weight: 650;
+  }
+
+  .friend-card :global(.smart-image-loaded .friend-avatar-inline-fallback) {
+    display: none;
+  }
+
   .friend-card-title {
     min-width: 0;
   }
@@ -292,6 +316,16 @@ const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '')
     line-height: 1.3;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .friend-card-title h2 a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .friend-card-title h2 a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
   .friend-card-title span {
@@ -317,6 +351,48 @@ const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '')
     color: var(--color-text-muted);
   }
 
+  .friend-latest {
+    display: block;
+    min-width: 0;
+    margin-top: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--color-background-alt) 70%, transparent);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: background-color 180ms ease;
+  }
+
+  .friend-latest:hover {
+    background: color-mix(in srgb, var(--color-background-alt) 92%, transparent);
+  }
+
+  .friend-latest-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    color: var(--color-text-muted);
+    font-size: 0.625rem;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+  }
+
+  .friend-latest time {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+
+  .friend-latest strong {
+    display: block;
+    margin-top: 0.3rem;
+    overflow: hidden;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .friend-card-footer {
     display: flex;
     align-items: center;
@@ -328,6 +404,7 @@ const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '')
     font-size: 0.6875rem;
     font-weight: 650;
     letter-spacing: 0.06em;
+    text-decoration: none;
   }
 
   .friend-card-arrow {
@@ -359,6 +436,34 @@ const getHostname = (url: string) => new URL(url).hostname.replace(/^www\./, '')
 
   :global(html.riso) .friend-card-footer {
     border-color: var(--riso-border-ink);
+  }
+
+  :global(html.riso) .friend-latest {
+    background: rgba(63, 154, 103, 0.12);
+  }
+
+  :global(html.riso) .friend-latest:hover {
+    background: rgba(63, 154, 103, 0.2);
+  }
+
+  .friend-empty {
+    padding: 3rem 1.5rem;
+    border: 1px dashed var(--color-border);
+    border-radius: 0.75rem;
+    color: var(--color-text-muted);
+    text-align: center;
+  }
+
+  .friend-empty p {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
+  .friend-empty span {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.875rem;
   }
 
   :global(html.riso) .friend-card:hover {

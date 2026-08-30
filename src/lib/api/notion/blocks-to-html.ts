@@ -424,7 +424,7 @@ export async function blockToHtml(
       const hasColHeader = b.table.has_column_header;
       const hasRowHeader = b.table.has_row_header;
       const cls = `notion-table${hasColHeader ? ' has-col-header' : ''}${hasRowHeader ? ' has-row-header' : ''}`;
-      return `<table class="${cls}">${tableHtml}</table>`;
+      return `<div class="notion-table-wrap" role="region" aria-label="数据表格" tabindex="0"><table class="${cls}">${tableHtml}</table></div>`;
     }
 
     case 'table_row': {
@@ -459,7 +459,7 @@ export async function blockToHtml(
 export function richTextToHtml(richText: RichTextItemResponse[]): string {
   return richText
     .map((text) => {
-      let content = escapeHtml(text.plain_text);
+      let content = escapeHtml(text.plain_text).replace(/\r?\n/g, '<br />');
 
       if (text.annotations) {
         if (text.annotations.bold) content = `<strong>${content}</strong>`;

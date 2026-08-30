@@ -11,6 +11,16 @@ import { fetchBlockChildren, calculateReadingTime, type BlockRenderOptions } fro
 
 const aiInvolvementOptions = ['未使用', '辅助润色', '协作创作', '主要生成'] as const;
 
+export function getNotionContentType(props: NotionArticleProperties): 'article' | 'page' {
+  return props.类型?.select?.name === '页面' ? 'page' : 'article';
+}
+
+export function normalizeContentPath(path: string, type: 'article' | 'page'): string {
+  const normalized = path.trim().replace(/^\/+|\/+$/g, '');
+  if (type === 'page') return `/${normalized}`;
+  return `/articles/${normalized}`;
+}
+
 function getAiInvolvement(
   props: NotionArticleProperties
 ): ArticleMetadata['aiInvolvement'] {
@@ -53,16 +63,17 @@ export async function fetchArticles(options?: {
     const updatedDate = new Date((page as any).last_edited_time);
     const image = getCoverImage(props.封面?.files || props.Cover?.files);
     const slug = getPlainText(props.路径?.rich_text || props.Slug?.rich_text || props.slug?.rich_text) || page.id;
+    const type = getNotionContentType(props);
 
     return {
       id: page.id,
-      type: 'article' as const,
+      type,
       title,
       content: '',
       date,
       updatedDate,
       source: 'notion' as const,
-      url: `/articles/${slug}`,
+      url: normalizeContentPath(slug, type),
       image,
       metadata: { excerpt, tags, featured, aiInvolvement, readingTime: 5 } as ArticleMetadata,
     };
@@ -94,16 +105,17 @@ export async function fetchArticle(
     const image = getCoverImage(props.封面?.files || props.Cover?.files);
     const slug = getPlainText(props.路径?.rich_text || props.Slug?.rich_text || props.slug?.rich_text) || pageId;
     const content = await fetchBlockChildren(pageId, renderOptions);
+    const type = getNotionContentType(props);
 
     return {
       id: (page as any).id,
-      type: 'article',
+      type,
       title,
       content,
       date,
       updatedDate,
       source: 'notion',
-      url: `/articles/${slug}`,
+      url: normalizeContentPath(slug, type),
       image,
       metadata: { excerpt, tags, featured, aiInvolvement, readingTime: calculateReadingTime(content) },
     };

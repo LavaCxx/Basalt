@@ -25,6 +25,15 @@ export interface NotionArticleProperties {
   路径?: { rich_text: RichTextItemResponse[] };
   Slug?: { rich_text: RichTextItemResponse[] };
   slug?: { rich_text: RichTextItemResponse[] };
+  类型?: { select: { name: string } | null };
+}
+
+export interface NotionFriendProperties {
+  名称?: { title: RichTextItemResponse[] };
+  描述?: { rich_text: RichTextItemResponse[] };
+  博客地址?: { url: string | null };
+  头像地址?: { url: string | null };
+  RSS地址?: { url: string | null };
 }
 
 /**

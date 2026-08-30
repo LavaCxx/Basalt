@@ -4,6 +4,8 @@
  */
 
 import type { FeedItem } from '../../src/lib/types';
+import type { NotionFriend } from '../../src/lib/api/notion/friends';
+import type { LatestFriendPost } from './friend-rss';
 
 interface D1Database {
   prepare: (sql: string) => {
@@ -152,6 +154,87 @@ export async function deleteStaleItemsScoped(
 export function findStaleItemIds(existingIds: string[], currentIds: string[]): string[] {
   const currentIdSet = new Set(currentIds);
   return existingIds.filter((id) => !currentIdSet.has(id));
+}
+
+export interface FriendRssState {
+  rssUrl: string | null;
+  rssCheckedAt: string | null;
+  rssError: string | null;
+}
+
+export async function upsertFriend(db: D1Database, friend: NotionFriend): Promise<void> {
+  await db.prepare(
+    `INSERT INTO friends (
+       id, title, url, icon_url, description, rss_url,
+       source_created_at, source_updated_at, updated_at
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+     ON CONFLICT(id) DO UPDATE SET
+       title = excluded.title,
+       url = excluded.url,
+       icon_url = excluded.icon_url,
+       description = excluded.description,
+       latest_post_title = CASE WHEN friends.rss_url IS excluded.rss_url THEN friends.latest_post_title ELSE NULL END,
+       latest_post_url = CASE WHEN friends.rss_url IS excluded.rss_url THEN friends.latest_post_url ELSE NULL END,
+       latest_post_published_at = CASE WHEN friends.rss_url IS excluded.rss_url THEN friends.latest_post_published_at ELSE NULL END,
+       rss_checked_at = CASE WHEN friends.rss_url IS excluded.rss_url THEN friends.rss_checked_at ELSE NULL END,
+       rss_error = CASE WHEN friends.rss_url IS excluded.rss_url THEN friends.rss_error ELSE NULL END,
+       rss_url = excluded.rss_url,
+       source_created_at = excluded.source_created_at,
+       source_updated_at = excluded.source_updated_at,
+       updated_at = datetime('now')`
+  ).bind(
+    friend.id,
+    friend.title,
+    friend.url,
+    friend.iconUrl || null,
+    friend.description || null,
+    friend.rssUrl || null,
+    friend.createdAt.toISOString(),
+    friend.updatedAt.toISOString()
+  ).run();
+}
+
+export async function getFriendRssState(db: D1Database, id: string): Promise<FriendRssState | null> {
+  const row = await db.prepare('SELECT rss_url, rss_checked_at, rss_error FROM friends WHERE id = ?').bind(id).first();
+  return row ? {
+    rssUrl: row.rss_url ?? null,
+    rssCheckedAt: row.rss_checked_at ?? null,
+    rssError: row.rss_error ?? null,
+  } : null;
+}
+
+export async function updateFriendLatestPost(
+  db: D1Database,
+  id: string,
+  latestPost: LatestFriendPost | null
+): Promise<void> {
+  await db.prepare(
+    `UPDATE friends SET
+       latest_post_title = ?, latest_post_url = ?, latest_post_published_at = ?,
+       rss_checked_at = datetime('now'), rss_error = NULL, updated_at = datetime('now')
+     WHERE id = ?`
+  ).bind(
+    latestPost?.title || null,
+    latestPost?.url || null,
+    latestPost?.publishedAt || null,
+    id
+  ).run();
+}
+
+export async function recordFriendRssError(db: D1Database, id: string, error: string): Promise<void> {
+  await db.prepare(
+    `UPDATE friends SET rss_checked_at = datetime('now'), rss_error = ?, updated_at = datetime('now') WHERE id = ?`
+  ).bind(error.slice(0, 500), id).run();
+}
+
+export async function deleteStaleFriends(db: D1Database, currentIds: string[]): Promise<void> {
+  const existing = await db.prepare('SELECT id FROM friends').all();
+  const staleIds = findStaleItemIds(existing.results.map((row) => String(row.id)), currentIds);
+  for (let i = 0; i < staleIds.length; i += 100) {
+    const batch = staleIds.slice(i, i + 100);
+    const placeholders = batch.map(() => '?').join(',');
+    await db.prepare(`DELETE FROM friends WHERE id IN (${placeholders})`).bind(...batch).run();
+  }
 }
 
 /**

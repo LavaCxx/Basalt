@@ -2,6 +2,11 @@
 import Layout from '../layouts/Layout.astro';
 import Comments from '../components/islands/Comments';
 import TableOfContents from '../components/islands/TableOfContents';
+import { getPageByPath, initRuntime } from '../lib/api';
+
+const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
+if (runtimeEnv) initRuntime(runtimeEnv);
+const aboutPage = await getPageByPath('/about');
 ---
 
 <Layout title="关于" description="LavaC 的自述">
@@ -15,28 +20,31 @@ import TableOfContents from '../components/islands/TableOfContents';
 
       <!-- Content -->
     <div class="about-content article-content prose-basalt">
+      {aboutPage?.content ? (
+        <div class="article-content-html" set:html={aboutPage.content} />
+      ) : (
       <div class="article-content-html">
         <p>
           LavaC 这个怪兮兮的 ID，<br />
           来源于 2017 年入坑
           <a href="https://www.ingress.com" target="_blank" rel="noopener noreferrer">Ingress</a>
           时启用的新代号，<br />
-          即“拉瓦锡”的谐音
+          即“拉瓦锡”的谐音。
         </p>
         <p>
           千禧年前生人，
-          多年前端社畜<br />
+          多年前端社畜。<br />
           曾经喜欢写代码，
-          可惜这份爱好已随 AI 的发展从我身上剥离<br />
-          目前维持一下表面关系
+          可惜这份爱好已随 AI 的发展从我身上剥离。<br />
+          目前维持一下表面关系。
         </p>
         <p>
-          按当今流行的 MBTI<del>赛博占星</del>测试来看，属于 INFP-T
+          按当今流行的 MBTI<del>赛博占星</del>测试来看，属于 INFP-T。
         </p>
 
         <h2 id="hobbies">爱好</h2>
         <ul class="list-disc pl-6 space-y-2">
-          <li><strong>游戏</strong>：除了 PVP，基本都能接受；因为电脑配置问题，小型独立游戏玩得比较多</li>
+          <li><strong>游戏</strong>：除了 PVP，基本都能接受；因为电脑配置问题，小型独立游戏玩得比较多。</li>
           <li>
             <strong>咖啡</strong>：在前司氛围还比较宽松的时候，每日的工作始于和同事冲半小时新买的豆子，
             还写过一篇
@@ -44,27 +52,28 @@ import TableOfContents from '../components/islands/TableOfContents';
               href="https://www.notion.so/45bd5106003c47f9bd24bb9a607e80c9?v=71242ee64f9b470781222c49b7039df0"
               target="_blank"
               rel="noopener noreferrer"
-            >咖啡豆统计</a>。但目前转胶囊和瑞幸也快 3 年了，问就是懒
+            >咖啡豆统计</a>。但目前转胶囊和瑞幸也快 3 年了，问就是懒。
           </li>
-          <li><strong>摄影</strong>：购置相机后一口气把广州能去的地方走了个遍，后面就 ed 了；现在只有遇到有意思的云，才会掏出来拍两张</li>
-          <li><strong>音乐</strong>：杂食，近年来更偏爱 City Pop 和 Synthwave</li>
+          <li><strong>摄影</strong>：购置相机后一口气把广州能去的地方走了个遍，后面就 ed 了；现在只有遇到有意思的云，才会掏出来拍两张。</li>
+          <li><strong>音乐</strong>：杂食，近年来更偏爱 City Pop 和 Synthwave。</li>
         </ul>
 
         <h2 id="about-blog">关于博客</h2>
         <p>
-          这是我做的第三版博客<br />
+          这是我做的第三版博客。<br />
           如果你对它之前的样子感兴趣，<br />
-          也可以回顾一下这段多年三分钟热度的 remake 记录
+          也可以回顾一下这段多年三分钟热度的 remake 记录。
         </p>
         <ul class="list-disc pl-6 space-y-2">
           <li>
-            <a href="https://analog-liart.vercel.app" target="_blank" rel="noopener noreferrer">2023 年</a>的第二版博客，使用 Nuxt 3 构建
+            <a href="https://analog-liart.vercel.app" target="_blank" rel="noopener noreferrer">2023 年</a>的第二版博客，使用 Nuxt 3 构建。
           </li>
           <li>
-            <a href="https://lavace.vercel.app/home" target="_blank" rel="noopener noreferrer">2022 年</a>的第一版博客，使用 Nuxt 2 构建
+            <a href="https://lavace.vercel.app/home" target="_blank" rel="noopener noreferrer">2022 年</a>的第一版博客，使用 Nuxt 2 构建。
           </li>
         </ul>
       </div>
+      )}
     </div>
 
       <Comments client:load mapping="specific" term="about" />

@@ -6,14 +6,16 @@
 import { setRuntimeEnv } from '../../src/lib/api/env';
 import { fetchArticles, fetchArticle } from '../../src/lib/api/notion/articles';
 import { fetchPhotos } from '../../src/lib/api/notion/photos';
+import { fetchNotionFriends } from '../../src/lib/api/notion/friends';
 import { getAllTelegramMessages } from '../../src/lib/api/telegram';
 import { fetchDoubanFeed } from '../../src/lib/api/rss';
 import { getSteamGames, getSteamStatus } from '../../src/lib/steam';
 import { calculateReadingTime } from '../../src/lib/api/notion/blocks-to-html';
 import type { FeedItem } from '../../src/lib/types';
 
-import { upsertItem, upsertArticleBody, getSyncState, updateSyncState, deleteStaleItems, deleteStaleItemsScoped } from './db';
+import { upsertItem, upsertArticleBody, getSyncState, updateSyncState, deleteStaleItems, deleteStaleItemsScoped, upsertFriend, getFriendRssState, updateFriendLatestPost, recordFriendRssError, deleteStaleFriends } from './db';
 import { ensureBookmarksEnriched, createBookmarkResolver } from './link-enricher';
+import { fetchLatestFriendPost } from './friend-rss';
 import type { D1Database } from './db';
 
 /**
@@ -43,6 +45,9 @@ export async function syncNotionArticles(db: D1Database, env: Record<string, str
     await upsertItem(db, article);
   }
 
+  await deleteStaleItemsScoped(db, 'notion', 'article', allArticleItems.filter((item) => item.type === 'article').map((item) => item.id));
+  await deleteStaleItemsScoped(db, 'notion', 'page', allArticleItems.filter((item) => item.type === 'page').map((item) => item.id));
+
   // For each article, fetch full content with bookmark enrichment, then store HTML
   const resolveBookmarkMeta = createBookmarkResolver(db);
 
@@ -65,6 +70,42 @@ export async function syncNotionArticles(db: D1Database, env: Record<string, str
 
   // Reset cursor to null after full sync (articles don't use incremental cursor long-term)
   await updateSyncState(db, 'notion:articles', null);
+}
+
+const FRIEND_RSS_TTL_MS = 6 * 60 * 60 * 1000;
+const FRIEND_RSS_ERROR_TTL_MS = 30 * 60 * 1000;
+
+export function shouldRefreshFriendRss(checkedAt: string | null, now = Date.now(), hasError = false): boolean {
+  if (!checkedAt) return true;
+  const checkedTime = Date.parse(checkedAt);
+  const ttl = hasError ? FRIEND_RSS_ERROR_TTL_MS : FRIEND_RSS_TTL_MS;
+  return Number.isNaN(checkedTime) || now - checkedTime >= ttl;
+}
+
+export async function syncNotionFriends(db: D1Database, env: Record<string, string>): Promise<void> {
+  setRuntimeEnv(env);
+  const friends = await fetchNotionFriends();
+
+  for (const friend of friends) {
+    const previous = await getFriendRssState(db, friend.id);
+    await upsertFriend(db, friend);
+    if (!friend.rssUrl) continue;
+
+    const rssChanged = previous?.rssUrl !== friend.rssUrl;
+    if (!rssChanged && !shouldRefreshFriendRss(previous?.rssCheckedAt ?? null, Date.now(), Boolean(previous?.rssError))) continue;
+
+    try {
+      const latestPost = await fetchLatestFriendPost(friend.rssUrl);
+      await updateFriendLatestPost(db, friend.id, latestPost);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await recordFriendRssError(db, friend.id, message);
+      console.error(JSON.stringify({ event: 'friends.rss.failed', id: friend.id, rssUrl: friend.rssUrl, error: message }));
+    }
+  }
+
+  await deleteStaleFriends(db, friends.map((friend) => friend.id));
+  await updateSyncState(db, 'notion:friends', null);
 }
 
 /**
