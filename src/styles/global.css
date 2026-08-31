@@ -2444,31 +2444,27 @@ html::view-transition-group(root) {
   font-variant-numeric: tabular-nums;
 }
 
-.feed-timeline-entry--media {
-  border-left-color: var(--color-border-subtle);
-}
-
-.feed-timeline-entry--media::before {
-  background: var(--color-border);
-}
-
 .feed-timeline-entry--article {
+  margin: 0;
+}
+
+.feed-timeline-entry--article::before {
+  top: 1.72rem;
+}
+
+.article-feed-card {
+  position: relative;
   isolation: isolate;
   overflow: hidden;
   margin: 0.5rem 0;
-  padding: 0 1rem 0 1.15rem;
+  padding: 1rem;
   border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-text-primary);
   border-radius: 0.25rem;
   background: color-mix(in srgb, var(--color-background) 82%, var(--color-background-alt));
   transition: background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
 }
 
-.feed-timeline-entry--article::before {
-  display: none;
-}
-
-.feed-timeline-entry--article::after {
+.article-feed-card::after {
   position: absolute;
   inset: 0 -24px;
   z-index: 0;
@@ -2485,17 +2481,13 @@ html::view-transition-group(root) {
   pointer-events: none;
 }
 
-.feed-timeline-entry--article > * {
+.article-feed-card > * {
   position: relative;
   z-index: 1;
 }
 
 .feed-timeline-entry--article + .feed-timeline-entry {
   border-top: 0;
-}
-
-.article-feed-card {
-  padding: 1rem 0;
 }
 
 .article-feed-meta {
@@ -2620,14 +2612,13 @@ html::view-transition-group(root) {
   border-top-color: rgba(39, 133, 91, 0.2);
 }
 
-.riso .feed-timeline-entry--article {
+.riso .article-feed-card {
   border-color: var(--riso-border-ink);
-  border-left-color: #17855b;
   background: rgba(255, 255, 255, 0.28);
   box-shadow: 2px 2px 0 rgba(63, 154, 103, 0.12);
 }
 
-.riso .feed-timeline-entry--article::after {
+.riso .article-feed-card::after {
   background:
     radial-gradient(rgba(23, 133, 91, 0.2) 0.8px, transparent 1px),
     linear-gradient(120deg, transparent 10%, rgba(63, 154, 103, 0.16));
@@ -2649,14 +2640,13 @@ html::view-transition-group(root) {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .feed-timeline-entry--article:hover {
+  .feed-timeline-entry--article:hover .article-feed-card {
     border-color: var(--color-text-muted);
-    border-left-color: var(--color-text-primary);
     background: color-mix(in srgb, var(--color-background) 72%, var(--color-background-alt));
     box-shadow: 3px 3px 0 var(--color-border);
   }
 
-  .feed-timeline-entry--article:hover::after {
+  .feed-timeline-entry--article:hover .article-feed-card::after {
     opacity: 0.34;
     transform: translateX(0);
   }
@@ -2677,14 +2667,13 @@ html::view-transition-group(root) {
     opacity: 1;
   }
 
-  .riso .feed-timeline-entry--article:hover {
+  .riso .feed-timeline-entry--article:hover .article-feed-card {
     border-color: rgba(23, 133, 91, 0.72);
-    border-left-color: #17855b;
     background: rgba(255, 255, 255, 0.4);
     box-shadow: 2px 2px 0 rgba(63, 154, 103, 0.24);
   }
 
-  .riso .feed-timeline-entry--article:hover::after {
+  .riso .feed-timeline-entry--article:hover .article-feed-card::after {
     opacity: 0.42;
   }
 
@@ -2694,7 +2683,7 @@ html::view-transition-group(root) {
   }
 }
 
-.feed-timeline-entry--article:focus-within::after {
+.feed-timeline-entry--article:focus-within .article-feed-card::after {
   opacity: 0.34;
   transform: translateX(0);
 }
@@ -2708,8 +2697,8 @@ html::view-transition-group(root) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .feed-timeline-entry--article,
-  .feed-timeline-entry--article::after,
+  .article-feed-card,
+  .article-feed-card::after,
   .article-feed-title,
   .article-feed-image,
   .article-feed-read::after,
