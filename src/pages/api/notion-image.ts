@@ -1,16 +1,9 @@
 import type { APIRoute } from 'astro';
 import { setRuntimeEnv } from '../../lib/api/env';
 import { getNotionClient } from '../../lib/api/notion/client';
+import { resolveImageContentType } from '../../lib/image-content-type';
 
 export const prerender = false;
-
-const imageContentTypes = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  'image/avif',
-]);
 
 export const GET: APIRoute = async (context) => {
   const runtimeEnv = (context as any).runtime?.env || (context.locals as any)?.runtime?.env;
@@ -42,8 +35,8 @@ export const GET: APIRoute = async (context) => {
     if (!sourceUrl) return invalidRequest('Image attachment not found');
 
     const imageResponse = await fetch(sourceUrl);
-    const contentType = (imageResponse.headers.get('content-type') || '').toLowerCase();
-    if (!imageResponse.ok || !imageContentTypes.has(contentType)) {
+    const contentType = resolveImageContentType(imageResponse.headers.get('content-type'), file?.name);
+    if (!imageResponse.ok || !contentType) {
       return new Response('Image not available', { status: 502, headers: { 'Cache-Control': 'no-store' } });
     }
 
@@ -51,6 +44,7 @@ export const GET: APIRoute = async (context) => {
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=300',
+        'X-Content-Type-Options': 'nosniff',
       },
     });
   } catch (error) {
