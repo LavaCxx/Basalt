@@ -18,6 +18,30 @@ interface MetingTrack {
   lrc?: unknown;
 }
 
+interface NeteaseAlbumPayload {
+  code?: unknown;
+  album?: {
+    name?: unknown;
+    picUrl?: unknown;
+  };
+  songs?: NeteaseAlbumSong[];
+}
+
+interface NeteaseAlbumSong {
+  id?: unknown;
+  name?: unknown;
+  ar?: Array<{ name?: unknown }>;
+  artists?: Array<{ name?: unknown }>;
+  al?: {
+    name?: unknown;
+    picUrl?: unknown;
+  };
+  album?: {
+    name?: unknown;
+    picUrl?: unknown;
+  };
+}
+
 export const GET: APIRoute = async (context) => {
   const type = context.url.searchParams.get('type') || 'playlist';
   const id = context.url.searchParams.get('id') || '';
@@ -45,6 +69,19 @@ export const GET: APIRoute = async (context) => {
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
+    if (type === 'album') {
+      const tracks = await fetchNeteaseAlbum(id, endpoint, controller.signal);
+      if (!tracks.length) {
+        return json({ error: 'No playable tracks were found' }, 404, 'no-store');
+      }
+
+      return json(
+        { source: 'netease', tracks },
+        200,
+        'public, max-age=300, s-maxage=21600, stale-while-revalidate=86400',
+      );
+    }
+
     const upstream = await fetch(endpoint, {
       headers: { Accept: 'application/json' },
       signal: controller.signal,
@@ -83,6 +120,61 @@ export const GET: APIRoute = async (context) => {
     clearTimeout(timeout);
   }
 };
+
+async function fetchNeteaseAlbum(id: string, metingBase: URL, signal: AbortSignal) {
+  const albumEndpoint = new URL(`/api/v1/album/${id}`, 'https://music.163.com');
+  const upstream = await fetch(albumEndpoint, {
+    headers: {
+      Accept: 'application/json',
+      Referer: 'https://music.163.com/',
+    },
+    signal,
+  });
+
+  if (!upstream.ok) throw new Error(`Netease album API returned ${upstream.status}`);
+  const payload = await readJsonWithinLimit(upstream, MAX_RESPONSE_BYTES) as NeteaseAlbumPayload;
+  if (payload.code !== 200 || !Array.isArray(payload.songs)) {
+    throw new Error('Netease album API returned an unexpected response');
+  }
+
+  const albumName = cleanText(payload.album?.name) || '网易云音乐';
+  const albumCover = safeHttpsUrl(payload.album?.picUrl);
+
+  return payload.songs
+    .slice(0, 200)
+    .map((song) => {
+      const songId = typeof song.id === 'number' || typeof song.id === 'string'
+        ? String(song.id)
+        : '';
+      const name = cleanText(song.name);
+      const artists = Array.isArray(song.ar) ? song.ar : song.artists;
+      const artist = artists
+        ?.map((item) => cleanText(item.name))
+        .filter(Boolean)
+        .join(' / ') || '';
+
+      if (!/^\d{1,20}$/.test(songId) || !name || !artist) return null;
+
+      return {
+        id: songId,
+        name,
+        artist,
+        album: cleanText(song.al?.name ?? song.album?.name) || albumName,
+        url: buildMetingResourceUrl(metingBase, 'url', songId),
+        cover: safeHttpsUrl(song.al?.picUrl ?? song.album?.picUrl) || albumCover,
+        lyric: buildMetingResourceUrl(metingBase, 'lrc', songId),
+      };
+    })
+    .filter((track): track is NonNullable<typeof track> => track !== null);
+}
+
+function buildMetingResourceUrl(base: URL, type: 'url' | 'lrc', id: string): string {
+  const endpoint = new URL(base);
+  endpoint.searchParams.set('server', 'netease');
+  endpoint.searchParams.set('type', type);
+  endpoint.searchParams.set('id', id);
+  return endpoint.toString();
+}
 
 function normalizeTrack(track: MetingTrack, index: number) {
   const name = cleanText(track.name);
