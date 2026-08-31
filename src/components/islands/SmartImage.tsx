@@ -19,11 +19,22 @@ export default function SmartImage(props: SmartImageProps) {
     props.src ? 'loading' : 'error'
   );
   let imageRef: HTMLImageElement | undefined;
+  let sourceRevision = 0;
 
   createEffect(() => {
+    const revision = ++sourceRevision;
     const nextState = props.src ? 'loading' : 'error';
     setState(nextState);
     props.onStateChange?.(nextState);
+
+    // Solid updates the reactive `src` attribute in the same flush. Re-check on
+    // the following microtask so a cached image whose load event already fired
+    // cannot be left behind in the loading state.
+    if (props.src) {
+      queueMicrotask(() => {
+        if (revision === sourceRevision) syncImageState();
+      });
+    }
   });
 
   const syncImageState = () => {
