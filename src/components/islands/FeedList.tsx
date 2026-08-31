@@ -9,6 +9,7 @@ import MicroblogCard from './feed-cards/MicroblogCard';
 import PhotoCard from './feed-cards/PhotoCard';
 import MediaCard from './feed-cards/MediaCard';
 import ArticleCard from './feed-cards/ArticleCard';
+import { formatDay, formatDayKey, formatWeekday } from './feed-cards/formatDate';
 
 interface FeedListProps {
   items?: SerializedFeedItem[];
@@ -39,7 +40,7 @@ export default function FeedList(props: FeedListProps) {
 
     for (const item of visibleItems()) {
       const date = item.date;
-      const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+      const key = formatDayKey(date);
       const lastGroup = grouped.at(-1);
       if (lastGroup?.key === key) {
         lastGroup.items.push(item);
@@ -50,13 +51,6 @@ export default function FeedList(props: FeedListProps) {
 
     return grouped;
   });
-
-  const formatDay = (date: Date) => date.toLocaleDateString('zh-CN', {
-    ...(date.getFullYear() !== new Date().getFullYear() ? { year: 'numeric' } : {}),
-    month: 'long',
-    day: 'numeric',
-  });
-  const formatWeekday = (date: Date) => date.toLocaleDateString('zh-CN', { weekday: 'short' });
 
   const loadMore = async () => {
     const cursor = nextCursor();
