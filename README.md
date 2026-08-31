@@ -88,3 +88,7 @@ pnpm build    # production build
 | `cd sync-worker && pnpm run dev` | Run sync worker locally with `--test-scheduled` |
 | `cd sync-worker && pnpm run deploy` | Deploy sync worker |
 | `wrangler d1 migrations apply basalt` | Apply DB migrations |
+
+## Content authoring
+
+- [在文章中嵌入网易云音乐播放器](docs/music-player.md)
