@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount, Show, type JSX } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount, Show, type JSX } from 'solid-js';
 
 interface SmartImageProps {
   src?: string | null;
@@ -19,6 +19,12 @@ export default function SmartImage(props: SmartImageProps) {
     props.src ? 'loading' : 'error'
   );
   let imageRef: HTMLImageElement | undefined;
+
+  createEffect(() => {
+    const nextState = props.src ? 'loading' : 'error';
+    setState(nextState);
+    props.onStateChange?.(nextState);
+  });
 
   const syncImageState = () => {
     if (!imageRef) return;

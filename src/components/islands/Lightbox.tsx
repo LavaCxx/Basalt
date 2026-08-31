@@ -34,6 +34,7 @@ const MAX_ZOOM = 5;
 const SINGLE_CLICK_ZOOM = 2;
 const DOUBLE_TAP_ZOOM = SINGLE_CLICK_ZOOM;
 const DRAG_THRESHOLD = 8;
+const SWIPE_THRESHOLD = 50;
 const PRESS_DELAY = 180;
 
 export default function Lightbox(props: LightboxProps) {
@@ -51,6 +52,7 @@ export default function Lightbox(props: LightboxProps) {
   let pointerDownTime = 0;
   const [pointerDown, setPointerDown] = createSignal(false);
   const activePointers = new Map<number, { x: number; y: number }>();
+  const preloadedSources = new Set<string>();
 
   createEffect(() => {
     props.index;
@@ -59,6 +61,23 @@ export default function Lightbox(props: LightboxProps) {
     setZoom(MIN_ZOOM);
     setOffset({ x: 0, y: 0 });
     setImageState('loading');
+  });
+
+  createEffect(() => {
+    if (isServer || !props.open || props.photos.length < 2) return;
+    const adjacentIndexes = [
+      (props.index - 1 + props.photos.length) % props.photos.length,
+      (props.index + 1) % props.photos.length,
+    ];
+
+    for (const index of adjacentIndexes) {
+      const src = props.photos[index]?.src;
+      if (!src || preloadedSources.has(src)) continue;
+      const image = new Image();
+      image.decoding = 'async';
+      image.src = src;
+      preloadedSources.add(src);
+    }
   });
 
   const clampOffset = (nextOffset: { x: number; y: number }, nextZoom = zoom()) => {
@@ -137,11 +156,11 @@ export default function Lightbox(props: LightboxProps) {
       updatePinch();
       return;
     }
-    if (zoom() <= MIN_ZOOM) return;
-
     const deltaX = event.clientX - pointerStart.x;
     const deltaY = event.clientY - pointerStart.y;
     if (Math.hypot(deltaX, deltaY) > DRAG_THRESHOLD) dragged = true;
+    if (zoom() <= MIN_ZOOM) return;
+
     setOffset(
       clampOffset({
         x: offsetStart.x + deltaX,
@@ -151,6 +170,26 @@ export default function Lightbox(props: LightboxProps) {
   };
 
   const handlePointerUp = (event: PointerEvent) => {
+    const swipeDelta = {
+      x: event.clientX - pointerStart.x,
+      y: event.clientY - pointerStart.y,
+    };
+    const canSwipe =
+      activePointers.size === 1 &&
+      event.pointerType === 'touch' &&
+      zoom() <= MIN_ZOOM &&
+      Math.abs(swipeDelta.x) >= SWIPE_THRESHOLD &&
+      Math.abs(swipeDelta.x) > Math.abs(swipeDelta.y) * 1.2;
+
+    if (canSwipe) {
+      if (swipeDelta.x < 0) props.onNext();
+      else props.onPrevious();
+      activePointers.delete(event.pointerId);
+      setPointerDown(false);
+      lastTap = { time: 0, x: 0, y: 0 };
+      return;
+    }
+
     const canTap =
       activePointers.size === 1 &&
       !dragged &&
@@ -215,6 +254,7 @@ export default function Lightbox(props: LightboxProps) {
   onCleanup(() => {
     if (isServer) return;
     document.removeEventListener('keydown', handleKeyDown);
+    preloadedSources.clear();
   });
 
   return (
@@ -240,101 +280,105 @@ export default function Lightbox(props: LightboxProps) {
           </svg>
         </button>
 
-        <Show when={props.photos.length > 1}>
-          <button
-            class="absolute left-4 z-10 p-2 text-white/70 hover:text-white transition-colors cursor-pointer"
-            onClick={props.onPrevious}
-            aria-label="Previous"
-          >
-            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button
-            class="absolute right-4 z-10 p-2 text-white/70 hover:text-white transition-colors cursor-pointer"
-            onClick={props.onNext}
-            aria-label="Next"
-          >
-            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </Show>
+        <div class="lightbox-shell">
+          <div class="lightbox-media">
+            <Show when={props.photos.length > 1}>
+              <button
+                class="lightbox-nav lightbox-nav-previous text-white/70 hover:text-white transition-colors cursor-pointer"
+                onClick={props.onPrevious}
+                aria-label="Previous"
+              >
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                class="lightbox-nav lightbox-nav-next text-white/70 hover:text-white transition-colors cursor-pointer"
+                onClick={props.onNext}
+                aria-label="Next"
+              >
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </Show>
 
-        <div class="flex flex-col items-center max-w-[90vw] max-h-[90vh]">
-          <div
-            ref={viewport}
-            class="lightbox-viewport"
-            classList={{ 'lightbox-viewport-zoomed': zoom() > MIN_ZOOM }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-            onDragStart={(event) => event.preventDefault()}
-            onWheel={handleWheel}
-          >
             <div
-              class="lightbox-frame"
-              style={{
-                transform: `translate3d(${offset().x}px, ${offset().y}px, 0) scale(${zoom()})`,
-                cursor:
-                  zoom() > MIN_ZOOM
-                    ? pointerDown()
-                      ? 'grabbing'
-                      : 'grab'
-                    : 'zoom-in',
-              }}
+              ref={viewport}
+              class="lightbox-viewport"
+              classList={{ 'lightbox-viewport-zoomed': zoom() > MIN_ZOOM }}
+              aria-busy={imageState() === 'loading'}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
+              onDragStart={(event) => event.preventDefault()}
+              onWheel={handleWheel}
             >
-              <SmartImage
-                src={photo()?.src}
-                alt={photo()?.alt || ''}
-                loading="eager"
-                naturalSizing
-                fit="contain"
-                class="max-h-[75vh] max-w-full"
-                onStateChange={setImageState}
-              />
+              <div
+                class="lightbox-frame"
+                style={{
+                  transform: `translate3d(${offset().x}px, ${offset().y}px, 0) scale(${zoom()})`,
+                  cursor:
+                    zoom() > MIN_ZOOM
+                      ? pointerDown()
+                        ? 'grabbing'
+                        : 'grab'
+                      : 'zoom-in',
+                }}
+              >
+                <SmartImage
+                  src={photo()?.src}
+                  alt={photo()?.alt || ''}
+                  loading="eager"
+                  naturalSizing
+                  fit="contain"
+                  onStateChange={setImageState}
+                />
+              </div>
             </div>
           </div>
 
-          <div class="mt-3 flex items-center justify-center gap-3 text-xs text-white/45">
-            <span>{zoom().toFixed(1)}x</span>
-            <Show when={zoom() > MIN_ZOOM}>
-              <span aria-hidden="true">·</span>
-              <span>拖拽移动 / 双击复位</span>
+          <div class="lightbox-caption">
+            <div class="flex items-center justify-center gap-3 text-xs text-white/45">
+              <span>{zoom().toFixed(1)}x</span>
+              <Show when={zoom() > MIN_ZOOM}>
+                <span aria-hidden="true">·</span>
+                <span>拖拽移动 / 双击复位</span>
+              </Show>
+            </div>
+
+            <Show when={photo() && (photo()?.title || photo()?.camera)}>
+              <div class="mt-2 text-center text-white/80 text-sm px-4">
+                <Show when={photo()?.title}>
+                  <p class="font-medium text-white">{photo()?.title}</p>
+                </Show>
+                <Show when={photo()?.camera || photo()?.location}>
+                  <div class="flex items-center justify-center gap-4 mt-2 text-xs text-white/60">
+                    <Show when={photo()?.camera}>
+                      <span>{photo()?.camera}</span>
+                    </Show>
+                    <Show when={photo()?.lens}>
+                      <span>{photo()?.lens}</span>
+                    </Show>
+                    <Show when={photo()?.aperture || photo()?.shutterSpeed || photo()?.iso}>
+                      <span>
+                        {photo()?.aperture} {photo()?.shutterSpeed} ISO {photo()?.iso}
+                      </span>
+                    </Show>
+                    <Show when={photo()?.location}>
+                      <span>{photo()?.location}</span>
+                    </Show>
+                  </div>
+                </Show>
+                <Show when={props.photos.length > 1}>
+                  <p class="mt-2 text-xs text-white/40">
+                    {props.index + 1} / {props.photos.length}
+                  </p>
+                </Show>
+              </div>
             </Show>
           </div>
-
-          <Show when={photo() && (photo()?.title || photo()?.camera)}>
-            <div class="mt-2 text-center text-white/80 text-sm px-4">
-              <Show when={photo()?.title}>
-                <p class="font-medium text-white">{photo()?.title}</p>
-              </Show>
-              <Show when={photo()?.camera || photo()?.location}>
-                <div class="flex items-center justify-center gap-4 mt-2 text-xs text-white/60">
-                  <Show when={photo()?.camera}>
-                    <span>{photo()?.camera}</span>
-                  </Show>
-                  <Show when={photo()?.lens}>
-                    <span>{photo()?.lens}</span>
-                  </Show>
-                  <Show when={photo()?.aperture || photo()?.shutterSpeed || photo()?.iso}>
-                    <span>
-                      {photo()?.aperture} {photo()?.shutterSpeed} ISO {photo()?.iso}
-                    </span>
-                  </Show>
-                  <Show when={photo()?.location}>
-                    <span>{photo()?.location}</span>
-                  </Show>
-                </div>
-              </Show>
-              <Show when={props.photos.length > 1}>
-                <p class="mt-2 text-xs text-white/40">
-                  {props.index + 1} / {props.photos.length}
-                </p>
-              </Show>
-            </div>
-          </Show>
         </div>
       </div>
     </Show>
