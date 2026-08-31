@@ -533,7 +533,7 @@
   border-top: 1px solid var(--music-line);
   background: color-mix(in srgb, var(--music-paper-alt) 58%, transparent);
   scrollbar-color: var(--music-faint) transparent;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: stable both-edges;
   scrollbar-width: thin;
 }
 .riso-music-playlist::-webkit-scrollbar { width: 0.45rem; }
