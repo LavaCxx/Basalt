@@ -21,6 +21,10 @@ export function normalizeContentPath(path: string, type: 'article' | 'page'): st
   return `/articles/${normalized}`;
 }
 
+export function getPublishedDate(props: NotionArticleProperties, createdTime: string): Date {
+  return new Date(props.发布时间?.date?.start || createdTime);
+}
+
 function getAiInvolvement(
   props: NotionArticleProperties
 ): ArticleMetadata['aiInvolvement'] {
@@ -45,7 +49,7 @@ export async function fetchArticles(options?: {
   const query: QueryDatabaseParameters = {
     database_id: dbId,
     filter: { property: '发布', checkbox: { equals: true } },
-    sorts: [{ timestamp: 'created_time', direction: 'descending' }],
+    sorts: [{ property: '发布时间', direction: 'descending' }],
     page_size: options?.pageSize || 10,
     start_cursor: options?.startCursor || undefined,
   };
@@ -59,7 +63,7 @@ export async function fetchArticles(options?: {
     const tags = (props.标签?.multi_select || props.Tags?.multi_select || []).map((t) => t.name);
     const featured = props.精选?.checkbox ?? props.Featured?.checkbox ?? false;
     const aiInvolvement = getAiInvolvement(props);
-    const date = new Date((page as any).created_time);
+    const date = getPublishedDate(props, (page as any).created_time);
     const updatedDate = new Date((page as any).last_edited_time);
     const image = getCoverImage(props.封面?.files || props.Cover?.files);
     const slug = getPlainText(props.路径?.rich_text || props.Slug?.rich_text || props.slug?.rich_text) || page.id;
@@ -100,7 +104,7 @@ export async function fetchArticle(
     const tags = (props.标签?.multi_select || props.Tags?.multi_select || []).map((t) => t.name);
     const featured = props.精选?.checkbox ?? props.Featured?.checkbox ?? false;
     const aiInvolvement = getAiInvolvement(props);
-    const date = new Date((page as any).created_time);
+    const date = getPublishedDate(props, (page as any).created_time);
     const updatedDate = new Date((page as any).last_edited_time);
     const image = getCoverImage(props.封面?.files || props.Cover?.files);
     const slug = getPlainText(props.路径?.rich_text || props.Slug?.rich_text || props.slug?.rich_text) || pageId;

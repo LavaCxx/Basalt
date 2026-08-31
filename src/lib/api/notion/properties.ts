@@ -20,6 +20,7 @@ export interface NotionArticleProperties {
   AI参与度?: { select: { name: string } | null };
   发布?: { checkbox: boolean };
   Published?: { checkbox: boolean };
+  发布时间?: { date: { start: string } | null };
   封面?: { files: { type: string; file?: { url: string }; external?: { url: string } }[] };
   Cover?: { files: { type: string; file?: { url: string }; external?: { url: string } }[] };
   路径?: { rich_text: RichTextItemResponse[] };

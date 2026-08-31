@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getNotionContentType, normalizeContentPath } from '../src/lib/api/notion/articles';
+import { getNotionContentType, getPublishedDate, normalizeContentPath } from '../src/lib/api/notion/articles';
 import { richTextToHtml } from '../src/lib/api/notion/blocks-to-html';
 import type { NotionArticleProperties } from '../src/lib/api/notion/properties';
 
@@ -15,6 +15,15 @@ describe('Notion content classification', () => {
     expect(normalizeContentPath('about', 'page')).toBe('/about');
     expect(normalizeContentPath('/about/', 'page')).toBe('/about');
     expect(normalizeContentPath('新博客Again', 'article')).toBe('/articles/新博客Again');
+  });
+
+  it('uses the custom publish date and falls back to the page creation time', () => {
+    const createdTime = '2026-01-02T03:04:05.000Z';
+    expect(getPublishedDate({ 发布时间: { date: { start: '2025-08-09' } } }, createdTime).toISOString())
+      .toBe('2025-08-09T00:00:00.000Z');
+    expect(getPublishedDate({ 发布时间: { date: null } }, createdTime).toISOString())
+      .toBe(createdTime);
+    expect(getPublishedDate({}, createdTime).toISOString()).toBe(createdTime);
   });
 });
 
