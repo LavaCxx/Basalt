@@ -64,10 +64,15 @@ const fullTitle = title === "LavaC's Stash" ? title : `${title} | LavaC's Stash`
     </script>
   </head>
   <body class="min-h-screen bg-background text-text-primary font-ui antialiased">
-    <button id="theme-toggle" type="button" transition:persist class="fixed bottom-4 right-4 p-3 rounded-full bg-background border border-border shadow-lg hover:border-text-muted transition-all z-50" aria-label="Light theme" title="Light theme">
-      <span class="block w-5 h-5 text-text-primary" aria-hidden="true">
-        <svg class="theme-icon theme-icon-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.78" x2="19.78" y2="4.22" /></svg>
-        <svg class="theme-icon theme-icon-riso" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="8.5" cy="9" r="2.5" /><path d="M15 8.5h.01" /><path d="M6 18c1.8-3 4.2-4.5 6-4.5S16.2 15 18 18" /></svg>
+    <button id="theme-toggle" type="button" transition:persist class="fixed bottom-4 right-4 p-3 rounded-full bg-background border border-border shadow-lg hover:border-text-muted transition-all z-50" aria-label="切换到 RISO 主题" title="切换到 RISO 主题">
+      <span class="theme-icon-frame block w-5 h-5 text-text-primary" aria-hidden="true">
+        <svg class="theme-icon theme-icon-riso" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <rect class="theme-riso-plate theme-riso-plate-back" x="4.25" y="6.25" width="13.5" height="13.5" rx="2.25" />
+          <rect class="theme-riso-plate theme-riso-plate-front" x="6.25" y="4.25" width="13.5" height="13.5" rx="2.25" />
+        </svg>
+        <svg class="theme-icon theme-icon-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4.5" y="4.5" width="15" height="15" rx="2.5" />
+        </svg>
       </span>
     </button>
 
@@ -113,7 +118,7 @@ const fullTitle = title === "LavaC's Stash" ? title : `${title} | LavaC's Stash`
         const syncThemeToggle = () => {
           const themeToggle = document.getElementById('theme-toggle');
           const isRiso = root.classList.contains('riso');
-          const label = isRiso ? 'RISO paper theme' : 'Light theme';
+          const label = isRiso ? '切换到 Light 主题' : '切换到 RISO 主题';
           themeToggle?.setAttribute('aria-label', label);
           themeToggle?.setAttribute('title', label);
           return isRiso;
