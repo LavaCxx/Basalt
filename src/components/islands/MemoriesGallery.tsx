@@ -43,10 +43,10 @@ export default function MemoriesGallery(props: MemoriesGalleryProps) {
       {/* Header */}
       <header class="mb-12">
         <h1 class="font-ui text-4xl font-bold text-text-primary mb-2">
-          相册
+          留影
         </h1>
         <p class="text-text-secondary">
-          定格时光的照片与记忆
+          色を 取り戻して
         </p>
       </header>
 

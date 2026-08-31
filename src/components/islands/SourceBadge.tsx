@@ -3,6 +3,7 @@ import type { ContentSource } from '../../lib/types';
 interface SourceBadgeProps {
   source: ContentSource;
   channel?: string;
+  sourceUrl?: string;
   feedName?: string;
   mediaType?: string;
   mediaTypeLabel?: string;
@@ -25,13 +26,31 @@ const icons: Record<string, { path: string; color?: string }> = {
   },
 };
 
+function getTelegramChannelUrl(messageUrl?: string): string | undefined {
+  if (!messageUrl) return undefined;
+
+  try {
+    const url = new URL(messageUrl);
+    if (url.hostname !== 't.me' && url.hostname !== 'telegram.me') return undefined;
+
+    const parts = url.pathname.split('/').filter(Boolean);
+    const channel = parts[0] === 's' ? parts[1] : parts[0];
+    if (!channel || channel === 'c') return undefined;
+
+    return `https://t.me/${channel}`;
+  } catch {
+    return undefined;
+  }
+}
+
 export default function SourceBadge(props: SourceBadgeProps) {
   const icon = icons[props.source] || icons.rss;
+  const telegramChannelUrl = props.source === 'telegram'
+    ? getTelegramChannelUrl(props.sourceUrl)
+    : undefined;
   const label = props.source === 'douban'
     ? `豆瓣 · ${props.mediaTypeLabel || '媒体'}`
-    : props.source === 'telegram'
-      ? `Telegram${props.channel ? ` · ${props.channel}` : ''}`
-      : props.source === 'rss'
+    : props.source === 'rss'
         ? props.feedName || 'RSS'
         : props.source === 'notion'
           ? 'Notion'
@@ -42,7 +61,27 @@ export default function SourceBadge(props: SourceBadgeProps) {
       <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
         <path d={icon.path} />
       </svg>
-      {label}
+      {props.source === 'telegram' ? (
+        <>
+          <span>Telegram</span>
+          {props.channel && (
+            <>
+              <span aria-hidden="true">·</span>
+              {telegramChannelUrl ? (
+                <a
+                  href={telegramChannelUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="source-badge-channel"
+                  title={`在 Telegram 打开 ${props.channel}`}
+                >
+                  {props.channel}
+                </a>
+              ) : props.channel}
+            </>
+          )}
+        </>
+      ) : label}
     </span>
   );
 }

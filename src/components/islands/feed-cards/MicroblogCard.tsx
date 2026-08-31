@@ -142,7 +142,11 @@ export default function MicroblogCard(props: { item: MicroblogFeedItem }) {
   return (
     <div class="py-4">
       <div class="flex items-center gap-1.5 mb-2 text-xs text-text-muted">
-        <SourceBadge source={item().source} channel={item().metadata?.channel} />
+        <SourceBadge
+          source={item().source}
+          channel={item().metadata?.channel}
+          sourceUrl={item().url}
+        />
         <time class="feed-card-time">{formatTime(item().date)}</time>
       </div>
       <div

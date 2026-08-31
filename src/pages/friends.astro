@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Comments from '../components/islands/Comments';
-import SmartImage from '../components/islands/SmartImage';
+import FriendAvatarDither from '../components/islands/FriendAvatarDither';
 import { getFriends, initRuntime } from '../lib/api';
 
 const runtimeEnv = (Astro as any).runtime?.env || (Astro.locals as any)?.runtime?.env;
@@ -14,75 +14,93 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
   month: '2-digit',
   day: '2-digit',
 });
+
+const BAYER_4 = [
+  0, 8, 2, 10,
+  12, 4, 14, 6,
+  3, 11, 1, 9,
+  15, 7, 13, 5,
+];
+
+const smoothstep = (start: number, end: number, value: number) => {
+  const position = Math.max(0, Math.min(1, (value - start) / (end - start)));
+  return position * position * (3 - 2 * position);
+};
+
+const friendDitherCache = new Map<number, string>();
+
+const buildFriendDither = (seed: number) => {
+  const cached = friendDitherCache.get(seed);
+  if (cached) return cached;
+
+  const cell = 5;
+  const columns = 192;
+  const rows = 108;
+  const path: string[] = [];
+
+  for (let row = 0; row < rows; row += 1) {
+    const y = (row + 0.5) / rows;
+
+    for (let column = 0; column < columns; column += 1) {
+      const x = (column + 0.5) / columns;
+      const rightEdge = smoothstep(0.56, 1, x);
+      const bottomEdge = smoothstep(0.66, 1, y);
+      const corner = smoothstep(0.48, 0.96, (x + y) / 2);
+      const broad = Math.sin((x * 4.8 + seed * 0.37) * Math.PI)
+        * Math.cos((y * 3.6 - seed * 0.23) * Math.PI);
+      const cross = Math.sin((x + y) * 8.2 + seed * 1.7) * 0.28;
+      const field = Math.max(0, Math.min(1, (broad + cross + 1.28) / 2.56));
+      const envelope = Math.max(rightEdge * 0.74, bottomEdge * 0.56, corner * 0.34);
+      const density = Math.max(0, Math.min(0.82, envelope * (0.34 + field * 0.5) - 0.035));
+      const threshold = (BAYER_4[(row % 4) * 4 + (column % 4)] + 0.5) / 16;
+
+      if (density <= threshold) continue;
+
+      path.push(`M${column * cell} ${row * cell}h${cell}v${cell}h-${cell}z`);
+    }
+  }
+
+  const result = path.join('');
+  friendDitherCache.set(seed, result);
+  return result;
+};
 ---
 
 <Layout title="友链" description="朋友们的网站">
   <div class="page-shell">
     <header class="mb-12">
       <h1 class="font-ui text-4xl font-bold text-text-primary mb-2">友链</h1>
-      <p class="text-text-secondary">ALONE isn't always ALONE，</p>
+      <p class="text-text-secondary">ALONE isn't always ALONE.</p>
     </header>
 
     {friends.length > 0 ? (
     <div class="friend-grid">
       {friends.map((friend, index) => (
         <article class="friend-card">
-          <svg class="friend-card-texture" viewBox="0 0 320 180" preserveAspectRatio="none" aria-hidden="true">
+          <svg class="friend-card-texture" viewBox="0 0 960 540" preserveAspectRatio="xMaxYMax slice" aria-hidden="true">
             <defs>
-              <pattern id={`friend-dots-${index}`} width="5" height="5" patternUnits="userSpaceOnUse">
-                <rect width="2" height="2" fill="currentColor" />
-                <rect x="3" y="3" width="1" height="1" fill="currentColor" />
+              <pattern id={`friend-riso-dots-${index}`} width="5" height="5" patternUnits="userSpaceOnUse">
+                <circle cx="2.5" cy="2.5" r="1.15" fill="currentColor" />
               </pattern>
-              <filter id={`friend-noise-${index}`} x="-15%" y="-15%" width="130%" height="130%">
-                <feTurbulence
-                  type="fractalNoise"
-                  baseFrequency={`${0.011 + index * 0.002} ${0.019 + index * 0.003}`}
-                  numOctaves="3"
-                  seed={17 + index * 23}
-                  result="noise"
-                />
-                <feComponentTransfer in="noise" result="threshold">
-                  <feFuncR type="discrete" tableValues="0 0 0 0.18 0.42 0.72 1 1" />
-                  <feFuncG type="discrete" tableValues="0 0 0 0.18 0.42 0.72 1 1" />
-                  <feFuncB type="discrete" tableValues="0 0 0 0.18 0.42 0.72 1 1" />
-                </feComponentTransfer>
-                <feComposite in="SourceGraphic" in2="threshold" operator="in" />
-              </filter>
-              <linearGradient id={`friend-fade-${index}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="black" stop-opacity="0" />
-                <stop offset="0.38" stop-color="white" stop-opacity="0.18" />
-                <stop offset="1" stop-color="white" />
-              </linearGradient>
-              <mask id={`friend-mask-${index}`}>
-                <rect width="320" height="180" fill={`url(#friend-fade-${index})`} />
-              </mask>
+              <path id={`friend-dither-${index}`} d={buildFriendDither(index)} />
             </defs>
-            <rect
-              width="320"
-              height="180"
-              fill={`url(#friend-dots-${index})`}
-              filter={`url(#friend-noise-${index})`}
-              mask={`url(#friend-mask-${index})`}
-            />
+            <g class="friend-texture-light">
+              <use href={`#friend-dither-${index}`} />
+            </g>
+            <g class="friend-texture-riso">
+              <use href={`#friend-dither-${index}`} fill={`url(#friend-riso-dots-${index})`} />
+            </g>
           </svg>
           <div class="friend-card-overline" aria-hidden="true">
             <span>{String(index + 1).padStart(2, '0')}</span>
-            <span class="friend-card-bayer" data-variant={index % 3}>
-              {Array.from({ length: 16 }, () => <i></i>)}
-            </span>
           </div>
           <div class="friend-card-header">
             {friend.iconUrl ? (
-              <SmartImage
-                src={friend.iconUrl}
-                alt=""
-                class="rounded-full w-12 h-12 flex-shrink-0 object-cover"
-                width={48}
-                height={48}
+              <FriendAvatarDither
+                friendId={friend.id}
+                title={friend.title}
                 client:visible
-              >
-                <span class="friend-avatar-inline-fallback" aria-hidden="true">{friend.title.charAt(0)}</span>
-              </SmartImage>
+              />
             ) : (
               <div class="friend-avatar-fallback" aria-hidden="true">
                 {friend.title.charAt(0)}
@@ -133,29 +151,6 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
       </div>
     )}
 
-    <div class="mt-12 text-center">
-      <p class="text-text-muted mb-4">想要交换友链？欢迎联系！</p>
-      <a
-        href="mailto:lavac@foxmail.com"
-        class="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-md text-text-secondary hover:text-text-primary hover:border-text-muted transition-colors"
-      >
-        <svg
-          class="w-4 h-4"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-          <polyline points="22,6 12,13 2,6" />
-        </svg>
-        联系我
-      </a>
-    </div>
-
     <Comments client:load mapping="specific" term="friends" />
   </div>
 </Layout>
@@ -190,9 +185,16 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
     width: 100%;
     height: 100%;
     color: var(--color-text-primary);
-    opacity: 0.1;
-    transition: opacity 180ms ease;
     pointer-events: none;
+  }
+
+  .friend-texture-light {
+    fill: currentColor;
+    opacity: 0.03;
+  }
+
+  .friend-texture-riso {
+    display: none;
   }
 
   .friend-card > :not(.friend-card-texture) {
@@ -204,10 +206,6 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
     border-color: var(--color-text-muted);
     background: color-mix(in srgb, var(--color-background) 84%, var(--color-border));
     box-shadow: 0 8px 24px rgba(20, 20, 20, 0.08);
-  }
-
-  .friend-card:hover .friend-card-texture {
-    opacity: 0.2;
   }
 
   .friend-card:active {
@@ -228,7 +226,6 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
 
   .friend-card-overline {
     display: flex;
-    justify-content: space-between;
     margin-bottom: 0.75rem;
     color: var(--color-text-muted);
     font-size: 0.625rem;
@@ -236,45 +233,41 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
     letter-spacing: 0.1em;
   }
 
-  .friend-card-bayer {
+  .friend-card :global(.friend-avatar-dither) {
+    position: relative;
     display: grid;
-    grid-template-columns: repeat(4, 2px);
-    gap: 2px;
-  }
-
-  .friend-card-bayer i {
-    width: 2px;
-    height: 2px;
-    background: currentColor;
-    opacity: 0.2;
-  }
-
-  .friend-card-bayer[data-variant='0'] i:nth-child(1),
-  .friend-card-bayer[data-variant='0'] i:nth-child(4),
-  .friend-card-bayer[data-variant='0'] i:nth-child(6),
-  .friend-card-bayer[data-variant='0'] i:nth-child(7),
-  .friend-card-bayer[data-variant='0'] i:nth-child(10),
-  .friend-card-bayer[data-variant='0'] i:nth-child(13),
-  .friend-card-bayer[data-variant='1'] i:nth-child(2),
-  .friend-card-bayer[data-variant='1'] i:nth-child(5),
-  .friend-card-bayer[data-variant='1'] i:nth-child(8),
-  .friend-card-bayer[data-variant='1'] i:nth-child(11),
-  .friend-card-bayer[data-variant='1'] i:nth-child(12),
-  .friend-card-bayer[data-variant='1'] i:nth-child(15),
-  .friend-card-bayer[data-variant='2'] i:nth-child(1),
-  .friend-card-bayer[data-variant='2'] i:nth-child(3),
-  .friend-card-bayer[data-variant='2'] i:nth-child(6),
-  .friend-card-bayer[data-variant='2'] i:nth-child(9),
-  .friend-card-bayer[data-variant='2'] i:nth-child(14),
-  .friend-card-bayer[data-variant='2'] i:nth-child(16) {
-    opacity: 0.9;
-  }
-
-  .friend-card :global(.smart-image) {
     flex: 0 0 3rem;
     width: 3rem;
     height: 3rem;
     aspect-ratio: 1;
+    overflow: hidden;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-background-alt);
+  }
+
+  .friend-card :global(.friend-avatar-dither canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    image-rendering: pixelated;
+    transition: opacity 140ms ease;
+  }
+
+  .friend-card :global(.friend-avatar-dither-ready canvas) {
+    opacity: 1;
+  }
+
+  .friend-card :global(.friend-avatar-dither-fallback) {
+    color: var(--color-text-muted);
+    font-weight: 650;
+  }
+
+  .friend-card :global(.friend-avatar-dither-ready .friend-avatar-dither-fallback) {
+    visibility: hidden;
   }
 
   .friend-avatar-fallback {
@@ -287,21 +280,6 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
     background: var(--color-text-primary);
     color: var(--color-background);
     font-weight: 650;
-  }
-
-  .friend-avatar-inline-fallback {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    border-radius: 999px;
-    background: var(--color-text-primary);
-    color: var(--color-background);
-    font-weight: 650;
-  }
-
-  .friend-card :global(.smart-image-loaded .friend-avatar-inline-fallback) {
-    display: none;
   }
 
   .friend-card-title {
@@ -354,17 +332,11 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
   .friend-latest {
     display: block;
     min-width: 0;
-    margin-top: 0.75rem;
-    padding: 0.65rem 0.75rem;
-    border-radius: 0.5rem;
-    background: color-mix(in srgb, var(--color-background-alt) 70%, transparent);
+    margin-top: 0.85rem;
+    padding: 0.75rem 0 0.1rem;
+    border-top: 1px solid var(--color-border);
     color: var(--color-text-primary);
     text-decoration: none;
-    transition: background-color 180ms ease;
-  }
-
-  .friend-latest:hover {
-    background: color-mix(in srgb, var(--color-background-alt) 92%, transparent);
   }
 
   .friend-latest-label {
@@ -384,13 +356,22 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
 
   .friend-latest strong {
     display: block;
-    margin-top: 0.3rem;
+    margin-top: 0.35rem;
     overflow: hidden;
     font-size: 0.8125rem;
     font-weight: 600;
     line-height: 1.45;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.2em;
+    transition: color 180ms ease, text-decoration-color 180ms ease;
+  }
+
+  .friend-latest:hover strong {
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-decoration-color: currentColor;
   }
 
   .friend-card-footer {
@@ -426,12 +407,21 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
 
   :global(html.riso) .friend-card-texture {
     color: #27855b;
-    opacity: 0.18;
     mix-blend-mode: multiply;
   }
 
-  :global(html.riso) .friend-card:hover .friend-card-texture {
-    opacity: 0.28;
+  :global(html.riso) .friend-card :global(.friend-avatar-dither) {
+    border-color: var(--riso-border-ink);
+    background: rgba(255, 255, 255, 0.38);
+  }
+
+  :global(html.riso) .friend-texture-light {
+    display: none;
+  }
+
+  :global(html.riso) .friend-texture-riso {
+    display: inline;
+    opacity: 0.1;
   }
 
   :global(html.riso) .friend-card-footer {
@@ -439,11 +429,7 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
   }
 
   :global(html.riso) .friend-latest {
-    background: rgba(63, 154, 103, 0.12);
-  }
-
-  :global(html.riso) .friend-latest:hover {
-    background: rgba(63, 154, 103, 0.2);
+    border-color: var(--riso-border-ink);
   }
 
   .friend-empty {
@@ -495,7 +481,8 @@ const formatLatestDate = (date?: Date) => date?.toLocaleDateString('zh-CN', {
 
   @media (prefers-reduced-motion: reduce) {
     .friend-card,
-    .friend-card-arrow {
+    .friend-card-arrow,
+    .friend-card :global(.friend-avatar-dither canvas) {
       transition: none;
     }
   }

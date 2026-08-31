@@ -307,6 +307,37 @@ import RisoMusicPlayer from '../components/islands/RisoMusicPlayer';
       <div class="blog-diff-notes" aria-label="文章结构设计说明"><span><b>共用骨架</b> 有图与无图只差封面模块</span><span><b>阅读入口</b> 章节线将 Hero 与正文明确分开</span><span><b>正文宽度</b> 保持稳定文字度量，目录退出主阅读列</span><span><b>讨论区</b> 通过文末导航缓冲，不再紧贴正文</span></div>
     </section>
 
+    <section class="lab-section link-source-lab" aria-labelledby="link-source-title">
+      <div class="blog-diff-heading">
+        <div>
+          <h2 id="link-source-title">正文链接来源图标</h2>
+        </div>
+        <p>知名站点使用本地单色图标提示来源；普通外链只保留原有箭头，避免正文变成 favicon 陈列柜。</p>
+      </div>
+
+      <div class="link-source-grid">
+        <article class="link-source-sample link-source-sample-light article-content-html">
+          <div class="link-source-sample-heading"><strong>Light</strong><span>正文实际字号</span></div>
+          <p>
+            项目源码放在 <a href="https://github.com" data-link-source="github" target="_blank" rel="noopener noreferrer">GitHub</a>，零碎想法偶尔写在 <a href="https://x.com" data-link-source="x" target="_blank" rel="noopener noreferrer">X</a>，更新也会同步到 <a href="https://t.me" data-link-source="telegram" target="_blank" rel="noopener noreferrer">Telegram 频道</a>。
+          </p>
+          <p>
+            视频可以去 <a href="https://youtube.com" data-link-source="youtube" target="_blank" rel="noopener noreferrer">YouTube</a> 或 <a href="https://bilibili.com" data-link-source="bilibili" target="_blank" rel="noopener noreferrer">哔哩哔哩</a>，文章草稿仍在 <a href="https://notion.so" data-link-source="notion" target="_blank" rel="noopener noreferrer">Notion</a> 整理；这是一个 <a href="https://example.com" target="_blank" rel="noopener noreferrer">普通外链</a>。
+          </p>
+        </article>
+
+        <article class="link-source-sample link-source-sample-riso article-content-html">
+          <div class="link-source-sample-heading"><strong>RISO</strong><span>同一套语义，绿色油墨</span></div>
+          <p>
+            项目源码放在 <a href="https://github.com" data-link-source="github" target="_blank" rel="noopener noreferrer">GitHub</a>，零碎想法偶尔写在 <a href="https://x.com" data-link-source="x" target="_blank" rel="noopener noreferrer">X</a>，更新也会同步到 <a href="https://t.me" data-link-source="telegram" target="_blank" rel="noopener noreferrer">Telegram 频道</a>。
+          </p>
+          <p>
+            视频可以去 <a href="https://youtube.com" data-link-source="youtube" target="_blank" rel="noopener noreferrer">YouTube</a> 或 <a href="https://bilibili.com" data-link-source="bilibili" target="_blank" rel="noopener noreferrer">哔哩哔哩</a>，文章草稿仍在 <a href="https://notion.so" data-link-source="notion" target="_blank" rel="noopener noreferrer">Notion</a> 整理；这是一个 <a href="https://example.com" target="_blank" rel="noopener noreferrer">普通外链</a>。
+          </p>
+        </article>
+      </div>
+    </section>
+
     <section class="lab-section" aria-labelledby="riso-lab-title">
       <h2 id="riso-lab-title" class="font-ui text-xl font-semibold text-text-primary mb-4">RISO 治愈小动物</h2>
       <RisoPortraitLab client:load />
@@ -690,6 +721,75 @@ import RisoMusicPlayer from '../components/islands/RisoMusicPlayer';
   font-size: 0.75rem;
   line-height: 1.65;
   color: var(--color-text-muted);
+}
+
+/* ===== 正文链接来源图标 ===== */
+.link-source-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.link-source-sample {
+  margin: 0;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+}
+.link-source-sample-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  font-family: var(--font-ui);
+}
+.link-source-sample-heading strong {
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.link-source-sample-heading span {
+  color: inherit;
+  font-size: 0.75rem;
+  opacity: 0.58;
+}
+.link-source-sample.article-content-html p {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  line-height: 1.9;
+}
+.link-source-sample.article-content-html p + p {
+  margin-top: 0.85rem;
+}
+.link-source-sample-light {
+  color: #333;
+  background: #faf9f6;
+  border: 1px solid #deddd9;
+}
+.link-source-sample-light.article-content-html a {
+  color: #1a1a1a;
+  text-decoration-color: #d5d4d0;
+}
+.link-source-sample-riso {
+  color: #2b4b3b;
+  background:
+    radial-gradient(rgba(18, 58, 41, 0.065) 1px, transparent 1.1px),
+    linear-gradient(145deg, #f2f8e9, #e3f1d7);
+  background-size: 7px 7px, auto;
+  border: 1px solid rgba(39, 133, 91, 0.52);
+  box-shadow: 4px 3px 0 rgba(63, 154, 103, 0.16), -2px 5px 0 rgba(24, 60, 44, 0.07);
+}
+.link-source-sample-riso.article-content-html a {
+  color: #176b48;
+  text-decoration-color: rgba(23, 107, 72, 0.3);
+}
+@media (max-width: 760px) {
+  .link-source-grid {
+    grid-template-columns: 1fr;
+  }
+  .link-source-sample {
+    padding: 1.15rem;
+  }
 }
 
 /* ===== RISO UI 组件试验 ===== */

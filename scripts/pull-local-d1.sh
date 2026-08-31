@@ -15,7 +15,7 @@ cd "$project_dir"
 
 pnpm exec wrangler d1 export basalt --remote --output="$snapshot_file"
 pnpm exec wrangler d1 execute basalt --local --persist-to="$persist_dir" --yes --command \
-  "DROP TABLE IF EXISTS article_bodies; DROP TABLE IF EXISTS link_metadata; DROP TABLE IF EXISTS sync_state; DROP TABLE IF EXISTS sync_locks; DROP TABLE IF EXISTS steam_state; DROP TABLE IF EXISTS steam_games; DROP TABLE IF EXISTS items; DROP TABLE IF EXISTS d1_migrations;"
+  "DROP TABLE IF EXISTS friends; DROP TABLE IF EXISTS article_bodies; DROP TABLE IF EXISTS link_metadata; DROP TABLE IF EXISTS sync_state; DROP TABLE IF EXISTS sync_locks; DROP TABLE IF EXISTS steam_state; DROP TABLE IF EXISTS steam_games; DROP TABLE IF EXISTS items; DROP TABLE IF EXISTS d1_migrations;"
 pnpm exec wrangler d1 execute basalt --local --persist-to="$persist_dir" --yes --file="$snapshot_file"
 
 echo "Local D1 refreshed from production."
