@@ -28,12 +28,13 @@ const fullTitle = title === "LavaC's Stash" ? title : `${title} | LavaC's Stash`
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" transition:animate="none">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     {canonical && <link rel="canonical" href={canonical} />}
+    <link rel="preload" href="/fonts/MiSans-Regular-v2025.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png?v=avatar" />
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png?v=avatar" />
     <link rel="icon" type="image/png" sizes="180x180" href="/favicon-180.png?v=avatar" />
@@ -54,7 +55,7 @@ const fullTitle = title === "LavaC's Stash" ? title : `${title} | LavaC's Stash`
     {indieauthGithub && <link rel="me" href={indieauthGithub} />}
 
     <!-- View Transitions for smooth page navigation -->
-    <ClientRouter />
+    <ClientRouter fallback="swap" />
     <script is:inline>
       (() => {
         const theme = localStorage.getItem('theme') === 'riso' ? 'riso' : 'light';
@@ -103,7 +104,7 @@ const fullTitle = title === "LavaC's Stash" ? title : `${title} | LavaC's Stash`
     <Footer />
 
     <!-- Dynamic 1-bit background -->
-    <OneBitBackground client:only="solid-js" />
+    <OneBitBackground transition:persist client:only="solid-js" />
     {import.meta.env.DEV && <OneBitControls client:only="solid-js" />}
 
     <script is:inline data-astro-rerun>

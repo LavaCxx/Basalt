@@ -16,29 +16,29 @@ colors:
   riso-accent: "#17855b"
 typography:
   display:
-    fontFamily: "SN Pro, system-ui, sans-serif"
+    fontFamily: "MiSans Web, PingFang SC, system-ui, sans-serif"
     fontSize: "clamp(2.25rem, 6vw, 3.75rem)"
     fontWeight: 700
     lineHeight: 1.1
     letterSpacing: "-0.04em"
   headline:
-    fontFamily: "SN Pro, system-ui, sans-serif"
+    fontFamily: "MiSans Web, PingFang SC, system-ui, sans-serif"
     fontSize: "clamp(1.5rem, 3vw, 2.25rem)"
     fontWeight: 700
     lineHeight: 1.2
     letterSpacing: "-0.03em"
   body:
-    fontFamily: "SN Pro, system-ui, PingFang SC, sans-serif"
+    fontFamily: "MiSans Web, PingFang SC, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.6
   prose:
-    fontFamily: "Newsreader, Georgia, Songti SC, serif"
+    fontFamily: "MiSans Web, PingFang SC, system-ui, sans-serif"
     fontSize: "1.125rem"
     fontWeight: 400
     lineHeight: 1.8
   label:
-    fontFamily: "SN Pro, system-ui, sans-serif"
+    fontFamily: "MiSans Web, PingFang SC, system-ui, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 650
     lineHeight: 1.4
@@ -105,11 +105,11 @@ The palette is built around warm off-white paper and near-black ink, with a comp
 
 ## Typography
 
-**Display Font:** SN Pro (with system-ui fallbacks)
-**Body Font:** SN Pro (with PingFang SC and system fallbacks)
+**Display Font:** PingFang SC (with system-ui fallbacks)
+**Body Font:** PingFang SC (with system-ui fallbacks)
 **Prose Font:** Newsreader (with Georgia and Songti SC fallbacks)
 
-**Character:** SN Pro provides compact, modern editorial UI text and strong small labels. Newsreader adds a warmer reading voice for long-form article content without competing with the interface.
+**Character:** PingFang SC keeps Chinese and Latin UI text stable during client-side navigation. Newsreader adds a warmer reading voice for long-form article content without competing with the interface.
 
 ### Hierarchy
 - **Display** (700, `clamp(2.25rem, 6vw, 3.75rem)`, 1.1): Page-level titles and distinctive introductions.
@@ -119,7 +119,7 @@ The palette is built around warm off-white paper and near-black ink, with a comp
 - **Label** (650, 0.75rem, 0.06em tracking): Dates, categories, navigation metadata, and compact controls.
 
 ### Named Rules
-**The Two-Voice Rule.** Use SN Pro for navigation and interface structure; reserve Newsreader for sustained reading.
+**The Two-Voice Rule.** Use the PingFang-led system stack for navigation and interface structure; reserve Newsreader for sustained reading.
 
 ## Layout
 
@@ -165,7 +165,7 @@ The system uses gently rounded paper corners rather than fully pill-shaped conta
 - **Error / Disabled:** Use text and border contrast, not color alone.
 
 ### Navigation
-- **Style:** Compact SN Pro labels in a restrained header; active links use primary ink and may receive RISO plate treatment. Mobile navigation collapses into a compact trigger and revealed list.
+- **Style:** Compact PingFang-led system labels in a restrained header; active links use primary ink and may receive RISO plate treatment. Mobile navigation collapses into a compact trigger and revealed list.
 
 ### Article Surface
 Long-form content uses a dedicated reading column, serif prose, quieter texture, and code blocks with their own high-contrast paper/ink treatment. RISO texture is intentionally reduced or removed inside article content for readability.

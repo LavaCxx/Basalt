@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "MiSans Web";
+  src: url("/fonts/MiSans-Regular-v2025.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: optional;
+}
+
+@font-face {
+  font-family: "MiSans Web";
+  src: url("/fonts/MiSans-Semibold-v2025.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600 900;
+  font-display: optional;
+}
+
 /* ===== Custom Theme ===== */
 @theme {
   /* Colors - Off-white palette */
@@ -21,11 +37,11 @@
   --color-dark-text-secondary: #a8b0bc;
   --color-dark-text-muted: #79828f;
 
-  /* Font families - SN Pro for EN/UI, system fonts for CN */
- --font-sans: "SN Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  /* Optional loading keeps the stable system fallback instead of swapping mid-session. */
+  --font-sans: "MiSans Web", "PingFang SC", "Hiragino Sans GB", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
 
-  /* Serif font for article prose */
-  --font-serif: "Newsreader", Georgia, "Songti SC", "Noto Serif SC", serif;
+  /* Article prose shares the same stable MiSans stack as the rest of the site. */
+  --font-serif: "MiSans Web", "PingFang SC", "Hiragino Sans GB", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
 
   /* Monospace for code blocks */
   --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, "Cascadia Code", monospace;
@@ -45,15 +61,6 @@
   /* Spacing */
   --spacing-content: 1.5rem;
   --spacing-section: 4rem;
-}
-
-/* ===== Self-hosted Font Declarations ===== */
-@font-face {
-  font-family: "SN Pro";
-  src: url("/fonts/SNPro-Variable.woff2") format("woff2-variations");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
 }
 
 /* ===== Base Styles ===== */
@@ -2090,30 +2097,6 @@ body {
 .toc-list .toc-item:nth-child(9) { animation-delay: 0.45s; }
 .toc-list .toc-item:nth-child(10) { animation-delay: 0.5s; }
 
-/* ===== View Transitions ===== */
-/* Fade transition for page navigation */
-@keyframes view-transition-fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes view-transition-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-::view-transition-old(root) {
-  animation: view-transition-fade-out 0.15s ease-out;
-}
-
-::view-transition-new(root) {
-  animation: view-transition-fade-in 0.15s ease-in;
-}
-
-/* Prevent white flash during transition */
-html::view-transition-group(root) {
-  background-color: var(--color-background);
-}
 /* ===== 1-bit Dynamic Background ===== */
 .onebit-bg-canvas {
   position: fixed;

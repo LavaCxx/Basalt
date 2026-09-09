@@ -19,12 +19,16 @@ const navItems = import.meta.env.DEV
 const currentPath = Astro.url.pathname;
 ---
 
-<header transition:persist class={`site-header sticky top-0 z-50 ${className || ''}`}>
+<header
+  transition:persist
+  class={`site-header sticky top-0 z-50 ${className || ''}`}
+  style="font-family: 'MiSans Web', 'PingFang SC', 'Hiragino Sans GB', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;"
+>
   <div class="header-cluster">
     <a
       href="/"
       data-astro-prefetch="hover"
-      class="header-brand flex items-center gap-2 font-ui font-semibold text-text-primary transition-colors"
+      class="header-brand flex items-center gap-2 font-semibold text-text-primary transition-colors"
     >
       <img src="/favicon-32.png?v=avatar" alt="" width="22" height="22" class="rounded-full" />
       LavaC's Stash
@@ -33,17 +37,17 @@ const currentPath = Astro.url.pathname;
     <nav class="header-shell" aria-label="主导航">
     <div class="header-bar flex items-center justify-between">
       <!-- Desktop Navigation -->
-      <div class="hidden sm:flex items-center gap-1 font-ui">
+      <div class="hidden sm:flex items-center gap-1">
         {navItems.map((item) => (
           <a
             href={item.href}
             data-astro-prefetch="hover"
             data-nav-link
-           class:list={[
-          'nav-link px-3 font-medium transition-colors',
-           currentPath === item.href
-            ? 'text-text-primary font-semibold is-current'
-                : 'text-text-secondary hover:text-text-primary',
+          class:list={[
+            'nav-link px-3 font-semibold transition-colors',
+            currentPath === item.href
+              ? 'text-text-primary is-current'
+              : 'text-text-secondary hover:text-text-primary',
             ]}
           >
             {item.label}
@@ -74,11 +78,11 @@ const currentPath = Astro.url.pathname;
             href={item.href}
             data-astro-prefetch="hover"
             data-nav-link
-           class:list={[
-          'flex min-h-11 items-center px-3 py-2 text-sm font-medium transition-colors',
-           currentPath === item.href
-                ? 'text-text-primary font-semibold is-current'
-                : 'text-text-secondary hover:text-text-primary',
+          class:list={[
+            'flex min-h-11 items-center px-3 py-2 text-sm font-semibold transition-colors',
+            currentPath === item.href
+              ? 'text-text-primary is-current'
+              : 'text-text-secondary hover:text-text-primary',
             ]}
           >
             {item.label}
@@ -140,10 +144,24 @@ const currentPath = Astro.url.pathname;
   }
 
   .header-bar { height: 2.75rem; }
-  .nav-link { display: flex; min-height: 2.25rem; align-items: center; font-size: 0.8125rem; }
+  .nav-link {
+    display: flex;
+    width: 3.5rem;
+    min-height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8125rem;
+  }
   .header-shell [data-nav-link] {
     position: relative;
     border-radius: 0.5rem;
+    font-family: inherit;
+    font-optical-sizing: none;
+    font-synthesis: none;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1;
+    white-space: nowrap;
     text-decoration: none;
     transition:
       color 180ms ease,
@@ -169,6 +187,21 @@ const currentPath = Astro.url.pathname;
     color: var(--color-background);
     background: var(--color-text-primary);
     box-shadow: 0 4px 10px rgba(20, 20, 20, 0.16), 0 1px 2px rgba(20, 20, 20, 0.12);
+  }
+
+  .header-shell [data-nav-link].is-pending::after {
+    position: absolute;
+    right: 0.35rem;
+    width: 0.25rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background: currentColor;
+    content: '';
+    opacity: 0.72;
+  }
+
+  .header-shell [data-nav-link].is-pending {
+    transition: none;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -387,6 +420,8 @@ const currentPath = Astro.url.pathname;
 </style>
 
 <script>
+  let navigationFeedbackTimer: number | undefined;
+
   function initializeMobileMenu() {
     const button = document.getElementById('mobile-menu-button');
     const menu = document.getElementById('mobile-menu');
@@ -418,26 +453,59 @@ const currentPath = Astro.url.pathname;
     setOpen(false);
   }
 
-  // Update active nav state on page navigation (for View Transitions)
-  function updateActiveNav() {
-    const currentPath = window.location.pathname;
+  function updateActiveNav(path = window.location.pathname, pendingHref?: string) {
     const navLinks = document.querySelectorAll('nav a[data-nav-link]');
 
     navLinks.forEach((link) => {
       const href = link.getAttribute('href');
-      const isActive = href === currentPath;
+      const isActive = href === path;
+      const isPending = href === pendingHref;
 
       link.classList.toggle('text-text-primary', isActive);
       link.classList.toggle('text-text-secondary', !isActive);
-      link.classList.toggle('font-semibold', isActive);
       link.classList.toggle('is-current', isActive);
+      link.classList.toggle('is-pending', isPending);
+
+      if (isActive && !pendingHref) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+
+    document.querySelector('nav.header-shell')?.toggleAttribute('aria-busy', Boolean(pendingHref));
+  }
+
+  function initializeNavigationFeedback() {
+    if (document.documentElement.dataset.navFeedbackReady === 'true') return;
+    document.documentElement.dataset.navFeedbackReady = 'true';
+
+    document.addEventListener('click', (event) => {
+      if (
+        event.defaultPrevented
+        || event.button !== 0
+        || event.metaKey
+        || event.ctrlKey
+        || event.shiftKey
+        || event.altKey
+        || !(event.target instanceof Element)
+      ) return;
+
+      const link = event.target.closest('nav a[data-nav-link]');
+      if (!(link instanceof HTMLAnchorElement) || link.target || link.hasAttribute('download')) return;
+
+      const targetUrl = new URL(link.href, window.location.href);
+      if (targetUrl.origin !== window.location.origin || targetUrl.pathname === window.location.pathname) return;
+
+      updateActiveNav(targetUrl.pathname, link.getAttribute('href') || targetUrl.pathname);
+      window.clearTimeout(navigationFeedbackTimer);
+      navigationFeedbackTimer = window.setTimeout(() => updateActiveNav(), 12000);
     });
   }
 
   initializeMobileMenu();
+  initializeNavigationFeedback();
   updateActiveNav();
 
   document.addEventListener('astro:page-load', () => {
+    window.clearTimeout(navigationFeedbackTimer);
     initializeMobileMenu();
     updateActiveNav();
   });
