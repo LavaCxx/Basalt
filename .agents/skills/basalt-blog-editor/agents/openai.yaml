@@ -1,0 +1,4 @@
+interface:
+  display_name: "Basalt 博客编辑"
+  short_description: "润色并补全 Basalt 的 Notion 博客文章"
+  default_prompt: "检查并编辑指定的 Basalt 博客文章，润色正文并补全缺少的摘要、标签和路径。"
