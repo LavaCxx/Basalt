@@ -1,6 +1,86 @@
 import { createSignal, onCleanup, onMount, Show } from 'solid-js';
 import Lightbox, { type LightboxPhoto } from './Lightbox';
 
+interface XWidgetsApi {
+  createTweet: (
+    postId: string,
+    target: HTMLElement,
+    options: {
+      align: 'center';
+      conversation: 'none';
+      dnt: true;
+      lang: 'zh-cn';
+      theme: 'light';
+    },
+  ) => Promise<HTMLElement | undefined>;
+}
+
+interface XGlobalApi {
+  ready?: (callback: (api: XGlobalApi) => void) => void;
+  widgets?: XWidgetsApi;
+}
+
+declare global {
+  interface Window {
+    twttr?: XGlobalApi;
+  }
+}
+
+let xWidgetsPromise: Promise<XWidgetsApi> | undefined;
+
+function loadXWidgets(): Promise<XWidgetsApi> {
+  if (window.twttr?.widgets) return Promise.resolve(window.twttr.widgets);
+  if (xWidgetsPromise) return xWidgetsPromise;
+
+  xWidgetsPromise = new Promise<XWidgetsApi>((resolve, reject) => {
+    let settled = false;
+    const timeout = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      xWidgetsPromise = undefined;
+      reject(new Error('X widgets timed out'));
+    }, 12_000);
+
+    const finish = (widgets?: XWidgetsApi) => {
+      if (settled || !widgets) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      resolve(widgets);
+    };
+
+    const fail = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      xWidgetsPromise = undefined;
+      reject(new Error('X widgets failed to load'));
+    };
+
+    const handleReady = () => {
+      if (window.twttr?.widgets) {
+        finish(window.twttr.widgets);
+        return;
+      }
+      window.twttr?.ready?.((api) => finish(api.widgets));
+    };
+
+    let script = document.querySelector<HTMLScriptElement>('script[data-x-widgets]');
+    if (!script) {
+      script = document.createElement('script');
+      script.src = 'https://platform.twitter.com/widgets.js';
+      script.async = true;
+      script.dataset.xWidgets = 'true';
+      document.head.appendChild(script);
+    }
+
+    script.addEventListener('load', handleReady, { once: true });
+    script.addEventListener('error', fail, { once: true });
+    handleReady();
+  });
+
+  return xWidgetsPromise;
+}
+
 const LINK_SOURCES = [
   { name: 'github', hosts: ['github.com'] },
   { name: 'x', hosts: ['x.com', 'twitter.com'] },
@@ -138,6 +218,7 @@ export default function ArticleEnhancements() {
       if (
         link.classList.contains('notion-bookmark')
         || link.closest('.notion-bookmark')
+        || link.closest('.x-embed')
         || link.querySelector('img')
       ) return;
 
@@ -150,6 +231,103 @@ export default function ArticleEnhancements() {
       } catch {
         // Leave malformed or non-HTTP links with the standard prose-link treatment.
       }
+    });
+
+    let disposed = false;
+    const xEmbedLoads = new Map<HTMLElement, () => void>();
+    const xEmbedObserver: IntersectionObserver | null = 'IntersectionObserver' in window
+      ? new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+
+            const embed = entry.target as HTMLElement;
+            xEmbedObserver.unobserve(embed);
+            const load = xEmbedLoads.get(embed);
+            xEmbedLoads.delete(embed);
+            load?.();
+          });
+        }, { rootMargin: '320px 0px' })
+      : null;
+
+    content.querySelectorAll<HTMLElement>('.article-content-html .x-embed[data-x-post-id]')
+      .forEach((embed) => {
+        const postId = embed.dataset.xPostId;
+        const placeholder = embed.querySelector<HTMLElement>('.x-embed-placeholder');
+        const description = embed.querySelector<HTMLElement>('.x-embed-description');
+        const actions = embed.querySelector<HTMLElement>('.x-embed-actions');
+        const renderTarget = embed.querySelector<HTMLElement>('.x-embed-render');
+        const status = embed.querySelector<HTMLElement>('.x-embed-status');
+        if (!postId || !placeholder || !actions || !renderTarget || !status) return;
+
+        if (description) {
+          description.textContent = '帖子接近可视区域后会连接 X 并自动加载，也可以直接查看原帖。';
+        }
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'x-embed-load';
+        button.textContent = '立即加载';
+        button.setAttribute('aria-label', '立即加载 X 帖子');
+        actions.prepend(button);
+
+        const setStatus = (message: string) => {
+          status.textContent = message;
+          status.hidden = !message;
+        };
+
+        const loadPost = async () => {
+          if (embed.dataset.xEmbedState === 'loading') return;
+          xEmbedObserver?.unobserve(embed);
+          xEmbedLoads.delete(embed);
+          embed.dataset.xEmbedState = 'loading';
+          embed.setAttribute('aria-busy', 'true');
+          button.disabled = true;
+          button.textContent = '正在加载…';
+          setStatus('正在从 X 加载帖子内容。');
+          renderTarget.replaceChildren();
+
+          try {
+            const widgets = await loadXWidgets();
+            const rendered = await widgets.createTweet(postId, renderTarget, {
+              align: 'center',
+              conversation: 'none',
+              dnt: true,
+              lang: 'zh-cn',
+              theme: 'light',
+            });
+            if (disposed) return;
+            if (!rendered) throw new Error('X post is unavailable');
+
+            embed.dataset.xEmbedState = 'ready';
+            embed.removeAttribute('aria-busy');
+            placeholder.hidden = true;
+          } catch {
+            if (disposed) return;
+            embed.dataset.xEmbedState = 'error';
+            embed.removeAttribute('aria-busy');
+            button.disabled = false;
+            button.textContent = '重新加载';
+            setStatus('暂时无法加载帖子。你仍可在 X 查看原帖，或稍后重试。');
+            renderTarget.replaceChildren();
+          }
+        };
+
+        const handleManualLoad = () => void loadPost();
+        button.addEventListener('click', handleManualLoad);
+        cleanupCallbacks.push(() => button.removeEventListener('click', handleManualLoad));
+
+        if (xEmbedObserver) {
+          xEmbedLoads.set(embed, () => void loadPost());
+          xEmbedObserver.observe(embed);
+        } else {
+          void loadPost();
+        }
+      });
+
+    cleanupCallbacks.push(() => {
+      disposed = true;
+      xEmbedObserver?.disconnect();
+      xEmbedLoads.clear();
     });
 
     content.querySelectorAll('.article-content-html .code-block').forEach((block) => {

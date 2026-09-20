@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getNotionContentType, getPublishedDate, normalizeContentPath } from '../src/lib/api/notion/articles';
-import { richTextToHtml } from '../src/lib/api/notion/blocks-to-html';
+import { blockToHtml, getXPostReference, richTextToHtml } from '../src/lib/api/notion/blocks-to-html';
 import type { NotionArticleProperties } from '../src/lib/api/notion/properties';
 
 describe('Notion content classification', () => {
@@ -45,5 +45,38 @@ describe('Notion rich text line breaks', () => {
     }] as any;
 
     expect(richTextToHtml(richText)).toBe('第一行<br />&lt;script&gt;alert(1)&lt;/script&gt;');
+  });
+});
+
+describe('Notion X bookmarks', () => {
+  it('recognizes public X and legacy Twitter post URLs', () => {
+    expect(getXPostReference('https://x.com/tobyfox/status/1234567890?s=20')).toEqual({
+      id: '1234567890',
+      url: 'https://x.com/tobyfox/status/1234567890?s=20',
+    });
+    expect(getXPostReference('https://twitter.com/user/status/987654321/photo/1')?.id)
+      .toBe('987654321');
+  });
+
+  it('rejects lookalike hosts and non-post profile links', () => {
+    expect(getXPostReference('https://x.com.example.com/user/status/123')).toBeNull();
+    expect(getXPostReference('https://x.com/tobyfox')).toBeNull();
+    expect(getXPostReference('http://x.com/tobyfox/status/123')).toBeNull();
+  });
+
+  it('renders X bookmarks as a progressively enhanced placeholder', async () => {
+    const html = await blockToHtml({
+      type: 'bookmark',
+      bookmark: {
+        url: 'https://x.com/tobyfox/status/1234567890',
+        caption: [],
+      },
+    } as any);
+
+    expect(html).toContain('class="x-embed"');
+    expect(html).toContain('data-x-post-id="1234567890"');
+    expect(html).toContain('href="https://x.com/tobyfox/status/1234567890"');
+    expect(html).not.toContain('<script');
+    expect(html).not.toContain('<iframe');
   });
 });

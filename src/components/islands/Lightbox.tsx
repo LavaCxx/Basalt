@@ -3,9 +3,8 @@
  * Used by PhotoGallery and ArticleContent
  */
 
-import { createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { isServer } from 'solid-js/web';
-import SmartImage from './SmartImage';
 
 export interface LightboxPhoto {
   src: string;
@@ -42,6 +41,8 @@ export default function Lightbox(props: LightboxProps) {
   const [zoom, setZoom] = createSignal(MIN_ZOOM);
   const [offset, setOffset] = createSignal({ x: 0, y: 0 });
   const [imageState, setImageState] = createSignal<'loading' | 'loaded' | 'error'>('loading');
+  const [imageSize, setImageSize] = createSignal({ width: 0, height: 0 });
+  const [viewportSize, setViewportSize] = createSignal({ width: 0, height: 0 });
   let viewport: HTMLDivElement | undefined;
   let pointerStart = { x: 0, y: 0 };
   let offsetStart = { x: 0, y: 0 };
@@ -53,6 +54,31 @@ export default function Lightbox(props: LightboxProps) {
   const [pointerDown, setPointerDown] = createSignal(false);
   const activePointers = new Map<number, { x: number; y: number }>();
   const preloadedSources = new Set<string>();
+  let viewportObserver: ResizeObserver | undefined;
+
+  const observeViewport = (node: HTMLDivElement) => {
+    viewport = node;
+    if (isServer) return;
+
+    const updateViewportSize = () => {
+      setViewportSize({ width: node.clientWidth, height: node.clientHeight });
+    };
+    viewportObserver?.disconnect();
+    viewportObserver = new ResizeObserver(updateViewportSize);
+    viewportObserver.observe(node);
+    updateViewportSize();
+  };
+
+  const fittedImageSize = createMemo(() => {
+    const image = imageSize();
+    const available = viewportSize();
+    if (!image.width || !image.height || !available.width || !available.height) return null;
+    const scale = Math.min(available.width / image.width, available.height / image.height);
+    return {
+      width: Math.round(image.width * scale),
+      height: Math.round(image.height * scale),
+    };
+  });
 
   createEffect(() => {
     props.index;
@@ -60,6 +86,7 @@ export default function Lightbox(props: LightboxProps) {
     photo()?.src;
     setZoom(MIN_ZOOM);
     setOffset({ x: 0, y: 0 });
+    setImageSize({ width: 0, height: 0 });
     setImageState('loading');
   });
 
@@ -83,8 +110,11 @@ export default function Lightbox(props: LightboxProps) {
   const clampOffset = (nextOffset: { x: number; y: number }, nextZoom = zoom()) => {
     if (!viewport || nextZoom <= MIN_ZOOM) return { x: 0, y: 0 };
     const rect = viewport.getBoundingClientRect();
-    const maxX = Math.max(0, (rect.width * nextZoom - rect.width) / 2);
-    const maxY = Math.max(0, (rect.height * nextZoom - rect.height) / 2);
+    const fitted = fittedImageSize();
+    const contentWidth = fitted?.width ?? rect.width;
+    const contentHeight = fitted?.height ?? rect.height;
+    const maxX = Math.max(0, (contentWidth * nextZoom - rect.width) / 2);
+    const maxY = Math.max(0, (contentHeight * nextZoom - rect.height) / 2);
     return {
       x: Math.min(maxX, Math.max(-maxX, nextOffset.x)),
       y: Math.min(maxY, Math.max(-maxY, nextOffset.y)),
@@ -254,6 +284,7 @@ export default function Lightbox(props: LightboxProps) {
   onCleanup(() => {
     if (isServer) return;
     document.removeEventListener('keydown', handleKeyDown);
+    viewportObserver?.disconnect();
     preloadedSources.clear();
   });
 
@@ -304,7 +335,7 @@ export default function Lightbox(props: LightboxProps) {
             </Show>
 
             <div
-              ref={viewport}
+              ref={observeViewport}
               class="lightbox-viewport"
               classList={{ 'lightbox-viewport-zoomed': zoom() > MIN_ZOOM }}
               aria-busy={imageState() === 'loading'}
@@ -318,6 +349,8 @@ export default function Lightbox(props: LightboxProps) {
               <div
                 class="lightbox-frame"
                 style={{
+                  width: fittedImageSize() ? `${fittedImageSize()!.width}px` : '100%',
+                  height: fittedImageSize() ? `${fittedImageSize()!.height}px` : '100%',
                   transform: `translate3d(${offset().x}px, ${offset().y}px, 0) scale(${zoom()})`,
                   cursor:
                     zoom() > MIN_ZOOM
@@ -327,13 +360,19 @@ export default function Lightbox(props: LightboxProps) {
                       : 'zoom-in',
                 }}
               >
-                <SmartImage
+                <img
                   src={photo()?.src}
                   alt={photo()?.alt || ''}
+                  class="lightbox-image"
                   loading="eager"
-                  naturalSizing
-                  fit="contain"
-                  onStateChange={setImageState}
+                  decoding="sync"
+                  onLoad={(event) => {
+                    const image = event.currentTarget;
+                    setImageSize({ width: image.naturalWidth, height: image.naturalHeight });
+                    setImageState('loaded');
+                  }}
+                  onError={() => setImageState('error')}
+                  draggable={false}
                 />
               </div>
             </div>

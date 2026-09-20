@@ -26,6 +26,11 @@ export interface BlockRenderOptions {
   resolveBookmarkMeta?: (url: string) => Promise<BookmarkMeta | null | undefined>;
 }
 
+export interface XPostReference {
+  id: string;
+  url: string;
+}
+
 const LANG_MAP: Record<string, string> = {
   js: 'javascript',
   ts: 'typescript',
@@ -248,6 +253,35 @@ function getNeteaseMusicEmbed(url: string): { url: string; kind: 'song' | 'playl
   }
 }
 
+/**
+ * Parse a public X/Twitter post URL without fetching third-party content.
+ * The original URL is retained as the no-JavaScript and error fallback.
+ */
+export function getXPostReference(url: string): XPostReference | null {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+    const supportedHosts = new Set(['x.com', 'twitter.com', 'mobile.x.com', 'mobile.twitter.com']);
+    if (parsed.protocol !== 'https:' || !supportedHosts.has(host)) return null;
+
+    const match = parsed.pathname.match(
+      /^\/(?:i\/web\/status|[^/]+\/status)\/(\d+)(?:\/(?:photo|video)\/\d+)?\/?$/
+    );
+    if (!match) return null;
+
+    return { id: match[1], url: parsed.toString() };
+  } catch {
+    return null;
+  }
+}
+
+function renderXPost(reference: XPostReference, caption: string): string {
+  const safeHref = safeUrl(reference.url);
+  if (!safeHref) return '';
+
+  return `<figure class="x-embed" data-x-post-id="${reference.id}" data-x-post-url="${safeHref}"><div class="x-embed-placeholder"><div class="x-embed-source" aria-hidden="true"><span class="x-embed-mark">X</span><span>外部内容</span></div><p class="x-embed-title">来自 X 的帖子</p><p class="x-embed-description">帖子接近可视区域后会连接 X 并自动加载，也可以直接查看原帖。</p><div class="x-embed-actions"><a class="x-embed-link" href="${safeHref}" target="_blank" rel="noopener noreferrer">在 X 查看</a></div><p class="x-embed-status" role="status" aria-live="polite" hidden></p></div><div class="x-embed-render"></div>${caption ? `<figcaption class="x-embed-caption">${caption}</figcaption>` : ''}</figure>`;
+}
+
 export async function blockToHtml(
   block: GetBlockResponse,
   recurse = true,
@@ -374,6 +408,8 @@ export async function blockToHtml(
       if (!safeHref) return '';
       const captionRaw = b.bookmark.caption || [];
       const captionText = captionRaw.map((t: any) => t.plain_text).join('');
+      const xPost = getXPostReference(url);
+      if (xPost) return renderXPost(xPost, richTextToHtml(captionRaw));
       let domain = '';
       try { domain = new URL(url).hostname; } catch { domain = url; }
       const fallbackFavicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
