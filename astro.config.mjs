@@ -10,6 +10,7 @@ export default defineConfig({
   integrations: [solidJs()],
   output: 'server',
   adapter: cloudflare({
+    imageService: 'passthrough',
     platformProxy: {
       enabled: true,
       persist: { path: '.wrangler/state/v3' }
