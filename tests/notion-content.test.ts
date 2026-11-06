@@ -1,7 +1,31 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import * as notionClient from '../src/lib/api/notion/client';
 import { getNotionContentType, getPublishedDate, normalizeContentPath } from '../src/lib/api/notion/articles';
 import { blockToHtml, getXPostReference, richTextToHtml } from '../src/lib/api/notion/blocks-to-html';
 import type { NotionArticleProperties } from '../src/lib/api/notion/properties';
+
+describe('Notion quotes', () => {
+  it('keeps child paragraphs inside the quote in order', async () => {
+    const text = (content: string) => [{ type: 'text', plain_text: content, annotations: {} }];
+    const list = vi.fn().mockResolvedValue({ results: [
+      { type: 'paragraph', paragraph: { rich_text: text('第二段') } },
+      { type: 'paragraph', paragraph: { rich_text: text('第三段') } },
+    ] });
+    const mock = vi.spyOn(notionClient, 'getNotionClient').mockReturnValue({
+      blocks: { children: { list } },
+    } as any);
+    try {
+      const quote = { id: 'preface', type: 'quote', has_children: true, quote: { rich_text: text('第一段') } } as any;
+      expect(await blockToHtml(quote)).toBe('<blockquote><p>第一段</p><p>第二段</p>\n<p>第三段</p></blockquote>');
+      expect(list).toHaveBeenCalledWith({ block_id: 'preface', page_size: 100 });
+      list.mockClear();
+      expect(await blockToHtml(quote, false)).toBe('<blockquote>第一段</blockquote>');
+      expect(list).not.toHaveBeenCalled();
+    } finally {
+      mock.mockRestore();
+    }
+  });
+});
 
 describe('Notion content classification', () => {
   it('defaults missing type to article', () => {

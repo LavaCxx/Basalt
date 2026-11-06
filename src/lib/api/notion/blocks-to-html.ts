@@ -304,8 +304,13 @@ export async function blockToHtml(
       return `<li>${richTextToHtml(b.bulleted_list_item.rich_text)}</li>`;
     case 'numbered_list_item':
       return `<li>${richTextToHtml(b.numbered_list_item.rich_text)}</li>`;
-    case 'quote':
-      return `<blockquote>${richTextToHtml(b.quote.rich_text)}</blockquote>`;
+    case 'quote': {
+      const text = richTextToHtml(b.quote.rich_text);
+      const inner = recurse && b.has_children
+        ? await fetchChildrenRecursive(b.id, options)
+        : '';
+      return `<blockquote>${inner ? `<p>${text}</p>${inner}` : text}</blockquote>`;
+    }
 
     case 'code': {
       const lang = b.code.language;
